@@ -1,19 +1,11 @@
-{% extends "base.html" %}
+{% extends "novusapp/base.html" %}
 
 {% load static %}
 
-{% block title %}Login{% endblock %}
+{% block title %} login {% endblock %}
 
 {% block head %}
-    <!-- Include your CSS and JS links for this specific page -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'images/icons/favicon.ico' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'vendor/animate/animate.css' %}">
-    <link rel="stylesheet" type="text css" href="{% static 'vendor/css-hamburgers/hamburgers.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'vendor/select2/select2.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/util.css' %}">
+  
 
 {% endblock %}
 
@@ -87,25 +79,8 @@
 {% endblock %}
 
 {% block scripts %}
-    <!-- Include your JavaScript here -->
-    <script src="{% static 'vendor/jquery/jquery-3.2.1.min.js' %}"></script>
-    <script src="{% static 'vendor/bootstrap/js/popper.js' %}"></script>
-    <script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'vendor/select2/select2.min.js' %}"></script>
-    <script src="{% static 'vendor/tilt/tilt.jquery.min.js' %}"></script>
-    <script>
-        $('.js-tilt').tilt({
-            scale: 1.1
-        });
-    </script>
-    <script src="{% static 'js/main.js' %}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Set the timeout to hide messages after 5 seconds (5000 milliseconds)
-            setTimeout(function() {
-                $('.message-item').fadeOut('slow');
-            }, 5000);
-        });
-    </script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/tiltinganimation.js' %}"></script>
+
 {% endblock %}

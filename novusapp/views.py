@@ -74,7 +74,7 @@ def register(request):
             return redirect('register')
     
     context = {'novushod':hod}
-    return render(request, 'register.html',context)
+    return render(request, 'novusapp/register.html',context)
 
 
 def confirm_registration(request,id):
@@ -292,9 +292,9 @@ def confirm_registration(request,id):
            
         }
 
-        return render(request, 'confirm_registration.html',context)
+        return render(request, 'novusapp/confirm_registration.html',context)
     
-    return render(request, 'confirm_registration.html')
+    return render(request, 'novusapp/confirm_registration.html')
 
 
 
@@ -335,7 +335,7 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid login credentials.')
 
-    return render(request, 'login.html')
+    return render(request, 'novusapp/login.html')
 
 
 
@@ -463,8 +463,14 @@ def user_dashboard(request):
             except Exception as e:
                 messages.error(request, f'Error: {e}')
                 return redirect('/user_dashboard')
+        
 
-        return render(request,"user_dashboard.html",{'username': TeamLeadname,'industry':industry,'allcountry':mycountry})
+        context = {
+            'username': TeamLeadname,
+            'industry':industry,
+            'allcountry':mycountry
+            }
+        return render(request,"novusapp/user_dashboard.html",context)
     
     return HttpResponse('Please login')
 
@@ -519,7 +525,7 @@ def userdata(request):
             'pagination_url': pagination_url, 
             
         }
-        return render(request, "userdata.html", context)
+        return render(request, "novusapp/userdata.html", context)
 
     return HttpResponse('Please Login')
 
@@ -576,7 +582,7 @@ def userhod_data(request):
             'pagination_url': pagination_url,  # Pass the pagination URL to the template
         }
 
-        return render(request, "userhod_data.html", context)
+        return render(request, "novusapp/userhod_data.html", context)
 
     return HttpResponse('Please Login')
 
@@ -592,7 +598,7 @@ def autocomplete(request):
 
         return JsonResponse(titles, safe=False)
     
-    return render(request, 'userhod_data.html')
+    return render(request, 'novusapp/userhod_data.html')
 
 
 def autocomplete1(request):
@@ -605,7 +611,7 @@ def autocomplete1(request):
 
         return JsonResponse(titles, safe=False)
     
-    return render(request, 'userhod_data.html')
+    return render(request, 'novusapp/userhod_data.html')
 
 
 def autocomplete2(request):
@@ -618,7 +624,7 @@ def autocomplete2(request):
 
         return JsonResponse(titles, safe=False)
     
-    return render(request, 'userhod_data.html')
+    return render(request, 'novusapp/userhod_data.html')
 
 
 def useralldata(request):
@@ -631,7 +637,7 @@ def useralldata(request):
             'host_url' : host_url,
         }
       
-        return render(request,"useralldata.html",context)
+        return render(request,"novusapp/useralldata.html",context)
 
     return HttpResponse('Please Login')
 
@@ -695,7 +701,7 @@ def hod_dashboard(request):
             'host_url' : host_url,
         }
         
-        return render(request, "tables.html", context)
+        return render(request, "novusapp/tables.html", context)
 
     return HttpResponse('Please login')
 
@@ -742,7 +748,7 @@ def tables(request):
             'host_url' : host_url,
         }
         
-        return render(request,'tables.html',context)
+        return render(request,'novusapp/tables.html',context)
     
     return HttpResponse('Please Login')
 
@@ -802,7 +808,7 @@ def manager(request):
             'pagination_url': pagination_url,  # Pass the pagination URL to the template
         }
 
-        return render(request, "teamlead_data.html", context)
+        return render(request, "novusapp/teamlead_data.html", context)
 
     return HttpResponse('Please Login')
 
@@ -824,7 +830,7 @@ def managerteam_data(request):
             'host_url' : host_url
         }
 
-        return render(request,"managerdata.html",context)
+        return render(request,"novusapp/managerdata.html",context)
 
     return HttpResponse('Please Login')
 
@@ -858,7 +864,7 @@ def profile(request):
             'role' : role,
             'department' : dep,
         }
-        return render(request, "edit.html",context)
+        return render(request, "novusapp/edit.html",context)
     return HttpResponse('Please Login')
 
 
@@ -886,8 +892,10 @@ def change_password(request):
         messages.success(request, 'Password changed successfully')
         return redirect('profile')  # Redirect to the profile page or another appropriate page
 
-    # Render your change password template for GET requests
-    return render(request, 'change_password.html',{'role':role,'username':name})  # Adjust the template name to your actual template
+    context = {
+        'role':role,
+        'username':name}
+    return render(request, 'novusapp/change_password.html',context)  
 
 
 
