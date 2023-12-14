@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from .models import *
 
 @admin.register(Country)
@@ -79,3 +80,5 @@ class RegisterAdmin(admin.ModelAdmin):
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ('email','username','role','user_manager','hod_name','department','mobile','is_active','is_staff')
+
+# admin.site.register(CustomUser, UserAdmin)

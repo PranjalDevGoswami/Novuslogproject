@@ -1,0 +1,388 @@
+{% extends "novusapp/base1.html" %} {% load static %} {% block head %}
+<!--jquery datatable css implement  -->
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css"
+/>
+{% block title %}    
+<title>TeamLead Data</title>
+{% endblock title %}
+
+{% endblock head %} {% block right_col %}
+<div class="right_col" role="main">
+  <div class="">
+    <div class="page-title">
+      <div class="title_left">
+        <h3>TeamLead Data <small></small></h3>
+      </div>
+
+      <div class="title_right">
+        <div class="col-md-5 col-sm-5 form-group pull-right top_search">
+          <div class="input-group">
+            <input
+              type="text"
+              id="basicSearch"
+              class="form-control"
+              placeholder="Search for..."
+            />
+            <span class="input-group-btn">
+              <button class="btn btn-secondary" type="button">
+                <i class="fa fa-search" aria-hidden="true"></i>
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <div class="col-md-5 col-sm-5 form-group top_search">
+          <!-- Advance Search on the right -->
+          <div class="col-md-6 mt-2 text-right">
+            <button
+              class="btn btn-primary btn-md rounded-lg"
+              id="showAdvancedSearch"
+            >
+              Advance Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="">
+      <!-- Advanced Search Fields -->
+      <div class="row mt-3" id="advancedSearchFields" style="display: none">
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="jobTitleInput">Job Title</label>
+            <input
+              type="text"
+              class="form-control"
+              id="jobTitleInput"
+              style="margin-bottom: 100px"
+            />
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="countryInput">Country</label>
+            <input type="text" class="form-control" id="countryInput" />
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="industryInput">Industry</label>
+            <input type="text" class="form-control" id="industryInput" />
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="actionButton" style="margin-top: 30px"></label>&nbsp;
+            <button
+              class="btn btn-primary mt-4 btn-md rounded-lg"
+              id="actionButton"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="x_panel">
+          <div class="x_title">
+            <h2>Datatable</h2>
+            <ul class="nav navbar-right panel_toolbox">
+              <li>
+                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+              </li>
+              <li>
+                <a class="close-link"><i class="fa fa-close"></i></a>
+              </li>
+            </ul>
+            <div class="clearfix"></div>
+          </div>
+          <div class="x_content">
+            <p></p>
+
+            <!-- start project list -->
+            <div class="table-responsive">
+              <table id="user_table" class="table table-striped jambo_table bulk_action">
+                  <thead>
+                      <tr class="headings">
+                          <th class="column-title">Sr.No</th>
+                          <th class="column-title">Respondent Name</th>
+                          <th class="column-title">Job Title</th>
+                          <th class="column-title">Country</th>
+                          <th class="column-title">Industry</th>
+                          <th class="column-title">Company</th>
+                          <th class="column-title">Interviewer Name</th>
+                          <th class="column-title">Project</th>
+                          <th class="column-title">Project Type</th>
+                          <th class="column-title">Company Revenue</th>
+                          <th class="column-title">Incentive</th>
+                          <th class="column-title">Interview Duration</th>
+                          <th class="column-title">Interview Date</th>
+                          <th class="column-title">Team Lead</th>
+                          <th class="column-title">Department</th>
+                          <th class="column-title">Status</th>
+                          
+                      </tr>
+                  </thead>
+          
+                  <tbody>
+                     
+                    {% for respondent in respondents %}
+                    <tr class="even pointer">
+                        <td class=" ">{{ forloop.counter }}</td>
+                        <td class=" ">{{ respondent.name }}</td>
+                        <td class=" ">{{ respondent.job.title }}</td>
+                        <td class=" ">{{ respondent.country.name }}</td>
+                        <td class=" ">{{ respondent.industry.name }}</td>
+                        <td class=" ">{{ respondent.company.name }}</td>
+                        <td class=" ">{{ respondent.analyst.title }}</td>
+                        <td class=" ">{{ respondent.project.name }}</td>
+                        <td class=" ">{{ respondent.project.project_type }}</td>
+                        <td class=" ">{{ respondent.company.revenue }}</td>
+                        <td class=" ">{{ respondent.incentive.Unique_identifier }}</td>
+                        <td class=" ">{{ respondent.project_interview.interview_duration }}</td>
+                        <td class=" ">{{ respondent.project_interview.interview_date }}</td>
+                        <td class=" ">{{ respondent.team_lead }}</td>
+                        <td class=" ">{{ respondent.Department }}</td>
+                        {% if respondent.is_active == 0 %}
+                        <td class="a-right a-right" style="color:red">Pending</td>
+                        {% elif respondent.is_active == 1 %}
+                        <td class="a-right a-right" style="color:green">Complete</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+              </table>
+            </div>
+            <!-- end project list -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock right_col %} {% block script %}
+<script
+  type="text/javascript"
+  charset="utf8"
+  src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"
+></script>
+<script src="{% static 'vendors/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+
+<script>
+  $(document).ready( function () {
+    $('#user_table').DataTable();
+  } );
+</script> 
+
+
+
+
+<script>
+  // Function to update items per page and reload the page
+  function updateItemsPerPage() {
+      var selectedValue = document.getElementById("itemsPerPage").value;
+      var currentUrl = window.location.href;
+
+      // Check if the 'items_per_page' parameter already exists in the URL
+      if (currentUrl.indexOf('items_per_page=') > -1) {
+          // Update the existing value
+          var newUrl = currentUrl.replace(/(items_per_page=)[^\&]+/, '$1' + selectedValue);
+      } else {
+          // Add the 'items_per_page' parameter to the URL
+          var separator = currentUrl.indexOf('?') !== -1 ? '&' : '?';
+          var newUrl = currentUrl + separator + 'items_per_page=' + selectedValue;
+      }
+
+      // Reload the page with the updated URL
+      window.location.href = newUrl;
+  }
+</script>
+
+<script>
+  $(document).ready(function () {
+      $('.simple-link').click(function () {
+          var type = $(this).data('type');
+          console.log('Selected type:', type);
+          // You can add logic here if needed
+      });
+  });
+</script>
+
+
+
+
+<script>
+  $(document).ready(function() {
+    // Set the timeout to hide messages after 5 seconds (5000 milliseconds)
+    setTimeout(function() {
+      $('.message-item').fadeOut('slow');
+    }, 5000);
+
+
+  $(function () {
+      $("#industryInput").autocomplete({
+          source: "{% url 'autocomplete' %}",
+          minLength: 3,
+          select: function (event, ui) {
+              var terms = this.value.split(','); // Split the current input value by comma
+              terms.pop(); // Remove the last element (in case there is an empty string at the end)
+              terms.push(ui.item.value); // Add the selected item
+              terms.push(''); // Add an empty string and a comma to continue suggestions
+              this.value = terms.join(','); // Join the array and set it as the new value
+              return false; // Prevent the default behavior
+          },
+          focus: function () {
+              // Prevent value inserted on focus
+              return false;
+          },
+      }).on("keyup", function (event) {
+          if (event.keyCode === $.ui.keyCode.COMMA || event.keyCode === $.ui.keyCode.TAB) {
+              $(this).autocomplete("search");
+          }
+      });
+  });
+
+
+  $(function () {
+      $("#countryInput").autocomplete({
+          source: "{% url 'autocomplete1' %}",
+          minLength: 3,
+          select: function (event, ui) {
+              var terms = this.value.split(','); // Split the current input value by comma
+              terms.pop(); // Remove the last element (in case there is an empty string at the end)
+              terms.push(ui.item.value); // Add the selected item
+              terms.push(''); // Add an empty string and a comma to continue suggestions
+              this.value = terms.join(','); // Join the array and set it as the new value
+              return false; // Prevent the default behavior
+          },
+          focus: function () {
+              // Prevent value inserted on focus
+              return false;
+          },
+      }).on("keyup", function (event) {
+          if (event.keyCode === $.ui.keyCode.COMMA || event.keyCode === $.ui.keyCode.TAB) {
+              $(this).autocomplete("search");
+          }
+      });
+  });
+
+  $(function () {
+      $("#jobTitleInput").autocomplete({
+          source: "{% url 'autocomplete2' %}",
+          minLength: 3,
+          select: function (event, ui) {
+              var terms = this.value.split(','); // Split the current input value by comma
+              terms.pop(); // Remove the last element (in case there is an empty string at the end)
+              terms.push(ui.item.value); // Add the selected item
+              terms.push(''); // Add an empty string and a comma to continue suggestions
+              this.value = terms.join(','); // Join the array and set it as the new value
+              return false; // Prevent the default behavior
+          },
+          focus: function () {
+              // Prevent value inserted on focus
+              return false;
+          },
+      }).on("keyup", function (event) {
+          if (event.keyCode === $.ui.keyCode.COMMA || event.keyCode === $.ui.keyCode.TAB) {
+              $(this).autocomplete("search");
+          }
+      });
+  });
+
+
+
+    // Function for basic search
+    function basicSearch() {
+      var searchText = $('#basicSearch').val().toLowerCase();
+      filterTableBasic(searchText);
+    }
+
+    // Function for advanced search
+    function advancedSearch() {
+      var jobTitle = $('#jobTitleInput').val().toLowerCase().split(',').map(s => s.trim());
+      var country = $('#countryInput').val().toLowerCase().split(',').map(s => s.trim());
+      var industry = $('#industryInput').val().toLowerCase().split(',').map(s => s.trim());
+
+      // Combine advanced search conditions
+      filterTableAdvanced(jobTitle, country, industry);
+    }
+
+    // Function to perform basic filtering
+    function filterTableBasic(searchText) {
+      // Loop through each row in the table
+      $('.jambo_table tbody tr').each(function () {
+        // Check if any condition matches for basic search
+        var basicSearchMatch = searchText === '' || $(this).text().toLowerCase().includes(searchText);
+
+        // Show or hide the row based on basic search conditions
+        if (basicSearchMatch) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    }
+
+    // Function to perform advanced filtering
+    function filterTableAdvanced(jobTitle, country, industry) {
+      // Loop through each row in the table
+      $('.jambo_table tbody tr').each(function () {
+        var rowJobTitle = $(this).find('td:eq(2)').text().toLowerCase();
+        var rowCountry = $(this).find('td:eq(3)').text().toLowerCase();
+        var rowIndustry = $(this).find('td:eq(4)').text().toLowerCase();
+
+        // Check if all conditions match for advanced search
+        var advancedSearchMatch =
+          (jobTitle.length === 0 || jobTitle.some(title => rowJobTitle.includes(title))) &&
+          (country.length === 0 || country.some(c => rowCountry.includes(c))) &&
+          (industry.length === 0 || industry.some(ind => rowIndustry.includes(ind)));
+
+        // Show or hide the row based on advanced search conditions
+        if (advancedSearchMatch) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    }
+
+    // Basic search input event
+    $('#basicSearch').on('input', function() {
+      // Trigger the basic search function
+      basicSearch();
+    });
+
+    // Enter key press event for basic search
+    $('#basicSearch').on('keypress', function(event) {
+      if (event.which === 13) { // 13 is the code for Enter key
+        basicSearch();
+      }
+    });
+
+    // Action button click event for advanced search
+    $('#actionButton').on('click', function() {
+      // Trigger the advanced search function
+      advancedSearch();
+    });
+
+    // Toggle visibility of advanced search fields
+    $('#showAdvancedSearch').on('click', function() {
+      $('#advancedSearchFields').toggle();
+      // If the advanced search fields are hidden, clear their values and trigger basic search
+      if ($('#advancedSearchFields').is(':hidden')) {
+        $('#jobTitleInput, #countryInput, #industryInput').val('');
+        basicSearch();
+      }
+    });
+  });
+</script>  
+
+{% endblock script %}

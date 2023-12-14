@@ -29,6 +29,10 @@ def is_valid_email_domain(email):
     # Split the email address to get the domain part
     domain = email.split('@')[-1]
 
+    # Check if the email is blank
+    if not email:
+        return False
+
     # Check if the domain is in the list of valid domains
     if domain in VALID_EMAIL_DOMAINS:
         return True
@@ -42,7 +46,10 @@ def register(request):
         username = request.POST['username']
         password = request.POST['pass']
         confpassword = request.POST['conf_pass']
-        novus_hod = request.POST['hod']
+        try:
+            novus_hod = request.POST['hod']
+        except:
+            pass
 
         # Check if the email already exists
         try:
@@ -59,9 +66,11 @@ def register(request):
 
         # Validate email domain
         if not is_valid_email_domain(email):
-            messages.error(request, 'Invalid email domain. Please use a valid domain.')
+            if not email:
+                messages.error(request, 'Please fill in the email field.')
+            else:
+                messages.error(request, 'Invalid email domain. Please use a valid domain.')
             return redirect('register')
-
         # Create a new user
         try:
             user = Register.objects.create(email=email,username=username,password=password,hod_name=novus_hod)
@@ -74,7 +83,7 @@ def register(request):
             return redirect('register')
     
     context = {'novushod':hod}
-    return render(request, 'register.html',context)
+    return render(request, 'novusapp/register.html',context)
 
 
 def confirm_registration(request,id):
@@ -292,9 +301,9 @@ def confirm_registration(request,id):
            
         }
 
-        return render(request, 'confirm_registration.html',context)
+        return render(request, 'novusapp/confirm_registration.html',context)
     
-    return render(request, 'confirm_registration.html')
+    return render(request, 'novusapp/confirm_registration.html')
 
 
 
@@ -322,7 +331,10 @@ def login_view(request):
 
             elif user.groups.filter(name="HOD").exists():
                 request.session['currentuser_id'] = user.id
-                hod_name = Hod.objects.get(email=user.email).name
+                try:
+                    hod_name = Hod.objects.get(email=user.email).name
+                except:
+                    hod_name = ""
                 CustomUser.objects.filter(id=user.id).update(hod_name=hod_name)
                 return redirect('/hod_dashboard')
 
@@ -335,7 +347,7 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid login credentials.')
 
-    return render(request, 'login.html')
+    return render(request, 'novusapp/login.html')
 
 
 
@@ -463,8 +475,13 @@ def user_dashboard(request):
             except Exception as e:
                 messages.error(request, f'Error: {e}')
                 return redirect('/user_dashboard')
+        
 
-        return render(request,"user_dashboard.html",{'username': TeamLeadname,'industry':industry,'allcountry':mycountry})
+        context = {
+            'industry':industry,
+            'allcountry':mycountry
+            }
+        return render(request,"novusapp/user_dashboard.html",context)
     
     return HttpResponse('Please login')
 
@@ -519,7 +536,7 @@ def userdata(request):
             'pagination_url': pagination_url, 
             
         }
-        return render(request, "userdata.html", context)
+        return render(request, "novusapp/userdata.html", context)
 
     return HttpResponse('Please Login')
 
@@ -576,7 +593,7 @@ def userhod_data(request):
             'pagination_url': pagination_url,  # Pass the pagination URL to the template
         }
 
-        return render(request, "userhod_data.html", context)
+        return render(request, "novusapp/userhod_data.html", context)
 
     return HttpResponse('Please Login')
 
@@ -592,7 +609,7 @@ def autocomplete(request):
 
         return JsonResponse(titles, safe=False)
     
-    return render(request, 'userhod_data.html')
+    return render(request, 'novusapp/userhod_data.html')
 
 
 def autocomplete1(request):
@@ -605,7 +622,7 @@ def autocomplete1(request):
 
         return JsonResponse(titles, safe=False)
     
-    return render(request, 'userhod_data.html')
+    return render(request, 'novusapp/userhod_data.html')
 
 
 def autocomplete2(request):
@@ -618,7 +635,7 @@ def autocomplete2(request):
 
         return JsonResponse(titles, safe=False)
     
-    return render(request, 'userhod_data.html')
+    return render(request, 'novusapp/userhod_data.html')
 
 
 def useralldata(request):
@@ -631,7 +648,7 @@ def useralldata(request):
             'host_url' : host_url,
         }
       
-        return render(request,"useralldata.html",context)
+        return render(request,"novusapp/useralldata.html",context)
 
     return HttpResponse('Please Login')
 
@@ -695,7 +712,7 @@ def hod_dashboard(request):
             'host_url' : host_url,
         }
         
-        return render(request, "tables.html", context)
+        return render(request, "novusapp/tables.html", context)
 
     return HttpResponse('Please login')
 
@@ -742,7 +759,7 @@ def tables(request):
             'host_url' : host_url,
         }
         
-        return render(request,'tables.html',context)
+        return render(request,'novusapp/tables.html',context)
     
     return HttpResponse('Please Login')
 
@@ -802,7 +819,7 @@ def manager(request):
             'pagination_url': pagination_url,  # Pass the pagination URL to the template
         }
 
-        return render(request, "teamlead_data.html", context)
+        return render(request, "novusapp/teamlead_data.html", context)
 
     return HttpResponse('Please Login')
 
@@ -824,7 +841,7 @@ def managerteam_data(request):
             'host_url' : host_url
         }
 
-        return render(request,"managerdata.html",context)
+        return render(request,"novusapp/managerdata.html",context)
 
     return HttpResponse('Please Login')
 
@@ -858,7 +875,7 @@ def profile(request):
             'role' : role,
             'department' : dep,
         }
-        return render(request, "edit.html",context)
+        return render(request, "novusapp/edit.html",context)
     return HttpResponse('Please Login')
 
 
@@ -886,9 +903,19 @@ def change_password(request):
         messages.success(request, 'Password changed successfully')
         return redirect('profile')  # Redirect to the profile page or another appropriate page
 
-    # Render your change password template for GET requests
-    return render(request, 'change_password.html',{'role':role,'username':name})  # Adjust the template name to your actual template
+    context = {
+        'role':role,
+        'username':name}
+    return render(request, 'novusapp/change_password.html',context)  
 
+
+
+
+
+# login templates render
+
+def loginDemo(request):
+    return render(request, 'novusapp/base1.html')
 
 
 

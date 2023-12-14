@@ -1,0 +1,264 @@
+{% extends "novusapp/base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% block head %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %} user table {% endblock %}</title>
+   
+
+    {% endblock %}
+  </head>
+
+{% block content %}
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+          
+  
+            <div class="clearfix"></div>
+  
+            <!-- menu profile quick info -->
+            <div class="profile clearfix">
+              <div class="profile_pic" style="margin-left: 10px;">
+                <img src="{% static 'images/logo.png' %}" alt="..." class="img-circle profile_img" style="margin-left: 1px;"><span>Novus Insights</span>
+              </div>
+              <div class="profile_info">
+                <span>Welcome, </span>
+                <h2>{{hod}}</h2>
+              </div>
+            </div>
+            <!-- /menu profile quick info -->
+  
+            <br />
+            
+  
+            <!-- sidebar menu -->
+            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">
+                <h3>General</h3>
+                <ul class="nav side-menu">
+                
+                  <li><a><i class="fa fa-edit"></i> User Forms <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="{% url 'user_dashboard' %}">Forms</a></li>   
+                    </ul>
+                  </li>
+                
+                  <li><a><i class="fa fa-table"></i> Tables <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="{% url 'userdata' %}">Tables</a></li>
+                      
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+              
+  
+            </div>
+            <!-- /sidebar menu -->
+  
+            <!-- /menu footer buttons -->
+            <div class="sidebar-footer hidden-small">
+          
+            </div>
+            <!-- /menu footer buttons -->
+          </div>
+        </div>
+  
+        <!-- top navigation -->
+        <div class="top_nav">
+          <div class="nav_menu">
+            <div class="nav toggle">
+              <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+            </div>
+            <nav class="nav navbar-nav">
+              <ul class=" navbar-right">
+                <li class="nav-item dropdown open" style="padding-left: 15px;">
+                  <a href="javascript:;" class="user-profile dropdown-toggle" aria-haspopup="true" id="navbarDropdown" data-toggle="dropdown" aria-expanded="false">
+                    {{hod}}
+                    <!-- <img src="images/img.jpg" alt=""> -->
+                  </a>
+                  <div class="dropdown-menu dropdown-usermenu pull-right" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="profile"> Profile</a>
+                  
+                    <a class="dropdown-item" href="{% url 'logout' %}"><i class="fa fa-sign-out pull-right"></i> Log Out</a>
+              
+                  </div>
+                </li>
+  
+                <li role="presentation" class="nav-item dropdown open">
+                  <a href="javascript:;" class="dropdown-toggle info-number" id="navbarDropdown1" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-envelope-o"></i>
+                    <span class="badge bg-green">{{total}}</span>
+                  </a>
+                  <ul class="dropdown-menu list-unstyled msg_list" role="menu" aria-labelledby="navbarDropdown1">
+                    <li class="nav-item">
+                      <a class="dropdown-item">
+                        <!-- <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span> -->
+                        <span>
+                          <span> </span>
+                          <span class="time"> </span>
+                        </span>
+                        {% for userid in user_data_list %}
+                        <span class="message" style="color:green;">
+                          <a href="{{host_url}}/hod_dashboard/confirm_registration/{{ userid.id }}">Activate user {{ userid.id }}</a><br>
+                        </span>
+                        {% endfor %}
+                      </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                      <div class="text-center">
+                        <a class="dropdown-item">
+                         
+                          <strong><a href="{{host_url}}/hod_dashboard">See All Alerts</a></strong>
+                         
+                          <i class="fa fa-angle-right"></i>
+                        </a>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- /top navigation -->
+  
+       
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+              <div class="title_left">
+                <h3>User Data<small></small></h3>
+              </div>
+
+              <div class="title_right">
+                <div class="col-md-5 col-sm-5   form-group pull-right top_search">
+                  <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search for...">
+                    <span class="input-group-btn">
+                      <button class="btn btn-default" type="button">Go!</button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <div class="row" style="display: block;">
+
+              <div class="clearfix"></div>
+
+              <div class="col-md-12 col-sm-12  ">
+                <div class="x_panel">
+                
+                  <div class="x_content">
+
+                    <!-- <p>Add class <code>bulk_action</code> to table for bulk actions options on row select</p> -->
+                     
+                      {% if messages %}
+                      <div id="message-container">
+                          <ul class="messages">
+                              {% for message in messages %}
+                              <li class="{{ message.tags }} message-item" style="color:red;">{{ message }}</li>
+                              {% endfor %}
+                          </ul>
+                      </div>
+                      {% endif %}
+                      <div class="table-responsive">
+                        <table class="table table-striped jambo_table bulk_action">
+                            <thead>
+                                <tr class="headings">
+                                    <th class="column-title">Sr.No</th>
+                                    <th class="column-title">Respondent Name</th>
+                                    <th class="column-title">Country</th>
+                                    <th class="column-title">Industry</th>
+                                    <th class="column-title">Company</th>
+                                    <th class="column-title">Profile Link</th>
+                                    <th class="column-title">Meeting Link</th>
+                                    <th class="column-title">Analyst</th>
+                                    <th class="column-title">Project</th>
+                                    <th class="column-title">Company Revenue</th>
+                                    <th class="column-title">Company Strength</th>
+                                    <th class="column-title">Incentive</th>
+                                    <th class="column-title">Interview Duration</th>
+                                    <th class="column-title">Interview Date</th>
+                                </tr>
+                            </thead>
+                    
+                            <tbody>
+                               
+                              {% for respondent in respondents %}
+                              <tr class="even pointer">
+                                  <td class=" ">{{ forloop.counter }}</td>
+                                  <td class=" ">{{ respondent.name }}</td>
+                                  <td class=" ">{{ respondent.country.name }}</td>
+                                  <td class=" ">{{ respondent.industry.name }}</td>
+                                  <td class=" ">{{ respondent.company.name }}</td>
+                                  <td class=" ">{{ respondent.profile_link }}</td>
+                                  <td class=" ">{{ respondent.meeting_link }}</td>
+                                  <td class=" ">{{ respondent.analyst.title }}</td>
+                                  <td class=" ">{{ respondent.project.name }}</td>
+                                  <td class=" ">{{ respondent.company.revenue }}</td>
+                                  <td class=" ">{{ respondent.company.strength }}</td>
+                                  <td class=" ">{{ respondent.incentive.Unique_identifier }}</td>
+                                  <td class=" ">{{ respondent.project_interview.interview_duration }}</td>
+                                  <td class=" ">{{ respondent.project_interview.interview_date }}</td>
+                              </tr>
+                          {% endfor %}
+                                
+                            </tbody>
+                        </table>
+                    
+                    </div>
+							
+						
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /page content -->
+
+    {% endblock %}
+
+    {% block scripts %}
+
+    <!-- jQuery -->
+    <script src="{% static 'vendors/jquery/dist/jquery.min.js' %}"></script>
+    <!-- Bootstrap -->
+   <script src="{% static 'vendors/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- FastClick -->
+    <script src="{% static 'vendors/fastclick/lib/fastclick.js' %}"></script>
+    <!-- NProgress -->
+    <script src="{% static 'vendors/nprogress/nprogress.js' %}"></script>
+    <!-- iCheck -->
+    <script src="{% static 'vendors/iCheck/icheck.min.js' %}"></script>
+
+    <!-- Custom Theme Scripts -->
+    <script src="{% static 'build/js/custom.min.js' %}"></script>
+    <script>
+      $(document).ready(function() {
+          // Set the timeout to hide messages after 5 seconds (5000 milliseconds)
+          setTimeout(function() {
+              $('.message-item').fadeOut('slow');
+          }, 5000);
+      });
+  </script>
+  </body>
+</html>
+
+{% endblock %}

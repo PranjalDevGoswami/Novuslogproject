@@ -1,0 +1,162 @@
+{% extends "novusapp/base1.html" %}
+{% load static %} 
+{% block head %}
+{% endblock head %} 
+{% block right_col %}
+        <!-- page content -->
+		<div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+              <div class="title_left">
+                <h3>User Profile <small></small></h3>
+              </div>
+              <div class="title_right">
+                <div class="col-md-5 col-sm-5 form-group pull-right">
+                  <div class="input-group">
+                    {% comment %} <input type="text" class="form-control" placeholder="Search for...">
+                    <span class="input-group-btn">
+                      <button class="btn btn-secondary" type="button">Go!</button>
+                    </span> {% endcomment %}
+					<button id="changePasswordBtn" class="btn btn-primary btn-sm" onclick="changePassword()">Change Password</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="clearfix"></div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="x_panel">
+                  <div class="x_title">
+                    <h2>Profile Form</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                      </li>
+                      <li><a class="close-link"><i class="fa fa-close"></i></a>
+                      </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                  </div>
+                  <div class="x_content">
+					<form  id="demo-form2" data-parsley-validate class="form-label-left" method="post" action="{% url 'profile' %}">
+						 {% csrf_token %}
+						<div class="item form-group">
+							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Username <span class="required">*</span></label>
+							<div class="col-md-6 col-sm-6 ">
+								<input id="mobile_no" class="form-control" disabled selected  type="text" name="username" required="required" value="{{username}}">
+								<span id="mobileError" style="color: red;"></span>
+							</div>
+						</div>
+						<div class="item form-group">
+							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Email <span class="required">*</span></label>	
+							</label>
+							<div class="col-md-6 col-sm-6 ">
+								<input id="mobile_no" class="form-control" disabled selected  type="text" name="email" required="required" value="{{email}}">
+								<span id="mobileError" style="color: red;"></span>
+							</div>
+						</div>
+						<div class="item form-group">
+							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Role <span class="required">*</span></label>
+							<div class="col-md-6 col-sm-6 ">
+								<input id="mobile_no" class="form-control" disabled selected  type="text" name="role" required="required" value="{{role}}">
+								<span id="mobileError" style="color: red;"></span>
+							</div>
+						</div>
+						<div class="item form-group">
+							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Manager</label>
+							<div class="col-md-6 col-sm-6">
+								<input id="mobile_no" class="form-control" disabled selected  type="text" name="manager" value="{{manager}}">
+								<span id="mobileError" style="color: red;"></span>
+							</div>	
+						</div>	
+
+						<div class="item form-group">
+							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Mobile no <span class="required">*</span></label>
+							<div class="col-md-6 col-sm-6">
+								<input id="mobile_no" class="form-control input-space" type="text" name="mobile_no" required="required">
+								<span id="mobileError" style="color: red;"></span>
+							</div>
+						</div>	
+
+						<div class="item form-group">
+							<label class="col-form-label col-md-3 col-sm-3 label-align" for="department"> Department <span class="required">*</span></label>
+							<div class="col-md-6 col-sm-6">
+								<select id="department" class="form-control" name="department" required="required">
+									<option value="" disabled selected>Type</option>
+									{% for data in department %}
+										<option value="{{data.name}}">{{data.name}}</option>
+									{% endfor %}
+								</select>
+							</div>	
+						</div>
+						<div class="ln_solid"></div>
+						<div class="item form-group">
+							<div class="col-md-6 col-sm-6 offset-md-3">		
+								<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Submit</button>
+								<button type="button" class="btn btn-danger rounded-lg">Back
+									<a href="{% if role == 'AM/Manager' %}{% url 'managerteam_data' %}
+										{% elif role == 'Team Lead' %}{% url 'user_dashboard' %}
+										{% else %}{% url 'hod_dashboard' %}{% endif %}">
+							 		</a>
+							
+								</button>
+							</div>
+						</div>
+
+					</form>
+													
+                    <p></p>
+
+                    <!-- start project list -->
+                    <table class="table table-striped projects">
+                 
+                    </table>
+                    <!-- end project list -->
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> 
+        <!-- /page content -->
+
+{% endblock right_col %} 
+{% block script %}
+
+<script>
+    document.getElementById('changePasswordBtn').addEventListener('click', function() {
+        window.location.href = 'profile/change_password';
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#department').select2();
+
+        setTimeout(function() {
+            $('.message-item').fadeOut('slow');
+        }, 5000);
+
+        // Add event listener to validate mobile number on input change
+        $('#mobile_no').on('input', function() {
+            validateMobileNumber($(this).val());
+        });
+    });
+
+    function validateMobileNumber(mobileNumber) {
+        // Regular expression to validate 10-digit mobile number
+        var mobileRegex = /^\d{10}$/;
+
+        if (mobileRegex.test(mobileNumber)) {
+            // Valid mobile number
+            $('#mobileError').text('');
+        } else {
+            // Invalid mobile number
+            $('#mobileError').text('Invalid mobile number. Please enter a 10-digit number.');
+        }
+    }
+</script>
+
+{% endblock script %}
