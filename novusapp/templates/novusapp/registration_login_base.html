@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Include your CSS and JS links for this specific page -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/icons/favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/animate/animate.css' %}">
+    <link rel="stylesheet" type="text css" href="{% static 'vendor/css-hamburgers/hamburgers.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/select2/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/util.css' %}">
+
+    
+    <title>{% block title %}   {% endblock %}</title>
+    
+
+    {% block head %}
+
+    
+
+    {% endblock %}
+
+</head>
+
+
+        <!-- /top navigation -->
+
+
+
+   
+{% block content %}
+
+
+
+
+{% endblock %}
+
+
+
+<script src="{% static 'vendor/jquery/jquery-3.2.1.min.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/js/popper.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'vendor/select2/select2.min.js' %}"></script>
+<script src="{% static 'vendor/tilt/tilt.jquery.min.js' %}"></script>
+
+
+
+<script>
+    $(document).ready(function() {
+        // Set the timeout to hide messages after 5 seconds (5000 milliseconds)
+        setTimeout(function() {
+            $('.message-item').fadeOut('slow');
+        }, 5000);
+    });
+</script>
+
+{% block scripts %} 
+<!-- jQuery -->
+<script src="{% static 'vendors/jquery/dist/jquery.min.js' %}"></script>
+
+
+
+{% endblock %}
+
+
+
+</body>
+
+</html>

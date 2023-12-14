@@ -29,6 +29,10 @@ def is_valid_email_domain(email):
     # Split the email address to get the domain part
     domain = email.split('@')[-1]
 
+    # Check if the email is blank
+    if not email:
+        return False
+
     # Check if the domain is in the list of valid domains
     if domain in VALID_EMAIL_DOMAINS:
         return True
@@ -42,7 +46,10 @@ def register(request):
         username = request.POST['username']
         password = request.POST['pass']
         confpassword = request.POST['conf_pass']
-        novus_hod = request.POST['hod']
+        try:
+            novus_hod = request.POST['hod']
+        except:
+            pass
 
         # Check if the email already exists
         try:
@@ -59,9 +66,11 @@ def register(request):
 
         # Validate email domain
         if not is_valid_email_domain(email):
-            messages.error(request, 'Invalid email domain. Please use a valid domain.')
+            if not email:
+                messages.error(request, 'Please fill in the email field.')
+            else:
+                messages.error(request, 'Invalid email domain. Please use a valid domain.')
             return redirect('register')
-
         # Create a new user
         try:
             user = Register.objects.create(email=email,username=username,password=password,hod_name=novus_hod)
@@ -322,7 +331,10 @@ def login_view(request):
 
             elif user.groups.filter(name="HOD").exists():
                 request.session['currentuser_id'] = user.id
-                hod_name = Hod.objects.get(email=user.email).name
+                try:
+                    hod_name = Hod.objects.get(email=user.email).name
+                except:
+                    hod_name = ""
                 CustomUser.objects.filter(id=user.id).update(hod_name=hod_name)
                 return redirect('/hod_dashboard')
 
@@ -466,7 +478,6 @@ def user_dashboard(request):
         
 
         context = {
-            'username': TeamLeadname,
             'industry':industry,
             'allcountry':mycountry
             }
@@ -897,6 +908,14 @@ def change_password(request):
         'username':name}
     return render(request, 'novusapp/change_password.html',context)  
 
+
+
+
+
+# login templates render
+
+def loginDemo(request):
+    return render(request, 'novusapp/base1.html')
 
 
 

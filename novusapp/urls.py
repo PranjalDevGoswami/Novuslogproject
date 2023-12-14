@@ -1,6 +1,7 @@
 from django.urls import path
 from .import views
 
+
 urlpatterns = [
     path('',views.login_view,name="login_view"),
     path('register',views.register,name="register"),
@@ -21,5 +22,6 @@ urlpatterns = [
     path('form_approved/<int:id>',views.form_approved,name='form_approved'),
     path('profile', views.profile,name='profile'),
     path('profile/change_password', views.change_password,name='change_password'),
+    path('loginDemo/', views.loginDemo, name='loginDemo'),
     
 ]
