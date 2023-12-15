@@ -336,6 +336,7 @@ def login_view(request):
                 except:
                     hod_name = ""
                 CustomUser.objects.filter(id=user.id).update(hod_name=hod_name)
+                messages.success(request, "successfully logged In.", extra_tags="alert-success")
                 return redirect('/hod_dashboard')
 
             elif user.is_superuser:
@@ -345,7 +346,7 @@ def login_view(request):
                 return redirect('admin:index') 
        
         else:
-            messages.error(request, 'Invalid login credentials.')
+            messages.error(request, 'Invalid login credentials.', extra_tags="alert-danger")
 
     return render(request, 'novusapp/login.html')
 
@@ -476,7 +477,7 @@ def user_dashboard(request):
                 return redirect('/user_dashboard')
 
             except Exception as e:
-                messages.error(request, f'Error: {e}')
+                messages.error(request, f'Error: {e}', extra_tags="alert-danger")
                 return redirect('/user_dashboard')
         
 
@@ -856,7 +857,7 @@ def profile(request):
             tl_email = CustomUser.objects.get(id=id,role="Team Lead").email
             tl_username = CustomUser.objects.get(id=id,role="Team Lead").username
             Respondent.objects.filter(email=tl_email).update(team_lead=tl_username,Department=dept)
-            messages.success(request, 'Profile Update successfully.')
+            messages.success(request, 'Profile Update successfully.',extra_tags="alert-success")
         context = {
             'username' : username,
             'email' : email,
