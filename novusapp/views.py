@@ -18,6 +18,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import check_password
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import yaml
+from .decorators import unauthenitcated_user
 credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 host_url = credentials['hosted_url']
 
@@ -54,32 +55,32 @@ def register(request):
         # Check if the email already exists
         try:
             existing_user = Register.objects.get(email=email)
-            messages.error(request, 'This email is already registered.')
+            messages.error(request, 'This email is already registered.', extra_tags="alert-danger")
             return redirect('/register')
         except Register.DoesNotExist:
             pass
 
         # Check if the passwords match
         if password != confpassword:
-            messages.error(request, 'Passwords do not match.')
+            messages.error(request, 'Passwords do not match.',extra_tags="alert-danger")
             return redirect('register')
 
         # Validate email domain
         if not is_valid_email_domain(email):
             if not email:
-                messages.error(request, 'Please fill in the email field.')
+                messages.error(request, 'Please fill in the email field.', extra_tags="alert-danger")
             else:
-                messages.error(request, 'Invalid email domain. Please use a valid domain.')
+                messages.error(request, 'Invalid email domain. Please use a valid domain.',extra_tags="alert-danger")
             return redirect('register')
         # Create a new user
         try:
             user = Register.objects.create(email=email,username=username,password=password,hod_name=novus_hod)
             user.save()
-            messages.success(request, 'Registration successful. You can wait some time for defining your role.')
+            messages.success(request, 'Registration successful. You can wait some time for defining your role.', extra_tags="alert-success")
             return redirect('/')
         except Exception as e:
             print(f"\n\n ERROR :: {e} \n\n")
-            messages.error(request, f'An error occurred: {str(e)}')
+            messages.error(request, f'An error occurred: {str(e)}',extra_tags="alert-danger")
             return redirect('register')
     
     context = {'novushod':hod}
@@ -654,7 +655,7 @@ def useralldata(request):
     return HttpResponse('Please Login')
 
 
-
+@unauthenitcated_user
 def hod_dashboard(request):
     role = RoleMaster.objects.all().values('name')
     team_manager = Manager.objects.all().values('name')
