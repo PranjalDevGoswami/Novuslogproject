@@ -47,7 +47,8 @@
                   	<div class="x_content">
 						<div class="col-md-12 col-lg-12 ">
 							<br />
-							<form class="form-horizontal form-label-left">
+							<form class="form-horizontal form-label-left" action="{% url 'user_dashboard' %}" method="post">
+								{% csrf_token %}
 
 								<div class="form-group row">
 									<label class="control-label col-md-2 col-sm-2" for="respondent_name"> Respondent's Name <span class="required">*</span></label>
