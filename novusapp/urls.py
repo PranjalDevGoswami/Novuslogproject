@@ -16,7 +16,6 @@ urlpatterns = [
     path('autocomplete2', views.autocomplete2, name='autocomplete2'),
     path('user_dashboard',views.user_dashboard, name='user_dashboard'),
     path('userdata',views.userdata,name='userdata'),
-    path('user_dashboard/alldata',views.useralldata,name='useralldata'),
     path('manager',views.manager,name='manager'),
     path('managerteam_data',views.managerteam_data,name='managerteam_data'),
     path('form_approved/<int:id>',views.form_approved,name='form_approved'),

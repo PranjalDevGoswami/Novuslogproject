@@ -365,7 +365,10 @@ def user_dashboard(request):
             user_manager_email = CustomUser.objects.get(id=userid).email
 
         else:
-            user_manager_email = Manager.objects.get(name=user_manager).email
+            try:
+                user_manager_email = Manager.objects.get(name=user_manager).email
+            except:
+                pass
 
         industry = Industry.objects.all()
         mycountry = Country.objects.all()
@@ -606,6 +609,7 @@ def autocomplete(request):
 
         qs = Industry.objects.filter(name__icontains=term)
         titles = [product.name for product in qs]
+        print('@@@@@@@@@@@@@@@@@/',titles)
 
         return JsonResponse(titles, safe=False)
     
@@ -636,21 +640,6 @@ def autocomplete2(request):
         return JsonResponse(titles, safe=False)
     
     return render(request, 'novusapp/userhod_data.html')
-
-
-def useralldata(request):
-    if request.session.has_key('currentuser_id'):
-        # Retrieve all data from the Respondent table
-        respondents = Respondent.objects.all()
-
-        context = {
-            'respondents':respondents,
-            'host_url' : host_url,
-        }
-      
-        return render(request,"novusapp/useralldata.html",context)
-
-    return HttpResponse('Please Login')
 
 
 
