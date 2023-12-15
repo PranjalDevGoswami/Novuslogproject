@@ -21,18 +21,10 @@
                     <span class="login100-form-title">
                         Dashboard Login
                     </span>
-                
+                    <div class="x_content bs-example-popovers">
                     <!-- Display messages if any -->
-                    {% if messages %}
-                    <div id="message-container">
-                        <ul class="messages">
-                            {% for message in messages %}
-                            <li class="{{ message.tags }} message-item" style="color:red">{{ message }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                
+                        {% include 'novusapp/alertmsg/msg.html' %}
+                    </div>    
                     <div class="wrap-input100 validate-input" data-validate="Valid email is required: ex@abc.xyz">
                         <input class="input100" type="text" name="email" placeholder="Email">
                         <span class="focus-input100"></span>
