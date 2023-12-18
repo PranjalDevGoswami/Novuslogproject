@@ -307,7 +307,7 @@ def confirm_registration(request,id):
     return render(request, 'novusapp/confirm_registration.html')
 
 
-
+@unauthenitcated_user
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -315,8 +315,6 @@ def login_view(request):
 
         # Authenticate the user
         user = authenticate(request, email=email, password=user_password)
-
-        print('#######',user)
 
         if user is not None:
             # Check the user's groups

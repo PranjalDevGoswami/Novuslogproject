@@ -84,13 +84,13 @@ WSGI_APPLICATION = 'novusproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 import yaml
-credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
+#credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 
-db_name = credentials['db_name']
-user = credentials['user']
-password = credentials['password']
-host = credentials['host']
-port = credentials['port']
+# db_name = credentials['db_name']
+# user = credentials['user']
+# password = credentials['password']
+# host = credentials['host']
+# port = credentials['port']
 
 # DATABASES = {
 #     'default': {
