@@ -30,7 +30,7 @@
 							{% include 'novusapp/alertmsg/msg.html' %}
 					</div>               
                     <div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
-						<input class="input100" type="text" name="email" placeholder="Email">
+						<input class="input100" type="text" name="email" placeholder="Email" required="required">
 						<span class="focus-input100"></span>
 						<span class="symbol-input100">
 							<i class="fa fa-envelope" aria-hidden="true"></i>
@@ -38,7 +38,7 @@
 					</div>
 
                     <div class="wrap-input100 validate-input" data-validate = "username required">
-						<input class="input100" type="text" name="username" placeholder="Username">
+						<input class="input100" type="text" name="username" placeholder="Username" required="required">
 						<span class="focus-input100"></span>
 						<span class="symbol-input100">
 							<i class="fa fa-user" aria-hidden="true"></i>
@@ -47,7 +47,7 @@
 
 
 					<div class="wrap-input100 validate-input" data-validate = "Password is required">
-						<input class="input100" type="password" name="pass" placeholder="Password">
+						<input class="input100" type="password" name="pass" placeholder="Password" required="required">
 						<span class="focus-input100"></span>
 						<span class="symbol-input100">
 							<i class="fa fa-lock" aria-hidden="true"></i>
@@ -55,7 +55,7 @@
 					</div>
 
                     <div class="wrap-input100 validate-input" data-validate = "Password is required">
-						<input class="input100" type="password" name="conf_pass" placeholder="Confirm Password">
+						<input class="input100" type="password" name="conf_pass" placeholder="Confirm Password" required="required">
 						<span class="focus-input100"></span>
 						<span class="symbol-input100">
 							<i class="fa fa-lock" aria-hidden="true"></i>
@@ -63,7 +63,7 @@
 					</div>
 
 					<div class="wrap-input100 validate-input">
-						<select class="input100" name="hod" id="hodSelect">
+						<select class="input100" name="hod" id="hodSelect" required="required">
 							<option value="" disabled selected>Select HOD</option>
                             {% for hod in novushod %}
                             {% if hod %}

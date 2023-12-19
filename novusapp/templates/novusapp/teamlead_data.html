@@ -155,13 +155,21 @@
                     <td class=" ">
                       {{ respondent.project_interview.interview_date }}
                     </td>
-                    <td class=" ">{{ respondent.team_lead }}</td>
-                    <td class=" ">{{ respondent.Department }}</td>
+                    {% if respondent.team_lead == none %}
+                      <td class=" "></td>
+                    {% else %}
+                      <td class=" ">{{ respondent.team_lead }}</td>
+                      {% endif %}
+                    {% if respondent.Department == none %}
+                      <td class=" "></td>
+                    {% else %}
+                      <td class=" ">{{ respondent.Department }}</td>
+                    {% endif %}
                     {% if respondent.is_active == 0 %}
-                    <td class="a-right a-right" style="color: red">Pending</td>
+                    <td class="a-right a-right" style="color: red"><span class="font-weight-bold"><i class="border border-secondary p-2">Pending</i></span></td>
                     {% elif respondent.is_active == 1 %}
                     <td class="a-right a-right" style="color: green">
-                      Complete
+                      <span class="font-weight-bold"><i class="border border-secondary p-2">Complete</i></span>
                     </td>
                     {% endif %}
                   </tr>

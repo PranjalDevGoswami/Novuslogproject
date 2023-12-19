@@ -251,26 +251,3 @@ class CustomUser(AbstractUser):
     
 
 
-
-
-# class CustomUser(AbstractUser):
-#     email = models.EmailField(_("email address"), unique=True)
-#     username = models.CharField(max_length=100)
-#     role = models.CharField(max_length=255, null=True, blank=True)
-#     user_manager = models.CharField(max_length=255, null=True, blank=True)
-#     hod_name = models.CharField(max_length=255, null=True, blank=True)
-#     department = models.CharField(max_length=255, null=True, blank=True)
-#     mobile = models.CharField(max_length=255, null=True, blank=True)
-#     token = models.CharField(max_length=255, null=True, blank=True)
-#     otp = models.CharField(max_length=255, null=True, blank=True)
-#     is_superviser = models.CharField(max_length=255, null=True, blank=True)
-#     is_category = models.CharField(max_length=255, null=True, blank=True)
-#     is_active = models.BooleanField(default=False)
-#     created_at = models.DateTimeField(default=timezone.now)
-#     updated_at = models.DateTimeField(auto_now=True)
-
-#     objects = CustomUserManager()
-
-#     USERNAME_FIELD = 'email'
-    
-#     REQUIRED_FIELDS = ['username']

@@ -16,8 +16,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'novusapp.CustomUser'
-LOGIN_URL = ''
-# LOGIN_REDIRECT_URL = '/user_dashboard/'
+LOGIN_URL = 'login_view'
+LOGIN_REDIRECT_URL = 'dashboard_redirect'
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 from django.contrib import messages
@@ -50,7 +50,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
+
+
+
 
 # settings.py
 
@@ -84,33 +88,33 @@ WSGI_APPLICATION = 'novusproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 import yaml
-#credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
+credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 
-# db_name = credentials['db_name']
-# user = credentials['user']
-# password = credentials['password']
-# host = credentials['host']
-# port = credentials['port']
+db_name = credentials['db_name']
+user = credentials['user']
+password = credentials['password']
+host = credentials['host']
+port = credentials['port']
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': db_name,
-#         'USER': user,
-#         'PASSWORD': password,
-#         'HOST' : host,
-#         'PORT': port,
-        
-        
-#     }
-# }
-DATABASE_DIR = os.path.join(BASE_DIR, 'db.sqlite3')
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DATABASE_DIR,
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': db_name,
+        'USER': user,
+        'PASSWORD': password,
+        'HOST' : host,
+        'PORT': port,
+        
+        
     }
 }
+# DATABASE_DIR = os.path.join(BASE_DIR, 'db.sqlite3')
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': DATABASE_DIR,
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

@@ -31,8 +31,12 @@
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Profile Form</h2>
+                    <button type="button" class="btn btn-danger rounded-lg pull-right" onclick="goBack()" >
+                      Back
+                    </button>
                     <ul class="nav navbar-right panel_toolbox">
                       <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        
                       </li>
                       <li><a class="close-link"><i class="fa fa-close"></i></a>
                       </li>
@@ -45,7 +49,7 @@
 						<div class="item form-group">
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Username <span class="required">*</span></label>
 							<div class="col-md-6 col-sm-6 ">
-								<input id="mobile_no" class="form-control" disabled selected  type="text" name="username" required="required" value="{{username}}">
+								<input id="mobile_no" class="form-control" disabled selected  type="text" name="username" required="required" value="{{profile_obj.username}}">
 								<span id="mobileError" style="color: red;"></span>
 							</div>
 						</div>
@@ -53,21 +57,21 @@
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Email <span class="required">*</span></label>	
 							</label>
 							<div class="col-md-6 col-sm-6 ">
-								<input id="mobile_no" class="form-control" disabled selected  type="text" name="email" required="required" value="{{email}}">
+								<input id="mobile_no" class="form-control" disabled selected  type="text" name="email" required="required" value="{{profile_obj.email}}">
 								<span id="mobileError" style="color: red;"></span>
 							</div>
 						</div>
 						<div class="item form-group">
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Role <span class="required">*</span></label>
 							<div class="col-md-6 col-sm-6 ">
-								<input id="mobile_no" class="form-control" disabled selected  type="text" name="role" required="required" value="{{role}}">
+								<input id="mobile_no" class="form-control" disabled selected  type="text" name="role" required="required" value="{{profile_obj.role}}">
 								<span id="mobileError" style="color: red;"></span>
 							</div>
 						</div>
 						<div class="item form-group">
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Manager</label>
 							<div class="col-md-6 col-sm-6">
-								<input id="mobile_no" class="form-control" disabled selected  type="text" name="manager" value="{{manager}}">
+								<input id="mobile_no" class="form-control" disabled selected  type="text" name="manager" value="{{profile_obj.user_manager}}">
 								<span id="mobileError" style="color: red;"></span>
 							</div>	
 						</div>	
@@ -75,37 +79,44 @@
 						<div class="item form-group">
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Mobile no <span class="required">*</span></label>
 							<div class="col-md-6 col-sm-6">
+                {% if profile_obj.mobile == "None" or profile_obj.mobile == "" or profile_obj.mobile == none %}
 								<input id="mobile_no" class="form-control input-space" type="text" name="mobile_no" required="required">
+                {% else %}
+								<input id="mobile_no" class="form-control input-space" value="{{profile_obj.mobile}}" type="text" name="mobile_no" required="required">
+                {% endif %}
 								<span id="mobileError" style="color: red;"></span>
 							</div>
 						</div>	
-
+            
 						<div class="item form-group">
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="department"> Department <span class="required">*</span></label>
 							<div class="col-md-6 col-sm-6">
 								<select id="department" class="form-control" name="department" required="required">
-									<option value="" disabled selected>Type</option>
-									{% for data in department %}
-										<option value="{{data.name}}">{{data.name}}</option>
+                  {% if profile_obj.department == "" or profile_obj.department == none  or profile_obj.department == "None" %}
+                  <option value="" disabled selected>-----SELECT----</option>
+                  {% for data in department %}
+									<option value="{{data.name}}">{{data.name}}</option>
 									{% endfor %}
+                  {% else %}
+                  <option value="" disabled selected>{{profile_obj.department}}</option>
+                  {% for data in department %}
+                  <option value="{{data.name}}">{{data.name}}</option>
+                  {% endfor %}
+                  {% endif %}
 								</select>
 							</div>	
 						</div>
+        
 						<div class="ln_solid"></div>
 						<div class="item form-group">
 							<div class="col-md-6 col-sm-6 offset-md-3">		
-								<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Submit</button>
-								<button type="button" class="btn btn-danger rounded-lg">Back
-									<a href="{% if role == 'AM/Manager' %}{% url 'managerteam_data' %}
-										{% elif role == 'Team Lead' %}{% url 'user_dashboard' %}
-										{% else %}{% url 'hod_dashboard' %}{% endif %}">
-							 		</a>
-							
-								</button>
+								<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Update</button>
+								
 							</div>
 						</div>
 
 					</form>
+        
 													
                     <p></p>
 
@@ -158,6 +169,25 @@
             $('#mobileError').text('Invalid mobile number. Please enter a 10-digit number.');
         }
     }
+</script>
+
+<script>
+  function goBack() {
+      // You can replace the following logic with your specific requirements
+      var role = "{% if role %}{{ role }}{% endif %}";
+
+      var url;
+      if (role === 'AM/Manager') {
+          url = "{% url 'managerteam_data' %}";
+      } else if (role === 'Team Lead') {
+          url = "{% url 'user_dashboard' %}";
+      } else {
+          url = "{% url 'hod_dashboard' %}";
+      }
+
+      // Redirect to the specified URL
+      window.location.href = url;
+  }
 </script>
 
 {% endblock script %}

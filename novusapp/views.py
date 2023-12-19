@@ -18,7 +18,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import check_password
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import yaml
-from .decorators import unauthenitcated_user
+from django.core import signing
+from django.contrib.auth.decorators import login_required
+from .decorators import unauthenitcated_user,role_required
+
+
 credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 host_url = credentials['hosted_url']
 
@@ -87,7 +91,12 @@ def register(request):
     return render(request, 'novusapp/register.html',context)
 
 
+@login_required
+@role_required(allowed_roles=['HOD'])
 def confirm_registration(request,id):
+    print('my str id',id)
+    # id = signing.loads(id)
+    # print(id)
     role = RoleMaster.objects.all().values('name')
     team_manager = Manager.objects.all().values('name')
     if request.session.has_key('currentuser_id'):
@@ -119,9 +128,11 @@ def confirm_registration(request,id):
             role1 = request.POST['user_role1']
           
             if role1 == 'Team Lead':
+                id = signing.loads(id)
                 user_manager = request.POST.get('user_manager', '')
 
             if role1 == 'AM/Manager':
+                id = signing.loads(id)
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
@@ -148,7 +159,7 @@ def confirm_registration(request,id):
 
                         # Save the changes to the user
                         user1.save()
-                        messages.error(request, 'This id user role and AM/Manager updated Successfully.')
+                        messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
                     else:
                         
@@ -171,12 +182,13 @@ def confirm_registration(request,id):
 
                         # Save the changes to the user
                         user1.save()
-                        messages.success(request, 'Registration Completed')
+                        messages.success(request, 'Registration Completed',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
                 except Register.DoesNotExist:
                     pass
                 
             if role1 == 'HOD':
+                id = signing.loads(id)
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
@@ -204,7 +216,7 @@ def confirm_registration(request,id):
 
                         # Save the changes to the user
                         user1.save()
-                        messages.error(request, 'This id user role and AM/Manager updated Successfully.')
+                        messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
                     else:
                        
@@ -226,11 +238,12 @@ def confirm_registration(request,id):
 
                         # Save the changes to the user
                         user1.save()
-                        messages.success(request, 'Registration Completed')
+                        messages.success(request, 'Registration Completed',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
                 except Register.DoesNotExist:
                     pass
-            
+                
+         
             email1 = Register.objects.get(id=id).email
             username = Register.objects.get(id=id).username
             password1 = Register.objects.get(id=id).password
@@ -257,7 +270,7 @@ def confirm_registration(request,id):
 
                     # Save the changes to the user
                     user1.save()
-                    messages.error(request, 'This id user role and AM/Manager updated Successfully.')
+                    messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                     return redirect('/hod_dashboard')
             except Register.DoesNotExist:
                 pass
@@ -283,14 +296,15 @@ def confirm_registration(request,id):
 
                 # Save the changes to the user
                 user1.save()
-                messages.success(request, 'Registration Completed')
+                messages.success(request, 'Registration Completed',extra_tags="alert-success")
                 return redirect('/hod_dashboard')
               
             except Exception as e:
                 print(f"\n\n ERROR :: {e} \n\n")
                 messages.error(request, f'An error occurred: {str(e)}')
                 return redirect('register')
-
+            
+        
         context = {
             'total': total_user,
             'user_data_list': user_data_list,
@@ -307,8 +321,14 @@ def confirm_registration(request,id):
     return render(request, 'novusapp/confirm_registration.html')
 
 
-@unauthenitcated_user
+
+
 def login_view(request):
+    # If user is already authenticated, redirect them to their dashboard
+    if request.user.is_authenticated:
+        return redirect('dashboard_redirect')
+
+    # Continue with the regular login logic if not authenticated
     if request.method == 'POST':
         email = request.POST.get('email')
         user_password = request.POST.get('login_password')
@@ -317,40 +337,50 @@ def login_view(request):
         user = authenticate(request, email=email, password=user_password)
 
         if user is not None:
-            # Check the user's groups
-            if user.groups.filter(name="Team Lead").exists():
-                request.session['currentuser_id'] = user.id
-                return redirect('/user_dashboard')
+            request.session['currentuser_id'] = user.id
+            login(request, user)
 
+            # Redirect to the dashboard if already authenticated
+            next_url = request.GET.get('next', None)
+            if next_url and not next_url.startswith('/login'):
+                return redirect(next_url)
 
-            elif user.groups.filter(name="AM/Manager").exists():
-                request.session['currentuser_id'] = user.id
-                return redirect('/manager')
+            return redirect('dashboard_redirect') 
 
-
-            elif user.groups.filter(name="HOD").exists():
-                request.session['currentuser_id'] = user.id
-                try:
-                    hod_name = Hod.objects.get(email=user.email).name
-                except:
-                    hod_name = ""
-                CustomUser.objects.filter(id=user.id).update(hod_name=hod_name)
-                messages.success(request, "successfully logged In.", extra_tags="alert-success")
-                return redirect('/hod_dashboard')
-
-            elif user.is_superuser:
-                request.session['currentuser_id'] = user.id
-                login(request, user)
-
-                return redirect('admin:index') 
-       
         else:
             messages.error(request, 'Invalid login credentials.', extra_tags="alert-danger")
 
     return render(request, 'novusapp/login.html')
 
 
+@login_required
+def dashboard_redirect(request):
+    # If user is already authenticated, redirect to their dashboard
+    if request.user.is_authenticated:
+        if request.user.groups.filter(name="Team Lead").exists():
+            return redirect('user_dashboard')
 
+        elif request.user.groups.filter(name="AM/Manager").exists():
+            return redirect('manager')
+
+        elif request.user.groups.filter(name="HOD").exists():
+            try:
+                hod_name = Hod.objects.get(email=request.user.email).name
+            except Hod.DoesNotExist:
+                hod_name = ""
+            CustomUser.objects.filter(id=request.user.id).update(hod_name=hod_name)
+            messages.success(request, "Successfully logged in.", extra_tags="alert-success")
+            return redirect('hod_dashboard')
+
+        elif request.user.is_superuser:
+            return redirect('admin:index')
+
+    # If not authenticated, handle as before
+    return redirect('/')
+
+
+@login_required
+@role_required(allowed_roles=['Team Lead'])
 def user_dashboard(request):
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
@@ -365,7 +395,10 @@ def user_dashboard(request):
             user_manager_email = CustomUser.objects.get(id=userid).email
 
         else:
-            user_manager_email = Manager.objects.get(name=user_manager).email
+            try:
+                user_manager_email = Manager.objects.get(name=user_manager).email
+            except:
+                pass
 
         industry = Industry.objects.all()
         mycountry = Country.objects.all()
@@ -469,7 +502,7 @@ def user_dashboard(request):
 
                 # Save the Respondent instance to the database
                 respondent.save()
-                messages.success(request, 'Form Submitted Successfully')
+                messages.success(request, 'Form Submitted Successfully',extra_tags="alert-success")
                 return redirect('/user_dashboard')
 
             except Exception as e:
@@ -486,6 +519,8 @@ def user_dashboard(request):
     return HttpResponse('Please login')
 
 
+@login_required
+@role_required(allowed_roles=['Team Lead'])
 def userdata(request):
     if request.session.has_key('currentuser_id'):
         # Retrieve all data from the Respondent table
@@ -541,7 +576,8 @@ def userdata(request):
     return HttpResponse('Please Login')
 
 
-
+@login_required
+@role_required(allowed_roles=['HOD'])
 def userhod_data(request):
     if request.session.has_key('currentuser_id'):
 
@@ -606,6 +642,7 @@ def autocomplete(request):
 
         qs = Industry.objects.filter(name__icontains=term)
         titles = [product.name for product in qs]
+        print('@@@@@@@@@@@@@@@@@/',titles)
 
         return JsonResponse(titles, safe=False)
     
@@ -638,22 +675,11 @@ def autocomplete2(request):
     return render(request, 'novusapp/userhod_data.html')
 
 
-def useralldata(request):
-    if request.session.has_key('currentuser_id'):
-        # Retrieve all data from the Respondent table
-        respondents = Respondent.objects.all()
-
-        context = {
-            'respondents':respondents,
-            'host_url' : host_url,
-        }
-      
-        return render(request,"novusapp/useralldata.html",context)
-
-    return HttpResponse('Please Login')
 
 
-@unauthenitcated_user
+
+@login_required
+@role_required(allowed_roles=['HOD'])
 def hod_dashboard(request):
     role = RoleMaster.objects.all().values('name')
     team_manager = Manager.objects.all().values('name')
@@ -676,8 +702,9 @@ def hod_dashboard(request):
         
 
         for userdata in complex_obj:
+            id = signing.dumps(userdata['id'])
             user_data = {
-                'id': userdata['id'],
+                'id': id,
                 'username': userdata['username'],
                 'email': userdata['email'],
                 'password': userdata['password'],
@@ -688,8 +715,9 @@ def hod_dashboard(request):
             user_data_list.append(user_data)
 
         for userdata1 in complex_obj1:
+            id = signing.dumps(userdata1['id'])
             user_data1 = {
-                'id': userdata1['id'],
+                'id': id,
                 'username': userdata1['username'],
                 'email': userdata1['email'],
                 'password': userdata1['password'],
@@ -722,7 +750,8 @@ def logout_view(request):
     logout(request)
     return redirect('/')  # Redirect to the login page or any other desired page
 
-
+@login_required
+@role_required(allowed_roles=['HOD'])
 def tables(request):
     role = RoleMaster.objects.all().values('name')
     team = TeamLead.objects.all().values('name')
@@ -764,6 +793,8 @@ def tables(request):
     return HttpResponse('Please Login')
 
 
+@login_required
+@role_required(allowed_roles=['AM/Manager'])
 def manager(request):
     if request.session.has_key('currentuser_id'):
      
@@ -824,7 +855,8 @@ def manager(request):
     return HttpResponse('Please Login')
 
 
-
+@login_required
+@role_required(allowed_roles=['AM/Manager'])
 def managerteam_data(request):
     if request.session.has_key('currentuser_id'):
         # Retrieve all data from the Respondent table
@@ -845,7 +877,8 @@ def managerteam_data(request):
 
     return HttpResponse('Please Login')
 
-
+@login_required
+@role_required(allowed_roles=['AM/Manager'])
 def form_approved(request,id):
     Respondent.objects.filter(id=id).update(is_active=1)
     return redirect('manager')
@@ -853,30 +886,40 @@ def form_approved(request,id):
 
     
 def profile(request):
-    dep = Department.objects.all()
-    if request.session.has_key('currentuser_id'):
-        id = request.session['currentuser_id']
-        username = CustomUser.objects.get(id=id).username
-        email = CustomUser.objects.get(id=id).email
-        manager = CustomUser.objects.get(id=id).user_manager
-        role = CustomUser.objects.get(id=id).role
-        if request.method == 'POST':
-            mobile = request.POST.get('mobile_no')
-            dept = request.POST.get('department')
-            CustomUser.objects.filter(id=id).update(department=dept,mobile=mobile)
-            tl_email = CustomUser.objects.get(id=id,role="Team Lead").email
-            tl_username = CustomUser.objects.get(id=id,role="Team Lead").username
-            Respondent.objects.filter(email=tl_email).update(team_lead=tl_username,Department=dept)
-            messages.success(request, 'Profile Update successfully.',extra_tags="alert-success")
-        context = {
-            'username' : username,
-            'email' : email,
-            'manager' : manager,
-            'role' : role,
-            'department' : dep,
-        }
-        return render(request, "novusapp/edit.html",context)
-    return HttpResponse('Please Login')
+    try:
+        dep = Department.objects.all()
+
+        if request.session.has_key('currentuser_id'):
+            id = request.session['currentuser_id']
+            profile_obj = CustomUser.objects.get(id=id)
+
+            if request.method == 'POST':
+                mobile = request.POST.get('mobile_no')
+                dept = request.POST.get('department')
+                
+                # Update user information
+                CustomUser.objects.filter(id=id).update(department=dept, mobile=mobile)
+                
+                # Update related Respondent information
+                tl_email = profile_obj.email
+                Respondent.objects.filter(email=tl_email).update(Department=dept)
+                
+                messages.success(request, 'Profile updated successfully.', extra_tags="alert-success")
+                return redirect('/profile')
+
+            context = {
+                'profile_obj': profile_obj,
+                'department': dep,
+            }
+            return render(request, "novusapp/edit.html", context)
+
+        return HttpResponse('Please Login')
+ 
+    except Exception as e:
+        # Handle other exceptions
+        messages.error(request, f'An error occurred: {str(e)}', extra_tags="alert-danger")
+        return render(request, "novusapp/edit.html", {'department': dep})
+
 
 
 def change_password(request):
@@ -888,20 +931,25 @@ def change_password(request):
         # Get the old, new, and confirmed passwords from the form
         old_password = request.POST.get('old_password')
         new_password = request.POST.get('new_password')
+        # confirm_password = request.POST.get('confirm_password')
+        
+        # if new_password != confirm_password:
+        #     messages.error(request, 'Passwords do not match.',extra_tags="alert-danger")
+        #     return redirect('/profile/change_password')
        
         # Retrieve the user object from the database
         user = CustomUser.objects.get(id=userid)
 
         # Check if the old password matches the user's current password
         if not check_password(old_password, user.password):
-            messages.error(request, 'Old password is incorrect')
-            return redirect('change_password')  # Adjust the URL name to your view
+            messages.error(request, 'Old password is incorrect',extra_tags="alert-danger")
+            return redirect('/profile/change_password')  # Adjust the URL name to your view
 
         user.set_password(new_password)
         user.save()
 
-        messages.success(request, 'Password changed successfully')
-        return redirect('profile')  # Redirect to the profile page or another appropriate page
+        messages.success(request, 'Password changed successfully',extra_tags="alert-success")
+        return redirect('/profile')  # Redirect to the profile page or another appropriate page
 
     context = {
         'role':role,
