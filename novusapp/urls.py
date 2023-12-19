@@ -1,9 +1,13 @@
 from django.urls import path
+from django.urls import path, reverse_lazy
+from django.views.generic import RedirectView
+from .views import login_view, dashboard_redirect
 from .import views
 
 
 urlpatterns = [
     path('',views.login_view,name="login_view"),
+    path('dashboard_redirect', views.dashboard_redirect, name='dashboard_redirect'),
     path('register',views.register,name="register"),
     path('hod_dashboard/confirm_registration/<str:id>',views.confirm_registration,name='confirm_registration'),
     path('logout/', views.logout_view, name='logout'),
