@@ -18,7 +18,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import check_password
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import yaml
-from .decorators import unauthenitcated_user
+# from .decorators import unauthenitcated_user
 credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 host_url = credentials['hosted_url']
 
@@ -307,20 +307,24 @@ def confirm_registration(request,id):
     return render(request, 'novusapp/confirm_registration.html')
 
 
-@unauthenitcated_user
+
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         user_password = request.POST.get('login_password')
-
-        # Authenticate the user
+        if not request.user.is_active:
+             messages.error(request, "Your account is not active. Please contact support.")
+             return redirect('')
+            # Authenticate the user
         user = authenticate(request, email=email, password=user_password)
-
+        
+        
         if user is not None:
             # Check the user's groups
+
             if user.groups.filter(name="Team Lead").exists():
                 request.session['currentuser_id'] = user.id
-                return redirect('/user_dashboard')
+                return redirect('/user_dashboard')                       
 
 
             elif user.groups.filter(name="AM/Manager").exists():
@@ -653,7 +657,7 @@ def useralldata(request):
     return HttpResponse('Please Login')
 
 
-@unauthenitcated_user
+
 def hod_dashboard(request):
     role = RoleMaster.objects.all().values('name')
     team_manager = Manager.objects.all().values('name')

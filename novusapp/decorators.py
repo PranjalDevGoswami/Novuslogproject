@@ -5,12 +5,12 @@ from functools import wraps
 from django.http import HttpResponseBadRequest
 
 
-def unauthenitcated_user(views_func):
-    def wrapper_func(request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect('')
-        else:
-            return views_func(request, *args, **kwargs)
+# def unauthenitcated_user(views_func):
+#     def wrapper_func(request, *args, **kwargs):
+#         if request.user.is_authenticated:
+#             return redirect('/')
+#         else:
+#             return views_func(request, *args, **kwargs)
 
 
-    return wrapper_func
+#     return wrapper_func

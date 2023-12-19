@@ -47,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'novusapp.middleware.IsActiveMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -84,33 +85,37 @@ WSGI_APPLICATION = 'novusproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 import yaml
-#credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
+credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 
-# db_name = credentials['db_name']
-# user = credentials['user']
-# password = credentials['password']
-# host = credentials['host']
-# port = credentials['port']
+import pymysql
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': db_name,
-#         'USER': user,
-#         'PASSWORD': password,
-#         'HOST' : host,
-#         'PORT': port,
-        
-        
-#     }
-# }
-DATABASE_DIR = os.path.join(BASE_DIR, 'db.sqlite3')
+pymysql.install_as_MySQLdb()
+
+db_name = credentials['db_name']
+user = credentials['user']
+password = credentials['password']
+host = credentials['host']
+port = credentials['port']
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DATABASE_DIR,
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': db_name,
+        'USER': user,
+        'PASSWORD': password,
+        'HOST' : host,
+        'PORT': port,
+        
+        
     }
 }
+# DATABASE_DIR = os.path.join(BASE_DIR, 'db.sqlite3')
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': DATABASE_DIR,
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
