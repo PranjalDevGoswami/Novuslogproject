@@ -5,7 +5,7 @@ from .import views
 urlpatterns = [
     path('',views.login_view,name="login_view"),
     path('register',views.register,name="register"),
-    path('hod_dashboard/confirm_registration/<int:id>',views.confirm_registration,name='confirm_registration'),
+    path('hod_dashboard/confirm_registration/<str:id>',views.confirm_registration,name='confirm_registration'),
     path('logout/', views.logout_view, name='logout'),
     path('hod_dashboard',views.hod_dashboard, name='hod_dashboard'),
     path('hod_dashboard/tables',views.tables,name='tables'),

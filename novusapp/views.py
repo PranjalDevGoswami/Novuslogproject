@@ -18,6 +18,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import check_password
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import yaml
+from django.core import signing
+
 credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 host_url = credentials['hosted_url']
 
@@ -61,25 +63,25 @@ def register(request):
 
         # Check if the passwords match
         if password != confpassword:
-            messages.error(request, 'Passwords do not match.')
+            messages.error(request, 'Passwords do not match.',extra_tags="alert-danger")
             return redirect('register')
 
         # Validate email domain
         if not is_valid_email_domain(email):
             if not email:
-                messages.error(request, 'Please fill in the email field.')
+                messages.error(request, 'Please fill in the email field.',extra_tags="alert-danger")
             else:
-                messages.error(request, 'Invalid email domain. Please use a valid domain.')
+                messages.error(request, 'Invalid email domain. Please use a valid domain.',extra_tags="alert-danger")
             return redirect('register')
         # Create a new user
         try:
             user = Register.objects.create(email=email,username=username,password=password,hod_name=novus_hod)
             user.save()
-            messages.success(request, 'Registration successful. You can wait some time for defining your role.')
+            messages.success(request, 'Registration successful. You can wait some time for defining your role.',extra_tags="alert-success")
             return redirect('/')
         except Exception as e:
             print(f"\n\n ERROR :: {e} \n\n")
-            messages.error(request, f'An error occurred: {str(e)}')
+            messages.error(request, f'An error occurred: {str(e)}',extra_tags="alert-danger")
             return redirect('register')
     
     context = {'novushod':hod}
@@ -87,6 +89,9 @@ def register(request):
 
 
 def confirm_registration(request,id):
+    print('my str id',id)
+    # id = signing.loads(id)
+    # print(id)
     role = RoleMaster.objects.all().values('name')
     team_manager = Manager.objects.all().values('name')
     if request.session.has_key('currentuser_id'):
@@ -118,9 +123,11 @@ def confirm_registration(request,id):
             role1 = request.POST['user_role1']
           
             if role1 == 'Team Lead':
+                id = signing.loads(id)
                 user_manager = request.POST.get('user_manager', '')
 
             if role1 == 'AM/Manager':
+                id = signing.loads(id)
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
@@ -147,7 +154,7 @@ def confirm_registration(request,id):
 
                         # Save the changes to the user
                         user1.save()
-                        messages.error(request, 'This id user role and AM/Manager updated Successfully.')
+                        messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
                     else:
                         
@@ -170,12 +177,13 @@ def confirm_registration(request,id):
 
                         # Save the changes to the user
                         user1.save()
-                        messages.success(request, 'Registration Completed')
+                        messages.success(request, 'Registration Completed',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
                 except Register.DoesNotExist:
                     pass
                 
             if role1 == 'HOD':
+                id = signing.loads(id)
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
@@ -203,7 +211,7 @@ def confirm_registration(request,id):
 
                         # Save the changes to the user
                         user1.save()
-                        messages.error(request, 'This id user role and AM/Manager updated Successfully.')
+                        messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
                     else:
                        
@@ -225,11 +233,12 @@ def confirm_registration(request,id):
 
                         # Save the changes to the user
                         user1.save()
-                        messages.success(request, 'Registration Completed')
+                        messages.success(request, 'Registration Completed',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
                 except Register.DoesNotExist:
                     pass
-            
+                
+         
             email1 = Register.objects.get(id=id).email
             username = Register.objects.get(id=id).username
             password1 = Register.objects.get(id=id).password
@@ -256,7 +265,7 @@ def confirm_registration(request,id):
 
                     # Save the changes to the user
                     user1.save()
-                    messages.error(request, 'This id user role and AM/Manager updated Successfully.')
+                    messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                     return redirect('/hod_dashboard')
             except Register.DoesNotExist:
                 pass
@@ -282,14 +291,15 @@ def confirm_registration(request,id):
 
                 # Save the changes to the user
                 user1.save()
-                messages.success(request, 'Registration Completed')
+                messages.success(request, 'Registration Completed',extra_tags="alert-success")
                 return redirect('/hod_dashboard')
               
             except Exception as e:
                 print(f"\n\n ERROR :: {e} \n\n")
                 messages.error(request, f'An error occurred: {str(e)}')
                 return redirect('register')
-
+            
+        
         context = {
             'total': total_user,
             'user_data_list': user_data_list,
@@ -473,7 +483,7 @@ def user_dashboard(request):
 
                 # Save the Respondent instance to the database
                 respondent.save()
-                messages.success(request, 'Form Submitted Successfully')
+                messages.success(request, 'Form Submitted Successfully',extra_tags="alert-success")
                 return redirect('/user_dashboard')
 
             except Exception as e:
@@ -666,8 +676,9 @@ def hod_dashboard(request):
         
 
         for userdata in complex_obj:
+            id = signing.dumps(userdata['id'])
             user_data = {
-                'id': userdata['id'],
+                'id': id,
                 'username': userdata['username'],
                 'email': userdata['email'],
                 'password': userdata['password'],
@@ -678,8 +689,9 @@ def hod_dashboard(request):
             user_data_list.append(user_data)
 
         for userdata1 in complex_obj1:
+            id = signing.dumps(userdata1['id'])
             user_data1 = {
-                'id': userdata1['id'],
+                'id': id,
                 'username': userdata1['username'],
                 'email': userdata1['email'],
                 'password': userdata1['password'],
@@ -843,30 +855,40 @@ def form_approved(request,id):
 
     
 def profile(request):
-    dep = Department.objects.all()
-    if request.session.has_key('currentuser_id'):
-        id = request.session['currentuser_id']
-        username = CustomUser.objects.get(id=id).username
-        email = CustomUser.objects.get(id=id).email
-        manager = CustomUser.objects.get(id=id).user_manager
-        role = CustomUser.objects.get(id=id).role
-        if request.method == 'POST':
-            mobile = request.POST.get('mobile_no')
-            dept = request.POST.get('department')
-            CustomUser.objects.filter(id=id).update(department=dept,mobile=mobile)
-            tl_email = CustomUser.objects.get(id=id,role="Team Lead").email
-            tl_username = CustomUser.objects.get(id=id,role="Team Lead").username
-            Respondent.objects.filter(email=tl_email).update(team_lead=tl_username,Department=dept)
-            messages.success(request, 'Profile Update successfully.',extra_tags="alert-success")
-        context = {
-            'username' : username,
-            'email' : email,
-            'manager' : manager,
-            'role' : role,
-            'department' : dep,
-        }
-        return render(request, "novusapp/edit.html",context)
-    return HttpResponse('Please Login')
+    try:
+        dep = Department.objects.all()
+
+        if request.session.has_key('currentuser_id'):
+            id = request.session['currentuser_id']
+            profile_obj = CustomUser.objects.get(id=id)
+
+            if request.method == 'POST':
+                mobile = request.POST.get('mobile_no')
+                dept = request.POST.get('department')
+                
+                # Update user information
+                CustomUser.objects.filter(id=id).update(department=dept, mobile=mobile)
+                
+                # Update related Respondent information
+                tl_email = profile_obj.email
+                Respondent.objects.filter(email=tl_email).update(Department=dept)
+                
+                messages.success(request, 'Profile updated successfully.', extra_tags="alert-success")
+                return redirect('/profile')
+
+            context = {
+                'profile_obj': profile_obj,
+                'department': dep,
+            }
+            return render(request, "novusapp/edit.html", context)
+
+        return HttpResponse('Please Login')
+ 
+    except Exception as e:
+        # Handle other exceptions
+        messages.error(request, f'An error occurred: {str(e)}', extra_tags="alert-danger")
+        return render(request, "novusapp/edit.html", {'department': dep})
+
 
 
 def change_password(request):
@@ -878,20 +900,25 @@ def change_password(request):
         # Get the old, new, and confirmed passwords from the form
         old_password = request.POST.get('old_password')
         new_password = request.POST.get('new_password')
+        # confirm_password = request.POST.get('confirm_password')
+        
+        # if new_password != confirm_password:
+        #     messages.error(request, 'Passwords do not match.',extra_tags="alert-danger")
+        #     return redirect('/profile/change_password')
        
         # Retrieve the user object from the database
         user = CustomUser.objects.get(id=userid)
 
         # Check if the old password matches the user's current password
         if not check_password(old_password, user.password):
-            messages.error(request, 'Old password is incorrect')
-            return redirect('change_password')  # Adjust the URL name to your view
+            messages.error(request, 'Old password is incorrect',extra_tags="alert-danger")
+            return redirect('/profile/change_password')  # Adjust the URL name to your view
 
         user.set_password(new_password)
         user.save()
 
-        messages.success(request, 'Password changed successfully')
-        return redirect('profile')  # Redirect to the profile page or another appropriate page
+        messages.success(request, 'Password changed successfully',extra_tags="alert-success")
+        return redirect('/profile')  # Redirect to the profile page or another appropriate page
 
     context = {
         'role':role,
