@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import CustomUser,Hod,Register,TeamLead,RoleMaster,Respondent, Job, Country, Industry, Company, Analyst, Project, Incentive, ProjectInterview,Manager,Department
+from .models import *
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.utils import timezone
@@ -20,7 +20,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import yaml
 from django.core import signing
 from django.contrib.auth.decorators import login_required
-from .decorators import unauthenitcated_user,role_required
+from .decorators import role_required
 
 
 credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
@@ -126,13 +126,78 @@ def confirm_registration(request,id):
    
         if request.method == 'POST':
             role1 = request.POST['user_role1']
+            print('********************',role1)
           
             if role1 == 'Team Lead':
                 id = signing.loads(id)
                 user_manager = request.POST.get('user_manager', '')
+                email1 = Register.objects.get(id=id).email
+                username = Register.objects.get(id=id).username
+                password1 = Register.objects.get(id=id).password
+                hodname = Register.objects.get(id=id).hod_name
+                user_manager = ''
+
+                try:
+                    existing_user_active = Register.objects.get(id=id).is_active
+                    if existing_user_active == 1:
+                        
+                        Register.objects.filter(id=id).update(role=role1,user_manager=user_manager)
+                        # Retrieve the user
+                        user1 = get_object_or_404(CustomUser, email=email1)
+
+                        # Retrieve the group
+                        try:
+                            group = Group.objects.get(name=role1)
+                        except Group.DoesNotExist:
+                            # Handle the case where the group doesn't exist
+                            return HttpResponse(f"Group '{role1}' does not exist.", status=400)
+
+                        # Add the user to the group
+                        user1.groups.clear()
+                        user1.groups.add(group)
+
+                        # Save the changes to the user
+                        user1.save()
+                        messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
+                        email1 = Register.objects.get(id=id).email
+                        username = Register.objects.get(id=id).username
+                        print('$$$$$$$$$$',email1,username)
+                        CustomUser.objects.filter(email=email1).update(role=role1)
+                        try:
+                            TeamLead.objects.create(name=username,email=email1)
+                            Manager.objects.filter(name=username,email=email1).delete()
+                        except:
+                            pass
+                        return redirect('/hod_dashboard')
+                    else:
+                        print('!!!!!!!!!!!')
+                        existing_user = Register.objects.filter(id=id).update(is_active=1,role=role1,user_manager=user_manager)
+                        user = CustomUser.objects.create_user(email=email1,username=username, password=password1,hod_name=hodname,role=role1,user_manager=user_manager,is_active=1,is_staff=1)
+                        
+                        user.save()
+                        # Retrieve the user
+                        user1 = get_object_or_404(CustomUser, email=email1)
+
+                        # Retrieve the group
+                        try:
+                            group = Group.objects.get(name=role1)
+                        except Group.DoesNotExist:
+                            # Handle the case where the group doesn't exist
+                            return HttpResponse(f"Group '{role1}' does not exist.", status=400)
+
+                        # Add the user to the group
+                        user1.groups.add(group)
+
+                        # Save the changes to the user
+                        user1.save()
+                        messages.success(request, 'Registration Completed',extra_tags="alert-success")
+                        return redirect('/hod_dashboard')
+                except Register.DoesNotExist:
+                    pass
 
             if role1 == 'AM/Manager':
                 id = signing.loads(id)
+                print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
@@ -160,11 +225,18 @@ def confirm_registration(request,id):
                         # Save the changes to the user
                         user1.save()
                         messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
+                        CustomUser.objects.filter(email=email1).update(role=role1)
+                        try:
+                            Manager.objects.create(name=username,email=email1)
+                            TeamLead.objects.filter(name=username,email=email1).delete()
+                        except:
+                            pass
                         return redirect('/hod_dashboard')
                     else:
                         
                         existing_user = Register.objects.filter(id=id).update(is_active=1,role=role1,user_manager=user_manager)
                         user = CustomUser.objects.create_user(email=email1,username=username, password=password1,hod_name=hodname,role=role1,user_manager=user_manager,is_active=1,is_staff=1)
+                        # CustomUser.objects.filter(email=email1).update(role=role1)
                         user.save()
                         # Retrieve the user
                         user1 = get_object_or_404(CustomUser, email=email1)
@@ -189,6 +261,7 @@ def confirm_registration(request,id):
                 
             if role1 == 'HOD':
                 id = signing.loads(id)
+                print('?????????????????????')
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
@@ -217,11 +290,20 @@ def confirm_registration(request,id):
                         # Save the changes to the user
                         user1.save()
                         messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
+                        email1 = Register.objects.get(id=id).email
+                        username = Register.objects.get(id=id).username
+                        print('$$$$$$$$$$',email1,username)
+                        CustomUser.objects.filter(email=email1).update(role=role1)
+                        try:
+                            Hod.objects.create(name=username,email=email1)
+                        except:
+                            pass
                         return redirect('/hod_dashboard')
                     else:
-                       
+                        print('!!!!!!!!!!!')
                         existing_user = Register.objects.filter(id=id).update(is_active=1,role=role1,user_manager=user_manager)
                         user = CustomUser.objects.create_user(email=email1,username=username, password=password1,hod_name=hodname,role=role1,user_manager=user_manager,is_active=1,is_staff=1)
+                        
                         user.save()
                         # Retrieve the user
                         user1 = get_object_or_404(CustomUser, email=email1)
@@ -271,6 +353,11 @@ def confirm_registration(request,id):
                     # Save the changes to the user
                     user1.save()
                     messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
+                    CustomUser.objects.filter(email=email1).update(role=role1)
+                    try:
+                        TeamLead.objects.create(name=username,email=email1)
+                    except:
+                        pass
                     return redirect('/hod_dashboard')
             except Register.DoesNotExist:
                 pass
@@ -349,11 +436,13 @@ def login_view(request):
 
         else:
             messages.error(request, 'Invalid login credentials.', extra_tags="alert-danger")
+            return redirect('/')
 
     return render(request, 'novusapp/login.html')
 
 
-@login_required
+
+@login_required(login_url='/')
 def dashboard_redirect(request):
     # If user is already authenticated, redirect to their dashboard
     if request.user.is_authenticated:
@@ -892,10 +981,14 @@ def profile(request):
         if request.session.has_key('currentuser_id'):
             id = request.session['currentuser_id']
             profile_obj = CustomUser.objects.get(id=id)
-
+            
             if request.method == 'POST':
                 mobile = request.POST.get('mobile_no')
                 dept = request.POST.get('department')
+
+                if (profile_obj.mobile == mobile and profile_obj.department == dept):
+                    messages.error(request,"Record already exists.",extra_tags="alert-danger")
+                    return redirect('/profile')
                 
                 # Update user information
                 CustomUser.objects.filter(id=id).update(department=dept, mobile=mobile)
@@ -933,13 +1026,14 @@ def change_password(request):
         new_password = request.POST.get('new_password')
         # confirm_password = request.POST.get('confirm_password')
         
-        # if new_password != confirm_password:
-        #     messages.error(request, 'Passwords do not match.',extra_tags="alert-danger")
-        #     return redirect('/profile/change_password')
-       
+        # Check if the old password matches the user's current password
+        if not check_password(old_password, new_password):
+            messages.info(request, 'Old password and new password match please change this password',extra_tags="alert-warning")
+            return redirect('/profile/change_password')  # Adjust the URL name to your view
+        
         # Retrieve the user object from the database
-        user = CustomUser.objects.get(id=userid)
-
+        user = CustomUser.objects.get(id=userid) 
+        
         # Check if the old password matches the user's current password
         if not check_password(old_password, user.password):
             messages.error(request, 'Old password is incorrect',extra_tags="alert-danger")

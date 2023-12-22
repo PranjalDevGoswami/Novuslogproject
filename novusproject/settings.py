@@ -16,8 +16,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'novusapp.CustomUser'
-LOGIN_URL = 'login_view'
-LOGIN_REDIRECT_URL = 'dashboard_redirect'
+# LOGIN_URL = 'login_view'
+# LOGIN_REDIRECT_URL = 'dashboard_redirect'
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 from django.contrib import messages

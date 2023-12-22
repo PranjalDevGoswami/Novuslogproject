@@ -1,7 +1,6 @@
 from django.urls import path
 from django.urls import path, reverse_lazy
 from django.views.generic import RedirectView
-from .views import login_view, dashboard_redirect
 from .import views
 
 

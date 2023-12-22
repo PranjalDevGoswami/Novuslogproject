@@ -18,7 +18,7 @@
                     <span class="input-group-btn">
                       <button class="btn btn-secondary" type="button">Go!</button>
                     </span> {% endcomment %}
-					<button id="changePasswordBtn" class="btn btn-primary btn-sm" onclick="changePassword()">Change Password</button>
+					  <button id="changePasswordBtn" class="btn btn-primary btn-sm" onclick="changePassword()">Change Password</button>
                   </div>
                 </div>
               </div>
@@ -44,7 +44,7 @@
                     <div class="clearfix"></div>
                   </div>
                   <div class="x_content">
-					<form  id="demo-form2" data-parsley-validate class="form-label-left" method="post" action="{% url 'profile' %}">
+					<form  id="demo-form2" class="form-label-left" method="post" action="{% url 'profile' %}">
 						 {% csrf_token %}
 						<div class="item form-group">
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="mobile_no"> Username <span class="required">*</span></label>
@@ -98,7 +98,7 @@
 									<option value="{{data.name}}">{{data.name}}</option>
 									{% endfor %}
                   {% else %}
-                  <option value="" disabled selected>{{profile_obj.department}}</option>
+                  <option value="{{profile_obj.department}}">{{profile_obj.department}}</option>
                   {% for data in department %}
                   <option value="{{data.name}}">{{data.name}}</option>
                   {% endfor %}
