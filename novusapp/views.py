@@ -23,8 +23,8 @@ from django.contrib.auth.decorators import login_required
 from .decorators import unauthenitcated_user,role_required
 
 
-credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
-host_url = credentials['hosted_url']
+# credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
+# host_url = credentials['hosted_url']
 
 
 # Define a list of valid email domains
@@ -737,7 +737,7 @@ def hod_dashboard(request):
             'hod':current_hod,
             'role':role,
             'team' : team_manager,
-            'host_url' : host_url,
+            # 'host_url' : host_url,
         }
         
         return render(request, "novusapp/tables.html", context)
@@ -897,7 +897,11 @@ def profile(request):
                 mobile = request.POST.get('mobile_no')
                 dept = request.POST.get('department')
                 
-                # Update user information
+                #Update user information
+                if CustomUser.objects.filter(department=dept, mobile=mobile).exists():
+                    messages.info(request, 'Same record already exists.')
+                    return redirect('/profile')
+                
                 CustomUser.objects.filter(id=id).update(department=dept, mobile=mobile)
                 
                 # Update related Respondent information
@@ -964,6 +968,11 @@ def change_password(request):
 
 def loginDemo(request):
     return render(request, 'novusapp/base1.html')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('/')
 
 
 
