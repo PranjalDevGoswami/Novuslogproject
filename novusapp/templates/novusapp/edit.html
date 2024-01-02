@@ -28,8 +28,9 @@
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Profile Form</h2>
+                 
                     <ul class="nav navbar-right panel_toolbox">
-
+              
                     </ul>
                     <div class="clearfix"></div>
                   </div>
@@ -96,8 +97,7 @@
 						<div class="item form-group">
 							<div class="col-md-6 col-sm-6 offset-md-3">		
 								<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Update</button>
-                <a href="/hod_dashboard" type="button" class="btn light btn-outline-danger  w-30">Back</a>
-								
+								<a href="/hod_dashboard" type="button" class="btn light btn-outline-danger  w-30">Back</a>
 							</div>
 						</div>
 
@@ -155,6 +155,25 @@
             $('#mobileError').text('Invalid mobile number. Please enter a 10-digit number.');
         }
     }
+</script>
+
+<script>
+  function goBack() {
+      // You can replace the following logic with your specific requirements
+      var role = "{% if role %}{{ role }}{% endif %}";
+
+      var url;
+      if (role === 'AM/Manager') {
+          url = "{% url 'managerteam_data' %}";
+      } else if (role === 'Team Lead') {
+          url = "{% url 'user_dashboard' %}";
+      } else {
+          url = "{% url 'hod_dashboard' %}";
+      }
+
+      // Redirect to the specified URL
+      window.location.href = url;
+  }
 </script>
 
 {% endblock script %}

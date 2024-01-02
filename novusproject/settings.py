@@ -16,8 +16,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'novusapp.CustomUser'
-LOGIN_URL = 'login_view'
-LOGIN_REDIRECT_URL = 'dashboard_redirect'
+# LOGIN_URL = 'login_view'
+# LOGIN_REDIRECT_URL = 'dashboard_redirect'
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 from django.contrib import messages
@@ -32,7 +32,7 @@ MESSAGE_TAGS = {
 
 # Application definition
 
-INSTALLED_APPS = [
+INSTALLED_APPS = [ 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -98,16 +98,26 @@ WSGI_APPLICATION = 'novusproject.wsgi.application'
 
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': db_name,
-#         'USER': user,
-#         'PASSWORD': password,
-#         'HOST' : host,
-#         'PORT': port,
-        
-        
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'myproject',
+#         'USER': 'myprojectuser',
+#         'PASSWORD': 'password',
+#         'HOST': 'localhost',
+#         'PORT': '',
 #     }
 # }
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.mysql',
+#        'NAME': db_name,
+#        'USER': user,
+#        'PASSWORD': password,
+#        'HOST' : host,
+#        'PORT': port,
+#        
+#        
+#    }
+#}
 DATABASE_DIR = os.path.join(BASE_DIR, 'db.sqlite3')
 DATABASES = {
     'default': {
@@ -158,6 +168,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 import os
 
+# STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
@@ -187,7 +201,7 @@ PASSWORD_HASHERS = [
 
 
 
-# JAZZMIN_SETTINGS = {
+#JAZZMIN_SETTINGS = {
 #     "site title": "Novus Log Administrator",
 #     "site_logo": "images/novus_logo.png",
 #     "site_brand": "Novus Admin",
@@ -195,25 +209,25 @@ PASSWORD_HASHERS = [
 #     "site_logo_classes": "img-circle",
 #     "welcome_sign": "Welcome to the Novus Admin",
 
-#     # "topmenu_links": [
+     # "topmenu_links": [
 
-#     #     # Url that gets reversed (Permissions can be added)
-#     #     {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+     #     # Url that gets reversed (Permissions can be added)
+     #     {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
 
-#     #     # external url that opens in a new window (Permissions can be added)
-#     #     {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+     #     # external url that opens in a new window (Permissions can be added)
+     #     {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
 
-#     #     # model admin to link to (Permissions checked against model)
-#     #     {"model": "auth.User"},
+     #     # model admin to link to (Permissions checked against model)
+     #     {"model": "auth.User"},
 
-#     #     # App with dropdown menu to all its models pages (Permissions checked against models)
-#     #     {"app": "CustomUser"},
-#     # ],
+     #     # App with dropdown menu to all its models pages (Permissions checked against models)
+     #     {"app": "CustomUser"},
+      #],
 
-
-    
 
     
+
     
-# }
-# JAZZMIN_SETTINGS["show_ui_builder"] = True 
+    
+#}
+#JAZZMIN_SETTINGS["show_ui_builder"] = True 
