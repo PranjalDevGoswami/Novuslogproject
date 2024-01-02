@@ -20,12 +20,7 @@
               <div class="title_right">
                 <div class="col-md-5 col-sm-5   form-group pull-right top_search">
                   <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for...">
-                    <span class="input-group-btn">
-                      <button class="btn btn-secondary"  type="button">
-                        <i class="fa fa-search" aria-hidden="true"></i>
-                      </button>
-                    </span>
+                 
                   </div>
                 </div>
               </div>
@@ -39,10 +34,7 @@
                   <div class="x_title">
                     <h2>Projects</h2>
                     <ul class="nav navbar-right panel_toolbox">
-                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                      </li>
-                      <li><a class="close-link"><i class="fa fa-close"></i></a>
-                      </li>
+                 
                     </ul>
                     <div class="clearfix"></div>
                   </div>
@@ -76,13 +68,13 @@
                                   <td class=" ">{{ user.team }}</td>
                                   <td class=" ">{{ user.hod_name }}</td>
                                   {% if user.is_active == 0 %}
-                                  <td class="a-right a-right">Pending</td>
+				  <td><h2><span class="badge badge-danger"></span></h2>Pending</td>
                                   <td class="last">
                                       <a href="{{host_url}}/hod_dashboard/confirm_registration/{{ user.id }}"
                                          class="btn btn-danger btn-sm"><i class="fa fa-eye"></i></a>
                                   </td>
                                   {% elif user.is_active == 1 %}
-                                  <td class="a-right a-right">Complete</td>
+				  <td><h2><span class="badge badge-success">Complete</span></h2></td>
                                   <td class="last">
                                       <a href="{{host_url}}/hod_dashboard/confirm_registration/{{ user.id }}" 
                                       class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i></a>   
