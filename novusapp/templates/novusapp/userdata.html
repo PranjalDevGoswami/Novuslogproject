@@ -125,6 +125,7 @@
                           <th class="column-title">Interview Duration</th>
                           <th class="column-title">Interview Date</th>
                           <th class="column-title">Team Lead</th>
+                          <th class="column-title">Manager</th>
                           <th class="column-title">Department</th>
                           <th class="column-title">Status</th>
                           
@@ -152,6 +153,11 @@
                         <td class=" "></td>
                         {% else %}
                         <td class=" ">{{ respondent.team_lead }}</td>
+                        {% endif %}
+                        {% if respondent.user_manager == none %}
+                        <td class=" "></td>
+                        {% else %}
+                        <td class=" ">{{ respondent.user_manager}}</td>
                         {% endif %}
                         {% if respondent.Department == none %}
                         <td class=" "></td>

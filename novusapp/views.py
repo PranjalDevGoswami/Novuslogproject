@@ -473,8 +473,7 @@ def user_dashboard(request):
         TeamLeadname = CustomUser.objects.get(id=userid).username
         TeamLead_email = CustomUser.objects.get(id=userid).email
         user_manager = CustomUser.objects.get(id=userid).user_manager
-        #hod_name = CustomUser.objects.get(id=userid).hod_name
-        #hod_email = Hod.objects.get(name=hod_name).email
+        
         
         try:
             hod_name = CustomUser.objects.get(id=userid).hod_name
@@ -593,6 +592,7 @@ def user_dashboard(request):
                     project=project,
                     incentive=incentive,
                     project_interview=project_interview,
+                    team_lead = TeamLeadname,
                     is_active = 0
                 )
 
