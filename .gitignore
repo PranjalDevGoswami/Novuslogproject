@@ -1,2 +1,8 @@
-# /base/bin
-__pycache__
+novusapp/migrations
+novusapp/__pycache__
+staticfiles
+novusproject/__pycache__
+db.sqlite3
+jenkinsfile
+gunicorn.sh
+envsetup.sh

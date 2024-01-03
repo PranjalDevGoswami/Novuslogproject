@@ -83,12 +83,13 @@
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="department"> Department <span class="required"></span></label>
 							<div class="col-md-6 col-sm-6">
 								<select id="department" class="form-control" name="department" required="">
-                  {% if profile_obj.department == "" or profile_obj.department == none  or profile_obj.department == "None" %}
+                  {% comment %} {% if profile_obj.department == "" or profile_obj.department == none  or profile_obj.department == "None" %} {% endcomment %}
                   <option value="" disabled selected>-----SELECT----</option>
+                  <option value="{{profile_obj.dep.id}}" selected>{{profile_obj.dep.name}}</option>
                   {% for data in department %}
-                  <option value="{{data.name}}">{{data.name}}</option>
+                  <option value="{{data.id}}">{{data.name}}</option>
                   {% endfor %}
-                  {% endif %}
+                  {% comment %} {% endif %} {% endcomment %}
 								</select>
 							</div>	
 						</div>

@@ -118,6 +118,9 @@ class ProjectInterview(models.Model):
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.project.name
 
 
 # Respondent Table
@@ -216,6 +219,7 @@ class CustomUser(AbstractUser):
     user_manager = models.CharField(max_length=255, null=True, blank=True)
     hod_name = models.CharField(max_length=255, null=True, blank=True)
     department = models.CharField(max_length=255, null=True, blank=True)
+    dep = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
     mobile = models.CharField(max_length=255, null=True, blank=True)
     token = models.CharField(max_length=255, null=True, blank=True)
     otp = models.CharField(max_length=255, null=True, blank=True)
