@@ -23,8 +23,8 @@ from django.contrib.auth.decorators import login_required
 from .decorators import unauthenitcated_user,role_required
 
 
-# credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
-# host_url = credentials['hosted_url']
+credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
+host_url = credentials['hosted_url']
 
 
 # Define a list of valid email domains
@@ -124,15 +124,19 @@ def confirm_registration(request,id):
         if request.method == 'POST':
             role1 = request.POST['user_role1']
             print('********************',role1)
+            try:
+                user_manager = request.POST['user_manager']
+            except:
+                pass
           
             if role1 == 'Team Lead':
                 id = signing.loads(id)
-                user_manager = request.POST.get('user_manager', '')
+                user_manager = user_manager
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
                 hodname = Register.objects.get(id=id).hod_name
-                user_manager = ''
+               
  
                 try:
                     existing_user_active = Register.objects.get(id=id).is_active
@@ -388,7 +392,7 @@ def confirm_registration(request,id):
                 messages.error(request, f'An error occurred: {str(e)}')
                 return redirect('register')
             
-        
+        host_url = credentials['hosted_url']
         context = {
             'total': total_user,
             'user_data_list': user_data_list,
@@ -442,7 +446,7 @@ def dashboard_redirect(request):
             return redirect('user_dashboard')
 
         elif request.user.groups.filter(name="AM/Manager").exists():
-            return redirect('manager')
+            return redirect('managerteam_data')
 
         elif request.user.groups.filter(name="HOD").exists():
             try:
@@ -870,7 +874,8 @@ def tables(request):
                 'hod_name': userdata['hod_name'],
             }
             user_data_list.append(user_data)
-
+            
+        host_url = credentials['hosted_url']
         context = {
             'total': total_user,
             'user_data_list': user_data_list,
@@ -958,7 +963,8 @@ def managerteam_data(request):
        
         useremail = CustomUser.objects.get(id=userid).email
         respondents = Respondent.objects.filter(user_manager_email=useremail,is_active=0).all()
-
+        
+        host_url = credentials['hosted_url']
         context = {
             'respondents':respondents,
             'name':name,
@@ -979,19 +985,17 @@ def form_approved(request,id):
     
 def profile(request):
     try:
-        dep = Department.objects.all()
-
         if request.session.has_key('currentuser_id'):
             id = request.session['currentuser_id']
             profile_obj = CustomUser.objects.get(id=id)
-
+            dep = Department.objects.all()
             if request.method == 'POST':
                 mobile = request.POST.get('mobile_no')
                 dept = request.POST.get('department')
                 
                 #Update user information
                 if CustomUser.objects.filter(department=dept, mobile=mobile).exists():
-                    messages.info(request, 'Same record already exists.')
+                    messages.info(request, 'Same record already exists.', extra_tags="alert-warning")
                     return redirect('/profile')
                 
                 CustomUser.objects.filter(id=id).update(department=dept, mobile=mobile)
@@ -1006,15 +1010,17 @@ def profile(request):
             context = {
                 'profile_obj': profile_obj,
                 'department': dep,
-            }
+                }
             return render(request, "novusapp/edit.html", context)
 
         return HttpResponse('Please Login')
- 
+    
     except Exception as e:
-        # Handle other exceptions
         messages.error(request, f'An error occurred: {str(e)}', extra_tags="alert-danger")
-        return render(request, "novusapp/edit.html", {'department': dep})
+        return redirect("/profile")
+        
+
+
 
 
 
