@@ -83,13 +83,13 @@
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="department"> Department <span class="required"></span></label>
 							<div class="col-md-6 col-sm-6">
 								<select id="department" class="form-control" name="department" required="">
-                  {% comment %} {% if profile_obj.department == "" or profile_obj.department == none  or profile_obj.department == "None" %} {% endcomment %}
+                  
                   <option value="" disabled selected>-----SELECT----</option>
-                  <option value="{{profile_obj.dep.id}}" selected>{{profile_obj.dep.name}}</option>
+                  <option value="{{profile_obj.dep.id}}" selected style="color: darkblue;">{{profile_obj.dep.name}}</option>
                   {% for data in department %}
                   <option value="{{data.id}}">{{data.name}}</option>
                   {% endfor %}
-                  {% comment %} {% endif %} {% endcomment %}
+                
 								</select>
 							</div>	
 						</div>
@@ -98,7 +98,7 @@
 						<div class="item form-group">
 							<div class="col-md-6 col-sm-6 offset-md-3">		
 								<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Update</button>
-								<a href="/hod_dashboard" type="button" class="btn light btn-outline-danger  w-30">Back</a>
+								<button onclick="goBack()" type="button" class="btn light btn-outline-danger  w-30">Back</button>
 							</div>
 						</div>
 
@@ -161,7 +161,7 @@
 <script>
   function goBack() {
       // You can replace the following logic with your specific requirements
-      var role = "{% if role %}{{ role }}{% endif %}";
+      var role = "{% if profile_obj.role %}{{ profile_obj.role }}{% endif %}";
 
       var url;
       if (role === 'AM/Manager') {
