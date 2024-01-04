@@ -392,6 +392,7 @@ def confirm_registration(request,id):
                 messages.error(request, f'An error occurred: {str(e)}')
                 return redirect('register')
             
+     
         host_url = credentials['hosted_url']
         context = {
             'total': total_user,
@@ -473,8 +474,7 @@ def user_dashboard(request):
         TeamLeadname = CustomUser.objects.get(id=userid).username
         TeamLead_email = CustomUser.objects.get(id=userid).email
         user_manager = CustomUser.objects.get(id=userid).user_manager
-        
-        
+              
         try:
             hod_name = CustomUser.objects.get(id=userid).hod_name
             print(hod_name)
@@ -982,7 +982,7 @@ def form_approved(request,id):
     return redirect('manager')
 
 
-    
+
 def profile(request):
     try:
         if request.session.has_key('currentuser_id'):
@@ -994,11 +994,11 @@ def profile(request):
                 dept = request.POST.get('department')
                 
                 #Update user information
-                if CustomUser.objects.filter(department=dept, mobile=mobile).exists():
+                if CustomUser.objects.filter(dep=dept, mobile=mobile).exists():
                     messages.info(request, 'Same record already exists.', extra_tags="alert-warning")
                     return redirect('/profile')
                 
-                CustomUser.objects.filter(id=id).update(department=dept, mobile=mobile)
+                CustomUser.objects.filter(id=id).update(dep=dept, mobile=mobile)
                 
                 # Update related Respondent information
                 tl_email = profile_obj.email
