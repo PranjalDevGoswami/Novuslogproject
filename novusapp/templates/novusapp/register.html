@@ -67,7 +67,7 @@
 							<option value="" disabled selected>Select HOD</option>
                             {% for hod in novushod %}
                             {% if hod %}
-							<option value="{{hod.name}}">{{hod.name}}</option>
+							<option value="{{hod.name|default_if_none:''}}">{{hod.name|default_if_none:""}}</option>
                             {% endif %}
                             {% endfor %}
 							

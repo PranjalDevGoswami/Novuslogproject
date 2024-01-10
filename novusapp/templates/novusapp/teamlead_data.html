@@ -143,27 +143,13 @@
                     <td class=" ">{{ respondent.project.name }}</td>
                     <td class=" ">{{ respondent.project.project_type }}</td>
                     <td class=" ">{{ respondent.company.revenue }}</td>
-                    <td class=" ">
-                      {{ respondent.incentive.Unique_identifier }}
-                    </td>
-                    <td class=" ">
-                      {{ respondent.project_interview.interview_duration }}
-                    </td>
-                    <td class=" ">
-                      {{ respondent.project_interview.interview_date }}
-                    </td>
-                    {% if respondent.team_lead == none %}
-                      <td class=" "></td>
-                    {% else %}
-                      <td class=" ">{{ respondent.team_lead }}</td>
-                      {% endif %}
-                    {% if respondent.Department == none %}
-                      <td class=" "></td>
-                    {% else %}
-                      <td class=" ">{{ respondent.Department }}</td>
-                    {% endif %}
+                    <td class=" ">{{ respondent.incentive.Unique_identifier }}</td>
+                    <td class=" ">{{ respondent.project_interview.interview_duration }}</td>
+                    <td class=" ">{{ respondent.project_interview.interview_date }}</td>
+                    <td class=" ">{{ respondent.team_lead|default_if_none:"" }}</td>
+                    <td class=" ">{{ respondent.Department|default_if_none:""}}</td>
                     {% if respondent.is_active == 0 %}
-		    <td><h2><span class="badge badge-danger">Pending</span></h2></td>
+		                <td><h2><span class="badge badge-danger">Pending</span></h2></td>
                     {% elif respondent.is_active == 1 %}
                     <td><h2><span class="badge badge-success">Complete</span></h2>
                     </td>

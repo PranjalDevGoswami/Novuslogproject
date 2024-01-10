@@ -81,7 +81,7 @@
 											
 											<option value="" disabled selected>---SELECT---</option>
 											{% for data in industry %}
-											<option value="{{data.name}}">{{data.name}}</option>
+											<option value="{{data.name|default_if_none:''}}">{{data.name|default_if_none:""}}</option>
 											{% endfor %}
 											<!-- <option value="option2">Option 2</option> -->
 											
@@ -96,7 +96,7 @@
 											
 											<option value="" disabled selected>---SELECT---</option>
 											{% for data in allcountry %}
-											<option value="{{data.name}}">{{data.name}}</option>
+											<option value="{{data.name|default_if_none:''}}">{{data.name|default_if_none:""}}</option>
 											{% endfor %}
 											<!-- <option value="option2">Option 2</option> -->
 											

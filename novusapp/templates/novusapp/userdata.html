@@ -125,6 +125,7 @@
                           <th class="column-title">Interview Duration</th>
                           <th class="column-title">Interview Date</th>
                           <th class="column-title">Team Lead</th>
+			  <th class="column-title">Manager</th>
                           <th class="column-title">Department</th>
                           <th class="column-title">Status</th>
                           
@@ -148,16 +149,9 @@
                         <td class=" ">{{ respondent.incentive.Unique_identifier }}</td>
                         <td class=" ">{{ respondent.project_interview.interview_duration }}</td>
                         <td class=" ">{{ respondent.project_interview.interview_date }}</td>
-                        {% if respondent.team_lead == none %}
-                        <td class=" "></td>
-                        {% else %}
-                        <td class=" ">{{ respondent.team_lead }}</td>
-                        {% endif %}
-                        {% if respondent.Department == none %}
-                        <td class=" "></td>
-                        {% else %}
-                        <td class=" ">{{ respondent.Department }}</td>
-                        {% endif %}
+			<td class=" ">{{respondent.team_lead|default_if_none:"" }}</td>
+			<td class="">{{respondent.user_manager|default_if_none:"" }}</td>
+			<td class=" ">{{respondent.Department|default_if_none:"" }}</td>
                         {% if respondent.is_active == 0 %}
 			<td><h2><span class="badge badge-danger">Pending</span></h2></td>
                         {% elif respondent.is_active == 1 %}

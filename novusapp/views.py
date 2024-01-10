@@ -23,8 +23,8 @@ from django.contrib.auth.decorators import login_required
 from .decorators import unauthenitcated_user,role_required
 
 
-# credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
-# host_url = credentials['hosted_url']
+credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
+host_url = credentials['hosted_url']
 
 
 # Define a list of valid email domains
@@ -45,7 +45,7 @@ def is_valid_email_domain(email):
 
 
 def register(request):
-    hod = Hod.objects.all().values('name')
+    hod = Hod.objects.filter(is_active=True).values('name')
     if request.method == 'POST':
         email = request.POST['email']
         username = request.POST['username']
@@ -59,6 +59,7 @@ def register(request):
         # Check if the email already exists
         try:
             existing_user = Register.objects.get(email=email)
+            existing_in_customuser = CustomUser.objects.get(email=email)
             messages.error(request, 'This email is already registered.', extra_tags="alert-danger")
             return redirect('/register')
         except Register.DoesNotExist:
@@ -94,8 +95,8 @@ def register(request):
 @login_required
 @role_required(allowed_roles=['HOD'])
 def confirm_registration(request,id):
-    role = RoleMaster.objects.all().values('name')
-    team_manager = Manager.objects.all().values('name')
+    role = RoleMaster.objects.filter(is_active=True).values('name')
+    team_manager = Manager.objects.filter(is_active=True).values('name')
     if request.session.has_key('currentuser_id'):
         currentid =  request.session['currentuser_id']
     
@@ -124,15 +125,17 @@ def confirm_registration(request,id):
         if request.method == 'POST':
             role1 = request.POST['user_role1']
             print('********************',role1)
-          
+            try:
+                user_manager = request.POST['user_manager']
+            except:
+                pass
             if role1 == 'Team Lead':
                 id = signing.loads(id)
-                user_manager = request.POST.get('user_manager', '')
+                user_manager = user_manager
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
                 hodname = Register.objects.get(id=id).hod_name
-                user_manager = ''
  
                 try:
                     existing_user_active = Register.objects.get(id=id).is_active
@@ -159,7 +162,7 @@ def confirm_registration(request,id):
                         email1 = Register.objects.get(id=id).email
                         username = Register.objects.get(id=id).username
                         print('$$$$$$$$$$',email1,username)
-                        CustomUser.objects.filter(email=email1).update(role=role1)
+                        CustomUser.objects.filter(email=email1).update(role=role1, user_manager=user_manager)
                         try:
                             TeamLead.objects.create(name=username,email=email1)
                             Manager.objects.filter(name=username,email=email1).delete()
@@ -469,9 +472,13 @@ def user_dashboard(request):
         TeamLeadname = CustomUser.objects.get(id=userid).username
         TeamLead_email = CustomUser.objects.get(id=userid).email
         user_manager = CustomUser.objects.get(id=userid).user_manager
-        #hod_name = CustomUser.objects.get(id=userid).hod_name
-        #hod_email = Hod.objects.get(name=hod_name).email
+
+        try:
+            department_obj=get_object_or_404(CustomUser, id=int(userid))
         
+        except:
+            department_obj=""
+
         try:
             hod_name = CustomUser.objects.get(id=userid).hod_name
             print(hod_name)
@@ -492,8 +499,8 @@ def user_dashboard(request):
             except:
                 pass
 
-        industry = Industry.objects.all()
-        mycountry = Country.objects.all()
+        industry = Industry.objects.filter(is_active=True).all() 
+        mycountry = Country.objects.filter(is_active=True).all()
         if request.method == 'POST':
             try:
                 # Get the data from the POST request
@@ -589,6 +596,8 @@ def user_dashboard(request):
                     project=project,
                     incentive=incentive,
                     project_interview=project_interview,
+                    team_lead = TeamLeadname,
+                    Department=department_obj.dep.name,
                     is_active = 0
                 )
 
@@ -732,7 +741,7 @@ def autocomplete(request):
         terms = request.GET.get('term').split(',')
         term = terms[-1].strip()  # Get the last term after the last comma
 
-        qs = Industry.objects.filter(name__icontains=term)
+        qs = Industry.objects.filter(is_active=True,name__icontains=term)
         titles = [product.name for product in qs]
         print('@@@@@@@@@@@@@@@@@/',titles)
 
@@ -746,7 +755,7 @@ def autocomplete1(request):
         terms = request.GET.get('term').split(',')
         term = terms[-1].strip()  # Get the last term after the last comma
 
-        qs = Country.objects.filter(name__icontains=term)
+        qs = Country.objects.filter(is_active=True,name__icontains=term)
         titles = [product.name for product in qs]
 
         return JsonResponse(titles, safe=False)
@@ -759,7 +768,7 @@ def autocomplete2(request):
         terms = request.GET.get('term').split(',')
         term = terms[-1].strip()  # Get the last term after the last comma
 
-        qs = Job.objects.filter(title__icontains=term)
+        qs = Job.objects.filter(is_active=True,title__icontains=term)
         titles = [product.title for product in qs]
 
         return JsonResponse(titles, safe=False)
@@ -979,7 +988,7 @@ def form_approved(request,id):
     
 def profile(request):
     try:
-        dep = Department.objects.all()
+        dep = Department.objects.filter(is_active=True).all()
 
         if request.session.has_key('currentuser_id'):
             id = request.session['currentuser_id']
@@ -988,17 +997,22 @@ def profile(request):
             if request.method == 'POST':
                 mobile = request.POST.get('mobile_no')
                 dept = request.POST.get('department')
+                try:
+                    dept_obj = Department.objects.get(id=dept)
+                except:
+                    pass
+                    
                 
                 #Update user information
-                if CustomUser.objects.filter(department=dept, mobile=mobile).exists():
-                    messages.info(request, 'Same record already exists.')
+                if CustomUser.objects.filter(dep=dept, mobile=mobile).exists():
+                    messages.info(request, 'Same record already exists.', extra_tags="alert-warning")
                     return redirect('/profile')
                 
-                CustomUser.objects.filter(id=id).update(department=dept, mobile=mobile)
+                CustomUser.objects.filter(id=id).update(dep=dept, mobile=mobile)
                 
                 # Update related Respondent information
                 tl_email = profile_obj.email
-                Respondent.objects.filter(email=tl_email).update(Department=dept)
+                Respondent.objects.filter(email=tl_email).update(Department=dept_obj.name)
                 
                 messages.success(request, 'Profile updated successfully.', extra_tags="alert-success")
                 return redirect('/profile')
@@ -1029,9 +1043,6 @@ def change_password(request):
         new_password = request.POST.get('new_password')
         # confirm_password = request.POST.get('confirm_password')
         
-        # if new_password != confirm_password:
-        #     messages.error(request, 'Passwords do not match.',extra_tags="alert-danger")
-        #     return redirect('/profile/change_password')
        
         # Retrieve the user object from the database
         user = CustomUser.objects.get(id=userid)
@@ -1041,11 +1052,16 @@ def change_password(request):
             messages.error(request, 'Old password is incorrect',extra_tags="alert-danger")
             return redirect('/profile/change_password')  # Adjust the URL name to your view
 
+        if old_password == new_password:
+            messages.warning(request,"Old and new password same please change this password.", extra_tags="alert-warning")
+            return redirect("/profile/change_password")
+
+
         user.set_password(new_password)
         user.save()
 
         messages.success(request, 'Password changed successfully',extra_tags="alert-success")
-        return redirect('/profile')  # Redirect to the profile page or another appropriate page
+        return redirect('/')  # Redirect to the profile page or another appropriate page
 
     context = {
         'role':role,

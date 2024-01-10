@@ -47,7 +47,7 @@ class ProjectInterviewAdmin(admin.ModelAdmin):
     list_display = ('project','interview_duration','interview_date')
 
 
-# @admin.register(Respondent)
+@admin.register(Respondent)
 # class HodAdmin(admin.ModelAdmin):
 #     list_display = ('name','job','email','')
 

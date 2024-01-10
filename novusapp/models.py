@@ -20,7 +20,7 @@ from django.contrib.auth import get_user_model
 # Job Master
 class Job(models.Model):
     title = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -31,7 +31,7 @@ class Job(models.Model):
 # Country Master
 class Country(models.Model):
     name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -42,7 +42,7 @@ class Country(models.Model):
 # Industry Master
 class Industry(models.Model):
     name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -55,7 +55,7 @@ class Company(models.Model):
     name = models.CharField(max_length=255)
     revenue = models.CharField(max_length=255)
     strength = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -66,7 +66,7 @@ class Company(models.Model):
 # Analyst Master
 class Analyst(models.Model):
     title = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -77,7 +77,7 @@ class Analyst(models.Model):
 # Department Master
 class Department(models.Model):
     name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -91,7 +91,7 @@ class Project(models.Model):
     project_type = models.CharField(max_length=255)
     project_code = models.CharField(max_length=255)
     LOI = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -102,7 +102,7 @@ class Project(models.Model):
 class Incentive(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     Unique_identifier = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -115,7 +115,7 @@ class ProjectInterview(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     interview_duration = models.CharField(max_length=255)
     interview_date = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -139,7 +139,7 @@ class Respondent(models.Model):
     project_interview = models.ForeignKey(ProjectInterview, on_delete=models.CASCADE)
     team_lead = models.CharField(max_length=255,blank=True,null=True)
     Department = models.CharField(max_length=255,blank=True,null=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -150,7 +150,7 @@ class Respondent(models.Model):
 # Role Master
 class RoleMaster(models.Model):
     name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -162,7 +162,7 @@ class RoleMaster(models.Model):
 class Hod(models.Model):
     name = models.CharField(max_length=255,blank=True)
     email = models.EmailField(unique=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -173,7 +173,7 @@ class Hod(models.Model):
 class TeamLead(models.Model):
     name = models.CharField(max_length=255,blank=True)
     email = models.EmailField(unique=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -184,7 +184,7 @@ class TeamLead(models.Model):
 class Manager(models.Model):
     name = models.CharField(max_length=255,blank=True)
     email = models.EmailField(unique=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -216,6 +216,7 @@ class CustomUser(AbstractUser):
     user_manager = models.CharField(max_length=255, null=True, blank=True)
     hod_name = models.CharField(max_length=255, null=True, blank=True)
     department = models.CharField(max_length=255, null=True, blank=True)
+    dep = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
     mobile = models.CharField(max_length=255, null=True, blank=True)
     token = models.CharField(max_length=255, null=True, blank=True)
     otp = models.CharField(max_length=255, null=True, blank=True)
