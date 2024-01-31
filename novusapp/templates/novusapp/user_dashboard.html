@@ -37,7 +37,7 @@
                   	<div class="x_content">
 						<div class="col-md-12 col-lg-12 ">
 					
-							<form class="form-horizontal form-label-left" action="{% url 'user_dashboard' %}" method="post">
+							<form id="myForm" class="form-horizontal form-label-left" action="{% url 'user_dashboard' %}" method="post">
 								{% csrf_token %}
 
 								<div class="form-group row">
@@ -63,7 +63,8 @@
 
 									<label class="control-label col-md-2 col-sm-2" for="company_revenue">Company Revenue</label>
 									<div class="col-md-4 col-sm-4">
-										<input id="project" class="form-control input-space" type="text" name="company_revenue">
+										<input id="company_revenue" class="form-control input-space" type="text" name="company_revenue">
+										<span id="company_revenue_error" class="error-message"></span>
 										<select id="company_revenue_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="company_revenue_currency_type">
 											<option value="" disabled selected>CUR</option>
 											{% for currency in currency_type %}
@@ -135,7 +136,8 @@
 								<div class="form-group row ">
 									<label class="control-label col-md-2 col-sm-2" for="incentive">Incentive <span class="required">*</span></label>
 									<div class="col-md-4 col-sm-4">
-										<input id="incentive" class="form-control input-space" type="text" name="incentive" required="required"> 
+										<input id="incentive" class="form-control input-space" type="text" name="incentive" required="required">
+										<span id="incentiveError" class="error-message"></span>
 										<select id="incentive_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="incentive_currency_type" style="border:black;" required="required">
 											<option value="" disabled selected>CUR</option>
 											{% for currency in currency_type %}
@@ -255,4 +257,51 @@
 </script>
 
 
+<script>
+// Add event listener to the incentive and company revenue fields for live validation
+document.getElementById('incentive').addEventListener('input', validateIncentive);
+document.getElementById('company_revenue').addEventListener('input', validateCompanyRevenue);
+
+function validateIncentive() {
+	// Get the value of the incentive field
+	var incentiveValue = document.getElementById('incentive').value;
+
+	// Get the error message element for incentive
+	var incentiveError = document.getElementById('incentiveError');
+
+	// Reset error message and style
+	incentiveError.textContent = '';
+	incentiveError.style.color = '';
+
+	// Validate for integer in the incentive field
+	if (!isInteger(incentiveValue)) {
+	incentiveError.textContent = 'Please enter an integer value.';
+	incentiveError.style.color = 'red';
+	}
+}
+
+function validateCompanyRevenue() {
+	// Get the value of the company revenue field
+	var companyRevenueValue = document.getElementById('company_revenue').value;
+
+	// Get the error message element for company revenue
+	var companyRevenueError = document.getElementById('company_revenue_error');
+
+	// Reset error message and style
+	companyRevenueError.textContent = '';
+	companyRevenueError.style.color = '';
+
+	// Validate for integer in the company revenue field
+	if (!isInteger(companyRevenueValue)) {
+	companyRevenueError.textContent = 'Please enter an integer value.';
+	companyRevenueError.style.color = 'red';
+	}
+}
+
+// Function to check if a given value is an integer
+function isInteger(value) {
+	return /^\d+$/.test(value);
+}
+</script>
+	
 {% endblock script %}

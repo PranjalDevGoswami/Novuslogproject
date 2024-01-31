@@ -505,11 +505,6 @@ def user_dashboard(request):
                 project_name = request.POST.get('project')
                 project_type = request.POST.get('project_type')
                 incentive_name = request.POST.get('incentive')
-                
-                if not isinstance(incentive_name, int):
-                    messages.warning(request, 'Please fill incentive using integer values', extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
                 incentive_currency_type = request.POST.get('incentive_currency_type')
                 interview_date = request.POST.get('interview_date')
                 interview_duration_hours = request.POST.get('interview_duration_hours')
@@ -518,13 +513,7 @@ def user_dashboard(request):
                 if not company_revenue_value:
                     company_revenue = 0
             
-                if not isinstance(company_revenue_value, int):
-                    messages.warning(request, 'Please fill in the company revenue using integer values', extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                if company_revenue_currency_type_value:
-                    company_revenue_currency_type = company_revenue_currency_type_value
-                else:
+                if  not company_revenue_currency_type_value:
                     company_revenue_currency_type = ""
                 
                 ''' Create or retrieve related records from other tables '''
@@ -532,7 +521,9 @@ def user_dashboard(request):
                     job = Job.objects.get(title=job_title)
                 except Job.DoesNotExist:
                     job = Job.objects.create(title=job_title)
+                    
                 ''' Use filter instead of get for cases where there might be multiple matches '''
+                
                 countries = Country.objects.filter(name=country_name)
                 if countries.exists():
                     country = countries.first()
