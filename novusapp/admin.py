@@ -1,10 +1,17 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import *
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
+
 
 @admin.register(Country)
-class CountryAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+class CountryAdmin(ImportExportModelAdmin):
+    list_display = ("name",)
+
+#@admin.register(Country)
+#class CountryAdmin(admin.ModelAdmin):
+#    list_display = ('name',)
 
 
 @admin.register(Industry)
@@ -18,7 +25,12 @@ class JobAdmin(admin.ModelAdmin):
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('name','revenue','strength')
+    list_display = ('name','revenue','revenue_currency_type')
+    
+@admin.register(Currency_Type)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ('currency_type',)
+    
 
 
 @admin.register(Analyst)
@@ -44,7 +56,7 @@ class IncentiveAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectInterview)
 class ProjectInterviewAdmin(admin.ModelAdmin):
-    list_display = ('project','interview_duration','interview_date')
+    list_display = ('project','interview_date')
 
 
 @admin.register(Respondent)
@@ -58,7 +70,7 @@ class RoleMasterAdmin(admin.ModelAdmin):
 
 @admin.register(Hod)
 class HodAdmin(admin.ModelAdmin):
-    list_display = ('name','email')
+    list_display = ('name','email','dep','Designation',)
 
 
 
@@ -79,6 +91,6 @@ class RegisterAdmin(admin.ModelAdmin):
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('email','username','role','user_manager','hod_name','department','mobile','is_active','is_staff')
+    list_display = ('email','username','role','user_manager','hod_name','mobile','is_active','is_staff')
 
 # admin.site.register(CustomUser, UserAdmin)

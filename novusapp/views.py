@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import CustomUser,Hod,Register,TeamLead,RoleMaster,Respondent, Job, Country, Industry, Company, Analyst, Project, Incentive, ProjectInterview,Manager,Department
+from .models import CustomUser,Hod,Register,TeamLead,RoleMaster,Respondent, Job, Country, Industry, Company, Analyst,Project, Incentive, ProjectInterview,Manager,Department,Currency_Type
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.utils import timezone
@@ -27,18 +27,19 @@ credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.F
 host_url = credentials['hosted_url']
 
 
-# Define a list of valid email domains
-VALID_EMAIL_DOMAINS = ['unimrkt.com', 'novusinsights.com']
+''' Define a list of valid email domain '''
+
+VALID_EMAIL_DOMAINS = ['unimrkt.com', 'novusinsights.com','unimrkthealth.com']
 
 def is_valid_email_domain(email):
-    # Split the email address to get the domain part
+    ''' Split the email address to get the domain part '''
     domain = email.split('@')[-1]
 
-    # Check if the email is blank
+    ''' Check if the email is blank '''
     if not email:
         return False
 
-    # Check if the domain is in the list of valid domains
+    ''' Check if the domain is in the list of valid domains '''
     if domain in VALID_EMAIL_DOMAINS:
         return True
     return False
@@ -56,27 +57,30 @@ def register(request):
         except:
             pass
 
-        # Check if the email already exists
+        ''' Check if the email already exists '''
         try:
-            existing_user = Register.objects.get(email=email)
+            existing_user = Register.objects.get(is_active=True,email=email)
             messages.error(request, 'This email is already registered.', extra_tags="alert-danger")
             return redirect('/register')
-        except Register.DoesNotExist:
-            pass
+        
+        except ObjectDoesNotExist:
+            messages.error(request, 'Registration table is not active.', extra_tags="alert-danger")
+            return redirect('/register')
 
-        # Check if the passwords match
+        ''' Check if the passwords match '''
         if password != confpassword:
             messages.error(request, 'Passwords do not match.',extra_tags="alert-danger")
             return redirect('register')
 
-        # Validate email domain
+        ''' Validate email domain '''
         if not is_valid_email_domain(email):
             if not email:
                 messages.error(request, 'Please fill in the email field.', extra_tags="alert-danger")
             else:
                 messages.error(request, 'Invalid email domain. Please use a valid domain.',extra_tags="alert-danger")
             return redirect('register')
-        # Create a new user
+        
+        ''' Create a new user '''
         try:
             user = Register.objects.create(email=email,username=username,password=password,hod_name=novus_hod)
             user.save()
@@ -98,18 +102,13 @@ def confirm_registration(request,id):
     team_manager = Manager.objects.all().values('name')
     if request.session.has_key('currentuser_id'):
         currentid =  request.session['currentuser_id']
-    
         customuserdata = CustomUser.objects.filter(id=currentid).values('hod_name','email')
- 
         current_hod = (customuserdata[0]['hod_name'])
- 
         hod_email = (customuserdata[0]['email'])
-        
         complex_obj = Register.objects.filter(is_active=0,hod_name=current_hod).values('id', 'email', 'password', 'hod_name')
-        
         total_user = complex_obj.count()
  
-        # Create a list of dictionaries to store user-specific data
+        ''' Create a list of dictionaries to store user-specific data '''
         user_data_list = []
  
         for userdata in complex_obj:
@@ -123,12 +122,10 @@ def confirm_registration(request,id):
    
         if request.method == 'POST':
             role1 = request.POST['user_role1']
-            print('********************',role1)
             try:
                 user_manager = request.POST['user_manager']
             except:
                 pass
-          
             if role1 == 'Team Lead':
                 id = signing.loads(id)
                 user_manager = user_manager
@@ -136,34 +133,32 @@ def confirm_registration(request,id):
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
                 hodname = Register.objects.get(id=id).hod_name
-               
  
                 try:
                     existing_user_active = Register.objects.get(id=id).is_active
                     if existing_user_active == 1:
                         
                         Register.objects.filter(id=id).update(role=role1,user_manager=user_manager)
-                        # Retrieve the user
+                        ''' Retrieve the user '''
                         user1 = get_object_or_404(CustomUser, email=email1)
  
-                        # Retrieve the group
+                        ''' Retrieve the group '''
                         try:
                             group = Group.objects.get(name=role1)
                         except Group.DoesNotExist:
-                            # Handle the case where the group doesn't exist
+                            ''' Handle the case where the group doesn't exist '''
                             return HttpResponse(f"Group '{role1}' does not exist.", status=400)
  
-                        # Add the user to the group
+                        ''' Add the user to the group '''
                         user1.groups.clear()
                         user1.groups.add(group)
  
-                        # Save the changes to the user
+                        ''' Save the changes to the user '''
                         user1.save()
                         messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                         email1 = Register.objects.get(id=id).email
                         username = Register.objects.get(id=id).username
-                        print('$$$$$$$$$$',email1,username)
-                        CustomUser.objects.filter(email=email1).update(role=role1)
+                        CustomUser.objects.filter(email=email1).update(role=role1, user_manager=user_manager)
                         try:
                             TeamLead.objects.create(name=username,email=email1)
                             Manager.objects.filter(name=username,email=email1).delete()
@@ -171,25 +166,24 @@ def confirm_registration(request,id):
                             pass
                         return redirect('/hod_dashboard')
                     else:
-                        print('!!!!!!!!!!!')
                         existing_user = Register.objects.filter(id=id).update(is_active=1,role=role1,user_manager=user_manager)
                         user = CustomUser.objects.create_user(email=email1,username=username, password=password1,hod_name=hodname,role=role1,user_manager=user_manager,is_active=1,is_staff=1)
                         
                         user.save()
-                        # Retrieve the user
+                        ''' Retrieve the user '''
                         user1 = get_object_or_404(CustomUser, email=email1)
  
-                        # Retrieve the group
+                        ''' Retrieve the group '''
                         try:
                             group = Group.objects.get(name=role1)
                         except Group.DoesNotExist:
-                            # Handle the case where the group doesn't exist
+                            ''' Handle the case where the group doesn't exist '''
                             return HttpResponse(f"Group '{role1}' does not exist.", status=400)
  
-                        # Add the user to the group
+                        ''' Add the user to the group '''
                         user1.groups.add(group)
  
-                        # Save the changes to the user
+                        ''' Save the changes to the user '''
                         user1.save()
                         messages.success(request, 'Registration Completed',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
@@ -198,7 +192,6 @@ def confirm_registration(request,id):
  
             if role1 == 'AM/Manager':
                 id = signing.loads(id)
-                print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
@@ -212,18 +205,18 @@ def confirm_registration(request,id):
                         Register.objects.filter(id=id).update(role=role1,user_manager=user_manager)
                         user1 = get_object_or_404(CustomUser, email=email1)
  
-                        # Retrieve the group
+                        ''' Retrieve the group '''
                         try:
                             group = Group.objects.get(name=role1)
                         except Group.DoesNotExist:
-                            # Handle the case where the group doesn't exist
+                            ''' Handle the case where the group doesn't exist '''
                             return HttpResponse(f"Group '{role1}' does not exist.", status=400)
  
-                        # Add the user to the group
+                        ''' Add the user to the group '''
                         user1.groups.clear()
                         user1.groups.add(group)
  
-                        # Save the changes to the user
+                        ''' Save the changes to the user '''
                         user1.save()
                         messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                         CustomUser.objects.filter(email=email1).update(role=role1)
@@ -237,23 +230,23 @@ def confirm_registration(request,id):
                         
                         existing_user = Register.objects.filter(id=id).update(is_active=1,role=role1,user_manager=user_manager)
                         user = CustomUser.objects.create_user(email=email1,username=username, password=password1,hod_name=hodname,role=role1,user_manager=user_manager,is_active=1,is_staff=1)
-                        # CustomUser.objects.filter(email=email1).update(role=role1)
                         user.save()
-                        # Retrieve the user
+                        
+                        ''' Retrieve the user '''
                         user1 = get_object_or_404(CustomUser, email=email1)
  
-                        # Retrieve the group
+                        ''' Retrieve the group '''
                         try:
                             group = Group.objects.get(name=role1)
                         except Group.DoesNotExist:
-                            # Handle the case where the group doesn't exist
+                            ''' Handle the case where the group doesn't exist '''
                             return HttpResponse(f"Group '{role1}' does not exist.", status=400)
  
-                        # Add the user to the group
+                        ''' Add the user to the group '''
                         user.groups.clear()
                         user1.groups.add(group)
  
-                        # Save the changes to the user
+                        ''' Save the changes to the user '''
                         user1.save()
                         messages.success(request, 'Registration Completed',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
@@ -262,7 +255,6 @@ def confirm_registration(request,id):
                 
             if role1 == 'HOD':
                 id = signing.loads(id)
-                print('?????????????????????')
                 email1 = Register.objects.get(id=id).email
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
@@ -274,26 +266,25 @@ def confirm_registration(request,id):
                     if existing_user_active == 1:
                         
                         Register.objects.filter(id=id).update(role=role1,user_manager=user_manager)
-                        # Retrieve the user
+                        ''' Retrieve the user '''
                         user1 = get_object_or_404(CustomUser, email=email1)
  
-                        # Retrieve the group
+                        ''' Retrieve the group '''
                         try:
                             group = Group.objects.get(name=role1)
                         except Group.DoesNotExist:
-                            # Handle the case where the group doesn't exist
+                            ''' Handle the case where the group doesn't exist '''
                             return HttpResponse(f"Group '{role1}' does not exist.", status=400)
  
-                        # Add the user to the group
+                        ''' Add the user to the group '''
                         user1.groups.clear()
                         user1.groups.add(group)
  
-                        # Save the changes to the user
+                        ''' Save the changes to the user '''
                         user1.save()
                         messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                         email1 = Register.objects.get(id=id).email
                         username = Register.objects.get(id=id).username
-                        print('$$$$$$$$$$',email1,username)
                         CustomUser.objects.filter(email=email1).update(role=role1)
                         try:
                             Hod.objects.create(name=username,email=email1)
@@ -301,25 +292,24 @@ def confirm_registration(request,id):
                             pass
                         return redirect('/hod_dashboard')
                     else:
-                        print('!!!!!!!!!!!')
                         existing_user = Register.objects.filter(id=id).update(is_active=1,role=role1,user_manager=user_manager)
                         user = CustomUser.objects.create_user(email=email1,username=username, password=password1,hod_name=hodname,role=role1,user_manager=user_manager,is_active=1,is_staff=1)
                         
                         user.save()
-                        # Retrieve the user
+                        ''' Retrieve the user '''
                         user1 = get_object_or_404(CustomUser, email=email1)
  
-                        # Retrieve the group
+                        ''' Retrieve the group '''
                         try:
                             group = Group.objects.get(name=role1)
                         except Group.DoesNotExist:
-                            # Handle the case where the group doesn't exist
+                            ''' Handle the case where the group doesn't exist '''
                             return HttpResponse(f"Group '{role1}' does not exist.", status=400)
  
-                        # Add the user to the group
+                        ''' Add the user to the group '''
                         user1.groups.add(group)
  
-                        # Save the changes to the user
+                        ''' Save the changes to the user '''
                         user1.save()
                         messages.success(request, 'Registration Completed',extra_tags="alert-success")
                         return redirect('/hod_dashboard')
@@ -332,26 +322,26 @@ def confirm_registration(request,id):
             password1 = Register.objects.get(id=id).password
             hodname = Register.objects.get(id=id).hod_name
             
-            # Check if the email already exists
+            ''' Check if the email already exists '''
             try:
                 existing_user_active = Register.objects.get(id=id).is_active
                 if existing_user_active == 1:
                     Register.objects.filter(id=id).update(role=role1,user_manager=user_manager)
-                    # Retrieve the user
+                    ''' Retrieve the user '''
                     user1 = get_object_or_404(CustomUser, email=email1)
  
-                    # Retrieve the group
+                    ''' Retrieve the group '''
                     try:
                         group = Group.objects.get(name=role1)
                     except Group.DoesNotExist:
-                        # Handle the case where the group doesn't exist
+                        ''' Handle the case where the group doesn't exist '''
                         return HttpResponse(f"Group '{role1}' does not exist.", status=400)
  
-                    # Add the user to the group
+                    ''' Add the user to the group '''
                     user1.groups.clear()
                     user1.groups.add(group)
  
-                    # Save the changes to the user
+                    ''' Save the changes to the user '''
                     user1.save()
                     messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
                     CustomUser.objects.filter(email=email1).update(role=role1)
@@ -363,26 +353,26 @@ def confirm_registration(request,id):
             except Register.DoesNotExist:
                 pass
  
-            # Create a new user
+            ''' Create a new user '''
             try:
                 
                 existing_user = Register.objects.filter(id=id).update(is_active=1,role=role1,user_manager=user_manager)
                 user = CustomUser.objects.create_user(email=email1,username=username,password=password1,hod_name=hodname,role=role1,user_manager=user_manager,is_active=1,is_staff=1)
                 user.save()
-                # Retrieve the user
+                ''' Retrieve the user '''
                 user1 = get_object_or_404(CustomUser, email=email1)
  
-                # Retrieve the group
+                ''' Retrieve the group '''
                 try:
                     group = Group.objects.get(name=role1)
                 except Group.DoesNotExist:
-                    # Handle the case where the group doesn't exist
+                    ''' Handle the case where the group doesn't exist '''
                     return HttpResponse(f"Group '{role1}' does not exist.", status=400)
  
-                # Add the user to the group
+                ''' Add the user to the group '''
                 user1.groups.add(group)
  
-                # Save the changes to the user
+                ''' Save the changes to the user '''
                 user1.save()
                 messages.success(request, 'Registration Completed',extra_tags="alert-success")
                 return redirect('/hod_dashboard')
@@ -392,8 +382,7 @@ def confirm_registration(request,id):
                 messages.error(request, f'An error occurred: {str(e)}')
                 return redirect('register')
             
-     
-        host_url = credentials['hosted_url']
+        
         context = {
             'total': total_user,
             'user_data_list': user_data_list,
@@ -410,23 +399,23 @@ def confirm_registration(request,id):
     return render(request, 'novusapp/confirm_registration.html')
 
 def login_view(request):
-    # If user is already authenticated, redirect them to their dashboard
+    ''' If user is already authenticated, redirect them to their dashboard '''
     if request.user.is_authenticated:
         return redirect('dashboard_redirect')
 
-    # Continue with the regular login logic if not authenticated
+    ''' Continue with the regular login logic if not authenticated '''
     if request.method == 'POST':
         email = request.POST.get('email')
         user_password = request.POST.get('login_password')
 
-        # Authenticate the user
+        ''' Authenticate the user '''
         user = authenticate(request, email=email, password=user_password)
 
-        if user is not None:
+        if user is not None and user.is_active:
             request.session['currentuser_id'] = user.id
             login(request, user)
 
-            # Redirect to the dashboard if already authenticated
+            ''' Redirect to the dashboard if already authenticated '''
             next_url = request.GET.get('next', None)
             if next_url and not next_url.startswith('/login'):
                 return redirect(next_url)
@@ -441,13 +430,13 @@ def login_view(request):
 
 @login_required
 def dashboard_redirect(request):
-    # If user is already authenticated, redirect to their dashboard
+    ''' If user is already authenticated, redirect to their dashboard '''
     if request.user.is_authenticated:
         if request.user.groups.filter(name="Team Lead").exists():
             return redirect('user_dashboard')
 
         elif request.user.groups.filter(name="AM/Manager").exists():
-            return redirect('managerteam_data')
+            return redirect('manager')
 
         elif request.user.groups.filter(name="HOD").exists():
             try:
@@ -461,7 +450,7 @@ def dashboard_redirect(request):
         elif request.user.is_superuser:
             return redirect('admin:index')
 
-    # If not authenticated, handle as before
+    ''' If not authenticated, handle as before '''
     return redirect('/')
 
 
@@ -470,14 +459,16 @@ def dashboard_redirect(request):
 def user_dashboard(request):
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
-        print('userid',userid)
         TeamLeadname = CustomUser.objects.get(id=userid).username
         TeamLead_email = CustomUser.objects.get(id=userid).email
         user_manager = CustomUser.objects.get(id=userid).user_manager
-              
+        try:
+            department_obj=get_object_or_404(CustomUser, id=int(userid))
+            department = department_obj.dep.name
+        except:
+            department =""
         try:
             hod_name = CustomUser.objects.get(id=userid).hod_name
-            print(hod_name)
         except Exception as e:
             messages.error(request, "Your Registration is not confirmed please wait some time and after login.", extra_tags="alert-danger")
             return redirect('/')
@@ -485,7 +476,7 @@ def user_dashboard(request):
             hod_email = Hod.objects.get(name=hod_name).email
         except Exception as e:
             messages.error(request, f"{e}", extra_tags="alert-danger")
-
+            
         if user_manager == '':
             user_manager_email = CustomUser.objects.get(id=userid).email
 
@@ -495,34 +486,53 @@ def user_dashboard(request):
             except:
                 pass
 
-        industry = Industry.objects.all()
-        mycountry = Country.objects.all()
+        industry = Industry.objects.all().values('name')
+        mycountry = Country.objects.all().values('name')
+        currency_type = Currency_Type.objects.all().values('currency_type')
         if request.method == 'POST':
             try:
-                # Get the data from the POST request
+                ''' Get the data from the POST request '''
                 respondent_name = request.POST.get('respondent_name')
                 job_title = request.POST.get('job_title')
+                company_name = request.POST.get('company')
+                company_revenue_value = request.POST.get('company_revenue')
+                company_revenue_currency_type_value = request.POST.get('company_revenue_currency_type')
                 country_name = request.POST.get('country')
                 industry_name = request.POST.get('industry')
-                company_name = request.POST.get('company')
-                profile_link = request.POST.get('profile_link')
-                meeting_link = request.POST.get('meeting_link')
+                incentive_code = request.POST.get('incentive_code')
                 analyst_name = request.POST.get('analyst')
+                incentive_type = request.POST.get('incentive_type')
                 project_name = request.POST.get('project')
                 project_type = request.POST.get('project_type')
-                company_revenue = request.POST.get('company_revenue')
-                company_strength = request.POST.get('company_strength')
                 incentive_name = request.POST.get('incentive')
-                interview_duration = request.POST.get('interview_duration')
-                interview_date = request.POST.get('interview_date')
-
                 
-                # Create or retrieve related records from other tables
+                if not isinstance(incentive_name, int):
+                    messages.warning(request, 'Please fill incentive using integer values', extra_tags="alert-danger")
+                    return redirect('/user_dashboard')
+
+                incentive_currency_type = request.POST.get('incentive_currency_type')
+                interview_date = request.POST.get('interview_date')
+                interview_duration_hours = request.POST.get('interview_duration_hours')
+                interview_duration_minutes = request.POST.get('interview_duration_minutes')
+                
+                if not company_revenue_value:
+                    company_revenue = 0
+            
+                if not isinstance(company_revenue_value, int):
+                    messages.warning(request, 'Please fill in the company revenue using integer values', extra_tags="alert-danger")
+                    return redirect('/user_dashboard')
+
+                if company_revenue_currency_type_value:
+                    company_revenue_currency_type = company_revenue_currency_type_value
+                else:
+                    company_revenue_currency_type = ""
+                
+                ''' Create or retrieve related records from other tables '''
                 try:
                     job = Job.objects.get(title=job_title)
                 except Job.DoesNotExist:
                     job = Job.objects.create(title=job_title)
-                # Use filter instead of get for cases where there might be multiple matches
+                ''' Use filter instead of get for cases where there might be multiple matches '''
                 countries = Country.objects.filter(name=country_name)
                 if countries.exists():
                     country = countries.first()
@@ -535,11 +545,11 @@ def user_dashboard(request):
                 else:
                     industry = Industry.objects.create(name=industry_name)
 
-                companies = Company.objects.filter(name=company_name, revenue=company_revenue, strength=company_strength)
+                companies = Company.objects.filter(name=company_name)
                 if companies.exists():
                     company = companies.first()
                 else:
-                    company = Company.objects.create(name=company_name, revenue=company_revenue, strength=company_strength)
+                    company = Company.objects.create(name=company_name, revenue=company_revenue,revenue_currency_type=company_revenue_currency_type)
 
                 analysts = Analyst.objects.filter(title=analyst_name)
                 if analysts.exists():
@@ -547,35 +557,33 @@ def user_dashboard(request):
                 else:
                     analyst = Analyst.objects.create(title=analyst_name)
 
-                # Retrieve or create the project
+                ''' Retrieve or create the project '''
                 projects = Project.objects.filter(name=project_name, project_type=project_type)
                 if projects.exists():
                     project = projects.first()
                 else:
                     project = Project.objects.create(name=project_name, project_type=project_type)
 
-                # Retrieve or create the project interview using the project
+                ''' Retrieve or create the project interview using the project '''
                 project_interviews = ProjectInterview.objects.filter(project=project)
                 if project_interviews.exists():
                     project_interview = project_interviews.first()
                 else:
                     project_interview = ProjectInterview.objects.create(
                         project=project,
-                        interview_duration=interview_duration,
+                        interview_duration_hours=interview_duration_hours,
+                        interview_duration_minutes=interview_duration_minutes,
                         interview_date=interview_date
                     )
 
-                # Retrieve or create the incentive using the project
-                incentives = Incentive.objects.filter(project=project)
+                ''' Retrieve or create the incentive using the project '''
+                incentives = Incentive.objects.filter(project=project,Unique_identifier=incentive_name)
                 if incentives.exists():
                     incentive = incentives.first()
                 else:
-                    incentive = Incentive.objects.create(project=project, Unique_identifier=incentive_name)
+                    incentive = Incentive.objects.create(project=project, Unique_identifier=incentive_name,incentive_code=incentive_code,incentive_currency_type=incentive_currency_type)
 
-
-
-
-                # Create the Respondent instance and associate it with the related records
+                ''' Create the Respondent instance and associate it with the related records '''
                 respondent = Respondent.objects.create(
                     name=respondent_name,
                     job=job,
@@ -586,17 +594,17 @@ def user_dashboard(request):
                     country=country,
                     industry=industry,
                     company=company,
-                    profile_link=profile_link,
-                    meeting_link=meeting_link,
+                    incentive_type=incentive_type,
                     analyst=analyst,
                     project=project,
                     incentive=incentive,
                     project_interview=project_interview,
                     team_lead = TeamLeadname,
+                    Department=department,
                     is_active = 0
                 )
 
-                # Save the Respondent instance to the database
+                ''' Save the Respondent instance to the database '''
                 respondent.save()
                 messages.success(request, 'Form Submitted Successfully',extra_tags="alert-success")
                 return redirect('/user_dashboard')
@@ -608,7 +616,8 @@ def user_dashboard(request):
 
         context = {
             'industry':industry,
-            'allcountry':mycountry
+            'allcountry':mycountry,
+            'currency_type':currency_type
             }
         return render(request,"novusapp/user_dashboard.html",context)
     
@@ -619,19 +628,18 @@ def user_dashboard(request):
 @role_required(allowed_roles=['Team Lead'])
 def userdata(request):
     if request.session.has_key('currentuser_id'):
-        # Retrieve all data from the Respondent table
+        ''' Retrieve all data from the Respondent table '''
         userid = request.session['currentuser_id']
         name = CustomUser.objects.get(id=userid).username
         useremail = CustomUser.objects.get(id=userid).email
-        dep = CustomUser.objects.get(id=userid).department
 
-        # Retrieve the 'type' parameter from the GET request
+        ''' Retrieve the 'type' parameter from the GET request '''
         data_type = request.GET.get('type')
 
-        # Get items per page from the request, default to 10 if not specified
+        ''' Get items per page from the request, default to 10 if not specified '''
         items_per_page = int(request.GET.get('items_per_page', 10))
 
-        # Filter data based on 'type' parameter
+        ''' Filter data based on 'type' parameter '''
         if data_type == 'self':
             respondents = Respondent.objects.filter(email=useremail, is_active__in=[0,1]).all()
         elif data_type == 'all':
@@ -639,7 +647,7 @@ def userdata(request):
         else:
             respondents = Respondent.objects.filter(email=useremail, is_active__in=[0,1]).all()
 
-        # Paginator
+        ''' Paginator '''
         paginator = Paginator(respondents, items_per_page)
         page_number = request.GET.get('page')
 
@@ -650,11 +658,11 @@ def userdata(request):
         except EmptyPage:
             servicedatafinal = paginator.page(paginator.num_pages)
 
-        # Get total page count for pagination links
+        ''' Get total page count for pagination links '''
         totalpage = servicedatafinal.paginator.num_pages
         totalpagelist = [i + 1 for i in range(totalpage)]
 
-        # Create the URL for pagination links
+        ''' Create the URL for pagination links '''
         base_url = reverse('userdata')
         pagination_url = f"{base_url}?type={data_type}&items_per_page={items_per_page}&page="
 
@@ -676,28 +684,27 @@ def userdata(request):
 @role_required(allowed_roles=['HOD'])
 def userhod_data(request):
     if request.session.has_key('currentuser_id'):
-
         userid = request.session['currentuser_id']
         name = CustomUser.objects.get(id=userid).username
         hodname = CustomUser.objects.get(id=userid).hod_name
         hodemail = CustomUser.objects.get(id=userid).email
        
-        # Retrieve the 'type' parameter from the GET request
+        ''' Retrieve the 'type' parameter from the GET request '''
         data_type = request.GET.get('type')
         
-        # Get items per page from the request, default to 10 if not specified
+        ''' Get items per page from the request, default to 10 if not specified '''
         items_per_page = int(request.GET.get('items_per_page', 10))
 
-        # Filter data based on 'type' parameter
+        ''' Filter data based on 'type' parameter '''
         if data_type == 'self':
             respondents = Respondent.objects.filter(hod_email=hodemail, is_active__in=[0,1]).all()
         elif data_type == 'all':
             respondents = Respondent.objects.filter(Q(hod_email=hodemail, is_active=1) | Q(is_active=1)).all()
         else:
-            # Handle other cases if needed
+            ''' Handle other cases if needed '''
             respondents = Respondent.objects.filter(hod_email=hodemail, is_active__in=[0,1]).all()
 
-        # Paginator
+        ''' Paginator '''
         paginator = Paginator(respondents, items_per_page)
         page_number = request.GET.get('page')
 
@@ -708,11 +715,11 @@ def userhod_data(request):
         except EmptyPage:
             servicedatafinal = paginator.page(paginator.num_pages)
 
-        # Get total page count for pagination links
+        ''' Get total page count for pagination links '''
         totalpage = servicedatafinal.paginator.num_pages
         totalpagelist = [i + 1 for i in range(totalpage)]
 
-        # Create the URL for pagination links
+        ''' Create the URL for pagination links '''
         base_url = reverse('userhod_data')
         pagination_url = f"{base_url}?type={data_type}&items_per_page={items_per_page}&page="
 
@@ -722,7 +729,8 @@ def userhod_data(request):
             'lastpage': totalpage,
             'totalpagelist': totalpagelist,
             'items_per_page': items_per_page,
-            'pagination_url': pagination_url,  # Pass the pagination URL to the template
+            ''' Pass the pagination URL to the template '''
+            'pagination_url': pagination_url,  
         }
 
         return render(request, "novusapp/userhod_data.html", context)
@@ -734,12 +742,12 @@ def userhod_data(request):
 def autocomplete(request):
     if 'term' in request.GET:
         terms = request.GET.get('term').split(',')
-        term = terms[-1].strip()  # Get the last term after the last comma
+        ''' Get the last term after the last comma '''
+        term = terms[-1].strip()  
 
         qs = Industry.objects.filter(name__icontains=term)
         titles = [product.name for product in qs]
-        print('@@@@@@@@@@@@@@@@@/',titles)
-
+        
         return JsonResponse(titles, safe=False)
     
     return render(request, 'novusapp/userhod_data.html')
@@ -748,7 +756,8 @@ def autocomplete(request):
 def autocomplete1(request):
     if 'term' in request.GET:
         terms = request.GET.get('term').split(',')
-        term = terms[-1].strip()  # Get the last term after the last comma
+        ''' Get the last term after the last comma '''
+        term = terms[-1].strip()  
 
         qs = Country.objects.filter(name__icontains=term)
         titles = [product.name for product in qs]
@@ -761,7 +770,8 @@ def autocomplete1(request):
 def autocomplete2(request):
     if 'term' in request.GET:
         terms = request.GET.get('term').split(',')
-        term = terms[-1].strip()  # Get the last term after the last comma
+        ''' Get the last term after the last comma '''
+        term = terms[-1].strip()  
 
         qs = Job.objects.filter(title__icontains=term)
         titles = [product.title for product in qs]
@@ -792,7 +802,7 @@ def hod_dashboard(request):
        
         total_user = complex_obj.count()
 
-        # Create a list of dictionaries to store user-specific data
+        ''' Create a list of dictionaries to store user-specific data '''
         user_data_list = []
         user_data_list1 = []
         
@@ -833,7 +843,6 @@ def hod_dashboard(request):
             'hod':current_hod,
             'role':role,
             'team' : team_manager,
-            # 'host_url' : host_url,
         }
         
         return render(request, "novusapp/tables.html", context)
@@ -842,7 +851,7 @@ def hod_dashboard(request):
 
 
 def logout_view(request):
-    # Clear the user's session
+    ''' Clear the user's session '''
     logout(request)
     return redirect('/')  # Redirect to the login page or any other desired page
 
@@ -863,7 +872,7 @@ def tables(request):
         
         total_user = complex_obj.count()
 
-        # Create a list of dictionaries to store user-specific data
+        ''' Create a list of dictionaries to store user-specific data '''
         user_data_list = []
 
         for userdata in complex_obj:
@@ -874,8 +883,7 @@ def tables(request):
                 'hod_name': userdata['hod_name'],
             }
             user_data_list.append(user_data)
-            
-        host_url = credentials['hosted_url']
+
         context = {
             'total': total_user,
             'user_data_list': user_data_list,
@@ -903,22 +911,22 @@ def manager(request):
 
         current_manager_email = CustomUser.objects.get(id=userid).email
 
-        # Retrieve the 'type' parameter from the GET request
+        ''' Retrieve the 'type' parameter from the GET request '''
         data_type = request.GET.get('type')
 
-        # Get items per page from the request, default to 10 if not specified
+        ''' Get items per page from the request, default to 10 if not specified '''
         items_per_page = int(request.GET.get('items_per_page', 10))
 
-        # Filter data based on 'type' parameter
+        ''' Filter data based on 'type' parameter '''
         if data_type == 'self':
             respondents = Respondent.objects.filter(user_manager_email=current_manager_email, is_active__in=[0, 1]).all()
         elif data_type == 'all':
             respondents = Respondent.objects.filter(Q(user_manager_email=current_manager_email, is_active=1) | Q(is_active=1)).all()
         else:
-            # Handle other cases if needed
+            ''' Handle other cases if needed '''
             respondents = Respondent.objects.filter(user_manager_email=current_manager_email, is_active__in=[0, 1]).all()
 
-        # Paginator
+        ''' Paginator '''
         paginator = Paginator(respondents, items_per_page)
         page_number = request.GET.get('page')
 
@@ -929,11 +937,11 @@ def manager(request):
         except EmptyPage:
             servicedatafinal = paginator.page(paginator.num_pages)
 
-        # Get total page count for pagination links
+        ''' Get total page count for pagination links '''
         totalpage = servicedatafinal.paginator.num_pages
         totalpagelist = [i + 1 for i in range(totalpage)]
 
-        # Create the URL for pagination links
+        ''' Create the URL for pagination links '''
         base_url = reverse('manager')
         pagination_url = f"{base_url}?type={data_type}&items_per_page={items_per_page}&page="
 
@@ -944,7 +952,8 @@ def manager(request):
             'totalpagelist': totalpagelist,
             'hod': current_manager,
             'items_per_page': items_per_page,
-            'pagination_url': pagination_url,  # Pass the pagination URL to the template
+            '''Pass the pagination URL to the template'''
+            'pagination_url': pagination_url,  
         }
 
         return render(request, "novusapp/teamlead_data.html", context)
@@ -956,15 +965,14 @@ def manager(request):
 @role_required(allowed_roles=['AM/Manager'])
 def managerteam_data(request):
     if request.session.has_key('currentuser_id'):
-        # Retrieve all data from the Respondent table
+        ''' Retrieve all data from the Respondent table '''
         userid = request.session['currentuser_id']
         
         name = CustomUser.objects.get(id=userid).username
        
         useremail = CustomUser.objects.get(id=userid).email
         respondents = Respondent.objects.filter(user_manager_email=useremail,is_active=0).all()
-        
-        host_url = credentials['hosted_url']
+
         context = {
             'respondents':respondents,
             'name':name,
@@ -982,27 +990,33 @@ def form_approved(request,id):
     return redirect('manager')
 
 
-
+    
 def profile(request):
     try:
+        dep = Department.objects.all()
+
         if request.session.has_key('currentuser_id'):
             id = request.session['currentuser_id']
             profile_obj = CustomUser.objects.get(id=id)
-            dep = Department.objects.all()
+
             if request.method == 'POST':
                 mobile = request.POST.get('mobile_no')
                 dept = request.POST.get('department')
-                
-                #Update user information
+                try:
+                    dept_obj = Department.objects.get(id=dept)
+                except:
+                    pass
+                    
+                ''' Update user information '''
                 if CustomUser.objects.filter(dep=dept, mobile=mobile).exists():
                     messages.info(request, 'Same record already exists.', extra_tags="alert-warning")
                     return redirect('/profile')
                 
                 CustomUser.objects.filter(id=id).update(dep=dept, mobile=mobile)
                 
-                # Update related Respondent information
+                ''' Update related Respondent information '''
                 tl_email = profile_obj.email
-                Respondent.objects.filter(email=tl_email).update(Department=dept)
+                Respondent.objects.filter(email=tl_email).update(Department=dept_obj.name)
                 
                 messages.success(request, 'Profile updated successfully.', extra_tags="alert-success")
                 return redirect('/profile')
@@ -1010,48 +1024,48 @@ def profile(request):
             context = {
                 'profile_obj': profile_obj,
                 'department': dep,
-                }
+            }
             return render(request, "novusapp/edit.html", context)
 
         return HttpResponse('Please Login')
-    
+ 
     except Exception as e:
+        ''' Handle other exceptions '''
         messages.error(request, f'An error occurred: {str(e)}', extra_tags="alert-danger")
-        return redirect("/profile")
-        
-
-
+        return render(request, "novusapp/edit.html", {'department': dep})
 
 
 
 def change_password(request):
-    # Get the user ID from the session
+    ''' Get the user ID from the session '''
     userid = request.session.get('currentuser_id')
     role = CustomUser.objects.get(id=userid).role
     name = CustomUser.objects.get(id=userid).username
     if request.method == 'POST':
-        # Get the old, new, and confirmed passwords from the form
+        ''' Get the old, new, and confirmed passwords from the form '''
         old_password = request.POST.get('old_password')
         new_password = request.POST.get('new_password')
-        # confirm_password = request.POST.get('confirm_password')
         
-        # if new_password != confirm_password:
-        #     messages.error(request, 'Passwords do not match.',extra_tags="alert-danger")
-        #     return redirect('/profile/change_password')
+        
        
-        # Retrieve the user object from the database
+        ''' Retrieve the user object from the database '''
         user = CustomUser.objects.get(id=userid)
 
-        # Check if the old password matches the user's current password
+        ''' Check if the old password matches the user's current password '''
         if not check_password(old_password, user.password):
             messages.error(request, 'Old password is incorrect',extra_tags="alert-danger")
-            return redirect('/profile/change_password')  # Adjust the URL name to your view
+            return redirect('/profile/change_password')  
+        
+        if old_password == new_password:
+            messages.warning(request,"Old and new password same please change this password.", extra_tags="alert-warning")
+            return redirect("/profile/change_password")
+
 
         user.set_password(new_password)
         user.save()
 
         messages.success(request, 'Password changed successfully',extra_tags="alert-success")
-        return redirect('/profile')  # Redirect to the profile page or another appropriate page
+        return redirect('/') 
 
     context = {
         'role':role,
@@ -1062,7 +1076,7 @@ def change_password(request):
 
 
 
-# login templates render
+''' login templates render '''
 
 def loginDemo(request):
     return render(request, 'novusapp/base1.html')

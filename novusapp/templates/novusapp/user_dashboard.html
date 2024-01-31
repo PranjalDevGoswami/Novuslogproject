@@ -47,12 +47,13 @@
 											<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
 										</div>
 										
-										<label class="control-label col-md-2 col-sm-2" for="job_title">Job Title <span class="required">*</span></label>
-											<div class="col-md-4 col-sm-4">
-												<input type="text" id="job_title" name="job_title" required="required" class="form-control input-space">
-												<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
-											</div>
+									<label class="control-label col-md-2 col-sm-2" for="job_title">Job Title <span class="required">*</span></label>
+										<div class="col-md-4 col-sm-4">
+											<input type="text" id="job_title" name="job_title" required="required" class="form-control input-space">
+											<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
+										</div>
 								</div>
+
 								<div class="form-group row">
 									<label class="control-label col-md-2 col-sm-2" for="company">Company <span class="required">*</span></label>
 									<div class="col-md-4 col-sm-4">
@@ -60,32 +61,16 @@
 										<span class="fa fa-building-o form-control-feedback right" aria-hidden="true"></span>
 									</div>
 
-									<label class="control-label col-md-2 col-sm-2" for="company_revenue">Company Revenue <span class="required">*</span></label>
+									<label class="control-label col-md-2 col-sm-2" for="company_revenue">Company Revenue</label>
 									<div class="col-md-4 col-sm-4">
-										<input id="project" class="form-control input-space" type="text" name="company_revenue" required="required">
-										<span class="fa fa-inr form-control-feedback right" aria-hidden="true"></span>
-									</div>
-								
-								</div>
-
-								<div class="form-group row">
-									<label class="control-label col-md-2 col-sm-2" for="company_strength">Company Strength <span class="required">*</span></label>
-									<div class="col-md-4 col-sm-4">
-										<input id="project" class="form-control input-space" type="text" name="company_strength"required="required">
-									</div>
-
-									<label class="control-label col-md-2 col-sm-2" for="industry">Industry <span class="required">*</span></label>
-									<div class="col-md-4 col-sm-4">
-												
-										<select id="industry" class="form-control input-space" name="industry" required="required"> 
-											
-											<option value="" disabled selected>---SELECT---</option>
-											{% for data in industry %}
-											<option value="{{data.name}}">{{data.name}}</option>
+										<input id="project" class="form-control input-space" type="text" name="company_revenue">
+										<select id="company_revenue_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="company_revenue_currency_type">
+											<option value="" disabled selected>CUR</option>
+											{% for currency in currency_type %}
+											<option value="{{currency.currency_type}}" style="color: black;">{{currency.currency_type}}</option>
 											{% endfor %}
-											<!-- <option value="option2">Option 2</option> -->
-											
-										</select>		
+													
+										</select>
 									</div>
 								</div>
 
@@ -93,42 +78,45 @@
 									<label class="control-label col-md-2 col-sm-2" for="country">Country <span class="required">*</span></label>
 									<div class="col-md-4 col-sm-4">
 										<select id="country" class="form-control input-space" name="country" required="required"> 
-											
 											<option value="" disabled selected>---SELECT---</option>
 											{% for data in allcountry %}
 											<option value="{{data.name}}">{{data.name}}</option>
 											{% endfor %}
-											<!-- <option value="option2">Option 2</option> -->
-											
 										</select>
 									</div>
 
-									<label class="control-label col-md-2 col-sm-2" for="profile_link">Profile Link <span class="required">*</span></label>
-									<div class="col-md-4 col-sm-6">
-										<input id="profile_link" class="form-control input-space" type="text" name="profile_link" style="margin-bottom: 10px;" required="required">
+									<label class="control-label col-md-2 col-sm-2" for="industry">Industry <span class="required">*</span></label>
+									<div class="col-md-4 col-sm-4">	
+										<select id="industry" class="form-control input-space" name="industry" required="required"> 
+											<option value="" disabled selected>---SELECT---</option>
+											{% for data in industry %}
+											<option value="{{data.name}}">{{data.name}}</option>
+											{% endfor %}
+										</select>		
 									</div>
-								
 								</div>
 
 								<div class="form-group row">
-									<label class="control-label col-md-2 col-sm-2" for="meeting_link">Meeting Link <span class="required">*</span></label>
+									<label class="control-label col-md-2 col-sm-2" for="incentive_code">Incentive Code <span class="required">*</span></label>
 									<div class="col-md-4 col-sm-4">
-										<input id="meeting_link" class="form-control input-space" type="text" name="meeting_link" required="required">
-										<span class="fa fa-envelope form-control-feedback right" aria-hidden="true"></span>
+										<input id="project" class="form-control input-space" type="text" name="incentive_code"required="required">
 									</div>
-
+								
 									<label class="control-label col-md-2 col-sm-2" for="analyst">Analyst(Interviewer) <span class="required">*</span></label>
 									<div class="col-md-4 col-sm-4">
 										<input id="analyst" class="form-control input-space" type="text" name="analyst" required="required">
 									</div>
-								
 								</div>
 
-								<div class="form-group row ">
-									<label class="control-label col-md-2 col-sm-2" for="project">Project <span class="required">*</span></label>
-
+								<div class="form-group row">
+									<label class="control-label col-md-2 col-sm-2" for="incentive_type">Incentive Type <span class="required">*</span></label>
 									<div class="col-md-4 col-sm-4">
-										<input id="project" class="form-control input-space" type="text" name="project" required="required">
+										<select id="incentive_type" class="form-control input-space" name="incentive_type" required="required">
+											<option value="" disabled selected>---SELECT INCENTIVE TYPE---</option>
+											<option value="">Incetive type 1</option>
+											<option value="">Incetive type 2</option>
+											<option value="">Incetive type 3</option>
+										</select>
 									</div>
 
 									<label class="control-label col-md-2 col-sm-2" for="project_type">Project Type <span class="required">*</span></label>
@@ -138,45 +126,78 @@
 											<option value="CAWI">CAWI</option>
 											<option value="CAPI">CAPI</option>
 											<option value="CATI">CATI</option>
-											
 										</select>
 									</div>
-								
 								</div>
+
+								
 
 								<div class="form-group row ">
 									<label class="control-label col-md-2 col-sm-2" for="incentive">Incentive <span class="required">*</span></label>
 									<div class="col-md-4 col-sm-4">
-										<input id="project" class="form-control input-space" type="text" name="incentive" required="required">
-										<span class="fa fa-inr form-control-feedback right" aria-hidden="true"></span>
+										<input id="incentive" class="form-control input-space" type="text" name="incentive" required="required"> 
+										<select id="incentive_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="incentive_currency_type" style="border:black;" required="required">
+											<option value="" disabled selected>CUR</option>
+											{% for currency in currency_type %}
+											<option value="{{currency.currency_type}}" style="color: black;">{{currency.currency_type}}</option>
+											{% endfor %}
+											
+										</select>
 									</div>
 
-									<label class="control-label col-md-2 col-sm-2" for="interview_duration">Interview Duration <span class="required">*</span></label>
-									<div class="col-md-4 col-sm-4">
-										<input id="project" class="form-control input-space" type="text" name="interview_duration" required="required">
-										<span class="fa fa-clock-o form-control-feedback right" aria-hidden="true"></span>
-									</div>
-
-								</div>
-
-								<div class="form-group row">
 									<label class="control-label col-md-2 col-sm-2" for="birthday">Interview Date<span class="required">*</span></label>
 									<div class="col-md-4 col-sm-4">
 										<input id="birthday" class="date-picker form-control input-space" name="interview_date" placeholder="dd-mm-yyyy" type="text" required="required" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)" style="margin-bottom: 10px;">
 									</div>
-								</div>	
+								</div>
+
+								<div class="form-group row ">
+									<label class="control-label col-md-2 col-sm-2" for="project">Project <span class="required">*</span></label>
+									<div class="col-md-4 col-sm-4">
+										<input id="project" class="form-control input-space" type="text" name="project" required="required">
+									</div>
+
+								
+									<label class="control-label col-md-2 col-sm-2" for="interview_duration">Interview Duration <span class="required">*</span></label>
+									<div class="col-md-4 col-sm-4">
+										<div class="input-group">
+											<div class="form-group">
+												<!-- Hour Label -->
+												<label for="hourDropdown">Select Hours:</label>
+												
+												<!-- Hour Dropdown -->
+												<div class="input-group">
+													<select id="hourDropdown" class="form-control input-space time-input" name="interview_duration_hours" required="required">
+														<!-- JavaScript will dynamically populate options here -->
+													</select>
+												</div>
+											</div>
+											
+											<div class="form-group">
+												<!-- Minute Label -->
+												<label for="minuteDropdown">Select Minutes:</label>
+												
+												<!-- Minute Dropdown -->
+												<div class="input-group">
+													<select id="minuteDropdown" class="form-control input-space time-input" name="interview_duration_minutes" required="required">
+														<!-- JavaScript will dynamically populate options here -->
+													</select>
+													
+												</div>
+											</div>
+											
+										</div>
+									</div>
+								</div>
 
 								<div class="ln_solid"></div>
 										
 								<div class="form-group row">
 									<div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-										<!-- <button class="btn btn-danger btn-attractive" type="button">Cancel</button> -->
 										<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Submit</button>
 										<button class="btn btn-danger btn-attractive rounded-lg"  type="reset">Reset</button>
 									</div>
 								</div>
-				
-
 							</form>
 						</div>	
 
@@ -214,4 +235,24 @@
 		}, 8000);
 	});
 </script>
+
+<script>
+    // Function to populate the hour and minute dropdowns with a specified interval
+    function populateDropdown(selectElement, maxValue, label, interval) {
+        for (let i = 0; i <= maxValue; i += interval) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.text = `${i} ${label}${i === 1 ? '' : ''}`;
+            selectElement.add(option);
+        }
+    }
+
+    // Populate the hour dropdown with options from 0 to 12 hours
+    populateDropdown(document.getElementById('hourDropdown'), 12, 'hr', 1);
+
+    // Populate the minute dropdown with options from 0 to 55 minutes in 5-minute intervals
+    populateDropdown(document.getElementById('minuteDropdown'), 55, 'min', 5);
+</script>
+
+
 {% endblock script %}

@@ -83,13 +83,13 @@
 							<label class="col-form-label col-md-3 col-sm-3 label-align" for="department"> Department <span class="required"></span></label>
 							<div class="col-md-6 col-sm-6">
 								<select id="department" class="form-control" name="department" required="">
-                  
+            
                   <option value="" disabled selected>-----SELECT----</option>
-                  <option value="{{profile_obj.dep.id}}" selected style="color: darkblue;">{{profile_obj.dep.name}}</option>
+		  <option value="{{profile_obj.dep.id}}" style="color:darkblue;" selected>{{profile_obj.dep.name}}</option>
                   {% for data in department %}
                   <option value="{{data.id}}">{{data.name}}</option>
                   {% endfor %}
-                
+                  
 								</select>
 							</div>	
 						</div>
@@ -98,7 +98,7 @@
 						<div class="item form-group">
 							<div class="col-md-6 col-sm-6 offset-md-3">		
 								<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Update</button>
-								<button onclick="goBack()" type="button" class="btn light btn-outline-danger  w-30">Back</button>
+								<button type="button" onclick="goBack()" class="btn light btn-outline-danger  w-30">Back</a>
 							</div>
 						</div>
 

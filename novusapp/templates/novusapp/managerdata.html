@@ -1,6 +1,5 @@
 {% extends "novusapp/base1.html" %}
 {% load static %} 
-
 {% block head %}
 <link
   rel="stylesheet"
@@ -29,84 +28,28 @@
               <div class="col-md-5 col-sm-5 form-group top_search">
                 <!-- Advance Search on the right -->
                 <div class="col-md-6 mt-2 text-right">
-                  <button
-                    class="btn btn-primary btn-md rounded-lg"
-                    id="showAdvancedSearch"
-                  >
-                    Advance Search
-                  </button>
                 </div>
               </div>
               </div>
             </div>
-          </div>
-          <div class="">
-            <!-- Advanced Search Fields -->
-            <div class="row mt-3" id="advancedSearchFields" style="display: none">
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label for="jobTitleInput">Job Title</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="jobTitleInput"
-                    style="margin-bottom: 100px"
-                  />
-                </div>
-              </div>
-              
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label for="countryInput">Country</label>
-                  <input type="text" class="form-control" id="countryInput" />
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label for="industryInput">Industry</label>
-                  <input type="text" class="form-control" id="industryInput" />
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label for="actionButton" style="margin-top: 30px"></label>&nbsp;
-                  <button
-                    class="btn btn-primary mt-4 btn-md rounded-lg"
-                    id="actionButton"
-                  >
-                    Search
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-              
+          </div>            
             
           <div class="clearfix"></div>
-            <div class="btn btn-info simple-link" data-type="self" style="cursor: pointer;">
-              <a href="{% url 'managerteam_data' %}?type=self" style="color: white; text-decoration: none;">
-                  Own Data
-              </a>
-            </div>
-          
-            <div class="btn btn-info simple-link" data-type="all" style="cursor: pointer;">
-              <a href="{% url 'managerteam_data' %}?type=all" style="color: white; text-decoration: none;">
-                  All Data
-              </a>
-            </div>
-
             <div class="row">
               <div class="col-md-12">
                 <div class="x_panel">
                   <div class="x_title">
-                    <h2>DataTable</h2>
+                    <ul class="nav nav-tabs bar_tabs" id="myTab" role="tablist">
+                      <li class="nav-item">
+                        <a class="nav-link active simple-link"  data-type="self"  href="{% url 'managerteam_data' %}?type=self" aria-selected="false">Own Data</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link simple-link" data-type="all" href="{% url 'managerteam_data' %}?type=all" >All Data</a>
+                      </li>
+                    </ul>
                     <ul class="nav navbar-right panel_toolbox">
                   
-                    </ul>
+                    </ul> 
                     <div class="clearfix"></div>
                   </div>
                   <div class="x_content">
@@ -149,29 +92,32 @@
                               <td class=" ">{{ respondent.analyst.title }}</td>
                               <td class=" ">{{ respondent.project.name }}</td>
                               <td class=" ">{{ respondent.project.project_type }}</td>
-                              <td class=" ">{{ respondent.company.revenue }}</td>
+                              {% if respondent.company.revenue == 0 %}
+                              <td class=""></td>
+                              {% else %}
+                              <td class="">{{ respondent.company.revenue}}</td>
+                              {% endif %}
                               <td class=" ">{{ respondent.incentive.Unique_identifier }}</td>
-                              <td class=" ">{{ respondent.project_interview.interview_duration }}</td>
+                              <td class=" ">{{ respondent.project_interview.interview_duration_hours}}hr:{{respondent.project_interview.interview_duration_minutes}}min</td>
                               <td class=" ">{{ respondent.project_interview.interview_date }}</td>
 
                               {% if respondent.is_active == 0 %}
-			      <td><h2><span class="badge badge-danger">Pending</span></h2></td>
+			                          <td><h2><span class="badge badge-danger">Pending</span></h2></td>
                                   {% if hod %}
                                     <td class="last">
                                       <a href="#"
-                                          class="btn btn-info btn-sm" disabled>Approved</a>
+                                          class="btn btn-info btn-sm" disabled>Approve</a>
                                     </td>
                                   {% else %}
                                     <td class="last">
                                       <a href="{{host_url}}/form_approved/{{ respondent.id }}"
-                                          class="btn btn-danger btn-sm">Approved</a>
-                                    </td>
+                                          class="btn light btn-outline-info btn-sm w-30">Approve</a>                                    </td>
                                   {% endif %}
                               {% elif respondent.is_active == 1 %}
-			      <td><h2><span class="badge badge-success">Complete</span></h2></td>
+			                        <td><h2><span class="badge badge-success">Complete</span></h2></td>
                               <td class="last">
                                   <a href="#"
-                                      class="btn btn-success btn-sm" disabled>Approved</a>
+                                      class="btn btn-success btn-sm" disabled>Approve</a>
                               </td>
                               {% endif %}
                           </tr>
@@ -371,3 +317,5 @@
   });
 </script>
 {% endblock script %}
+
+

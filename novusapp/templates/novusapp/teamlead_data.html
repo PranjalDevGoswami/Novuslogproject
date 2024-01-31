@@ -5,7 +5,6 @@
   type="text/css"
   href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css"
 />
-<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 {% block title %}
 {% endblock title %}
 {% endblock head %} {% block right_col %}
@@ -143,28 +142,18 @@
                     <td class=" ">{{ respondent.analyst.title }}</td>
                     <td class=" ">{{ respondent.project.name }}</td>
                     <td class=" ">{{ respondent.project.project_type }}</td>
-                    <td class=" ">{{ respondent.company.revenue }}</td>
-                    <td class=" ">
-                      {{ respondent.incentive.Unique_identifier }}
-                    </td>
-                    <td class=" ">
-                      {{ respondent.project_interview.interview_duration }}
-                    </td>
-                    <td class=" ">
-                      {{ respondent.project_interview.interview_date }}
-                    </td>
-                    {% if respondent.team_lead == none %}
-                      <td class=" "></td>
+                    {% if respondent.company.revenue == 0 %}
+                    <td class=""></td>
                     {% else %}
-                      <td class=" ">{{ respondent.team_lead }}</td>
-                      {% endif %}
-                    {% if respondent.Department == none %}
-                      <td class=" "></td>
-                    {% else %}
-                      <td class=" ">{{ respondent.Department }}</td>
+                    <td class="">{{ respondent.company.revenue}}</td>
                     {% endif %}
+                    <td class=" ">{{ respondent.incentive.Unique_identifier}}</td>
+                    <td class=" ">{{ respondent.project_interview.interview_duration_hours}}hr:{{respondent.project_interview.interview_duration_minutes}}min</td>
+                    <td class=" ">{{ respondent.project_interview.interview_date }}</td>
+                    <td class=" ">{{respondent.team_lead|default_if_none:""}}</td>
+                    <td class=" ">{{respondent.Department|default_if_none:""}}</td>
                     {% if respondent.is_active == 0 %}
-		    <td><h2><span class="badge badge-danger">Pending</span></h2></td>
+		                <td><h2><span class="badge badge-danger">Pending</span></h2></td>
                     {% elif respondent.is_active == 1 %}
                     <td><h2><span class="badge badge-success">Complete</span></h2>
                     </td>
@@ -188,7 +177,7 @@
   src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"
 ></script>
 <script src="{% static 'vendors/datatables.net/js/jquery.dataTables.min.js' %}"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
 <script>
   $(document).ready(function () {
     $("#teamlead_table").DataTable();

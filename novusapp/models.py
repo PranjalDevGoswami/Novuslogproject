@@ -20,7 +20,7 @@ from django.contrib.auth import get_user_model
 # Job Master
 class Job(models.Model):
     title = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -31,7 +31,7 @@ class Job(models.Model):
 # Country Master
 class Country(models.Model):
     name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -42,7 +42,7 @@ class Country(models.Model):
 # Industry Master
 class Industry(models.Model):
     name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -53,20 +53,30 @@ class Industry(models.Model):
 # Company Table
 class Company(models.Model):
     name = models.CharField(max_length=255)
-    revenue = models.CharField(max_length=255)
-    strength = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    revenue = models.IntegerField(null=True,blank=True)
+    revenue_currency_type = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+    
+# Currency Table
+class Currency_Type(models.Model):
+    currency_type = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.currency_type
 
 
 # Analyst Master
 class Analyst(models.Model):
     title = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -77,7 +87,7 @@ class Analyst(models.Model):
 # Department Master
 class Department(models.Model):
     name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -91,7 +101,7 @@ class Project(models.Model):
     project_type = models.CharField(max_length=255)
     project_code = models.CharField(max_length=255)
     LOI = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -101,26 +111,26 @@ class Project(models.Model):
 # Incentive Table
 class Incentive(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    Unique_identifier = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    incentive_code = models.CharField(max_length=255)
+    incentive_currency_type = models.CharField(max_length=255)
+    Unique_identifier = models.IntegerField()
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.Unique_identifier
+        return self.incentive_code
 
 
 # Project Interview
 class ProjectInterview(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    interview_duration = models.CharField(max_length=255)
+    interview_duration_hours = models.CharField(max_length=255)
+    interview_duration_minutes = models.CharField(max_length=255)
     interview_date = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return self.project.name
 
 
 # Respondent Table
@@ -134,15 +144,14 @@ class Respondent(models.Model):
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     industry = models.ForeignKey(Industry, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    profile_link = models.CharField(max_length=255)
-    meeting_link = models.CharField(max_length=255)
+    incentive_type = models.CharField(max_length=255)
     analyst = models.ForeignKey(Analyst, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     incentive = models.ForeignKey(Incentive, on_delete=models.CASCADE)
     project_interview = models.ForeignKey(ProjectInterview, on_delete=models.CASCADE)
     team_lead = models.CharField(max_length=255,blank=True,null=True)
     Department = models.CharField(max_length=255,blank=True,null=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -153,7 +162,7 @@ class Respondent(models.Model):
 # Role Master
 class RoleMaster(models.Model):
     name = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -165,7 +174,9 @@ class RoleMaster(models.Model):
 class Hod(models.Model):
     name = models.CharField(max_length=255,blank=True)
     email = models.EmailField(unique=True)
-    is_active = models.BooleanField(default=False)
+    Designation = models.CharField(max_length=100,null=True, blank=True)
+    dep = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -176,7 +187,7 @@ class Hod(models.Model):
 class TeamLead(models.Model):
     name = models.CharField(max_length=255,blank=True)
     email = models.EmailField(unique=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -187,7 +198,7 @@ class TeamLead(models.Model):
 class Manager(models.Model):
     name = models.CharField(max_length=255,blank=True)
     email = models.EmailField(unique=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -218,7 +229,6 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=255, null=True, blank=True)
     user_manager = models.CharField(max_length=255, null=True, blank=True)
     hod_name = models.CharField(max_length=255, null=True, blank=True)
-    department = models.CharField(max_length=255, null=True, blank=True)
     dep = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
     mobile = models.CharField(max_length=255, null=True, blank=True)
     token = models.CharField(max_length=255, null=True, blank=True)

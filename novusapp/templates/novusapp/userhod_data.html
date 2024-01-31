@@ -24,6 +24,7 @@
                 
                   </div>
                 </div>
+	
                 <div class="col-md-5 col-sm-5 form-group top_search">
                   <!-- Advance Search on the right -->
                   <div class="col-md-6 mt-2 text-right">
@@ -141,24 +142,20 @@
                                 <td class=" ">{{ respondent.analyst.title }}</td>
                                 <td class=" ">{{ respondent.project.name }}</td>
                                 <td class=" ">{{ respondent.project.project_type }}</td>
-                                <td class=" ">{{ respondent.company.revenue }}</td>
+                                {% if respondent.company.revenue == 0 %}
+                                <td class=""></td>
+                                {% else %}
+                                <td class="">{{ respondent.company.revenue}}</td>
+                                {% endif %}
                                 <td class=" ">{{ respondent.incentive.Unique_identifier }}</td>
-                                <td class=" ">{{ respondent.project_interview.interview_duration }}</td>
+                                <td class=" ">{{ respondent.project_interview.interview_duration_hours}}hr:{{respondent.project_interview.interview_duration_minutes}}min</td>
                                 <td class=" ">{{ respondent.project_interview.interview_date }}</td>
-                                {% if respondent.team_lead == none %}
-                                <td class=" "></td>
-                                {% else %}
-                                <td class=" ">{{ respondent.team_lead }}</td>
-                                {% endif %}
-                                {% if respondent.Department == none %}
-                                <td class=" "></td>
-                                {% else %}
-                                <td class=" ">{{ respondent.Department }}</td>
-                                {% endif %}
+                                <td class=" ">{{respondent.team_lead|default_if_none:""}}</td>
+                                <td class=" ">{{respondent.Department|default_if_none:""}}</td>
                                 {% if respondent.is_active == 0 %}
-				<td><h2><span class="badge badge-danger">Pending</span></h2></td>
+				                        <td><h2><span class="badge badge-danger">Pending</span></h2></td>
                                 {% elif respondent.is_active == 1 %}
-				<td><h2><span class="badge badge-success">Complete</span></h2></td>
+				                        <td><h2><span class="badge badge-success">Complete</span></h2></td>
                                 {% endif %}
                             </tr>
                             {% endfor %}
@@ -182,8 +179,8 @@
   charset="utf8"
   src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"
 ></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="{% static 'vendors/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script>
   // Function to update items per page and reload the page
   function updateItemsPerPage() {
