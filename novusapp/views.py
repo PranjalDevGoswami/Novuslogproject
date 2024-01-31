@@ -3,7 +3,11 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import CustomUser,Hod,Register,TeamLead,RoleMaster,Respondent, Job, Country, Industry, Company, Analyst,Project, Incentive, ProjectInterview,Manager,Department,Currency_Type
+from .models import (
+    CustomUser, Hod, Register, TeamLead, RoleMaster, Respondent,
+    Job, Country, Industry, Company, Analyst, Project, Incentive,
+    ProjectInterview, Manager, Department, Currency_Type
+)
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.utils import timezone
