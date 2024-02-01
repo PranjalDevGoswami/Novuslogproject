@@ -515,10 +515,10 @@ def user_dashboard(request):
                 interview_duration_minutes = request.POST.get('interview_duration_minutes')
                 
                 if not company_revenue_value:
-                    company_revenue = 0
+                    company_revenue_value = 0
             
                 if  not company_revenue_currency_type_value:
-                    company_revenue_currency_type = ""
+                    company_revenue_currency_type_value = ""
                 
                 ''' Create or retrieve related records from other tables '''
                 try:
@@ -544,7 +544,7 @@ def user_dashboard(request):
                 if companies.exists():
                     company = companies.first()
                 else:
-                    company = Company.objects.create(name=company_name, revenue=company_revenue,revenue_currency_type=company_revenue_currency_type)
+                    company = Company.objects.create(name=company_name, revenue=company_revenue_value,revenue_currency_type=company_revenue_currency_type_value)
 
                 analysts = Analyst.objects.filter(title=analyst_name)
                 if analysts.exists():
@@ -1066,9 +1066,6 @@ def change_password(request):
         'role':role,
         'username':name}
     return render(request, 'novusapp/change_password.html',context)  
-
-
-
 
 
 ''' login templates render '''
