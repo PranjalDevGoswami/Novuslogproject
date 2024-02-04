@@ -1,0 +1,4 @@
+# /base/bin
+novusapp/__pycache__
+novusapp/migrations
+novusproject/__pycache__

@@ -1,0 +1,155 @@
+{% extends "novusapp/base1.html" %}
+{% load static %} 
+{% block head %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css"
+/>
+{% block title %}
+<title>Confirm registration</title>
+{% endblock title %}
+{% endblock head %} 
+{% block right_col %}
+        <!-- page content -->
+		<div class="right_col" role="main">
+			<div class="">
+			  <div class="page-title">
+				{% include 'novusapp/alertmsg/msg.html' %}
+				<div class="title_left">
+				  <h3>To assign role TemLead/Manager<small></small></h3>
+				</div>
+  
+				<div class="title_right">
+				  <div class="col-md-5 col-sm-5   form-group pull-right top_search">
+					<div class="input-group">
+					 
+					</div>
+				  </div>
+				</div>
+			  </div>
+			  
+			  <div class="clearfix"></div>
+  
+			  <div class="row">
+				<div class="col-md-12">
+				  <div class="x_panel">
+					<div class="x_title">
+					  <h2></h2>
+					  <ul class="nav navbar-right panel_toolbox">
+					
+					  </ul>
+					  <div class="clearfix"></div>
+					</div>
+					<div class="x_content">
+						<br />
+						<form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left" method="post" action="{% url 'confirm_registration' id %}">
+							{% csrf_token %}
+						
+								
+								<div class="item form-group">
+									<div class="col-md-3 col-sm-3 col-xs-12">
+										<label class="control-label" for="respondent_name" style="margin-bottom: 10px;"> User Role <span class="required">*</span></label>
+									</div>
+									<div class="col-md-3 col-sm-3 col-xs-6">
+										<select class="form-control" name="user_role1" id="userRole">
+											<option value="" disabled selected>User Role</option>
+											{% for rol in role %}
+												{% if rol %}
+													<option value="{{rol.name}}">{{rol.name}}</option>
+												{% endif %}
+											{% endfor %}
+										</select>
+									</div>
+								</div>
+			
+							</div>
+
+
+							<div class="form-group">
+						
+									<div class="form-group" id="amManagerField">
+										<div class="col-md-3 col-sm-3 col-xs-12">
+											<label class="control-label" for="respondent_name" style="margin-bottom: 10px;"> AM/Manager <span class="required">*</span></label>
+										</div>
+										<div class="col-md-3 col-sm-3 col-xs-6">
+											<select class="form-control" name="user_manager" id="amManagerSelect">
+												<option value="" disabled selected>AM/Manager</option>
+												{% for manager in team %}
+													{% if manager %}
+														<option value="{{manager.name}}">{{manager.name}}</option>
+													{% endif %}
+												{% endfor %}
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+		
+										
+							<div class="ln_solid"></div>
+		
+							<div class="form-group">
+								<div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+									<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Submit</button>
+								</div>
+							</div>
+						</form>
+						
+  
+					  <p></p>
+  
+					  <!-- start project list -->
+					  <table class="table table-striped projects">
+				   
+					  </table>
+					  <!-- end project list -->
+  
+					</div>
+				  </div>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		  <!-- /page content -->
+
+{% endblock right_col %} 
+{% block script %}
+<script
+  type="text/javascript"
+  charset="utf8"
+  src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"
+></script>
+<script src="{% static 'vendors/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        // Initially hide the AM/Manager field
+        $('#amManagerField').hide();
+
+        // Show/hide the AM/Manager field based on the selected User Role
+        $('#userRole').change(function () {
+            var selectedRole = $(this).val();
+            if (selectedRole === 'Team Lead') {
+                $('#amManagerField').show();
+            } else {
+                $('#amManagerField').hide();
+            }
+        });
+
+        // Add form submission validation
+        $('#demo-form2').submit(function (event) {
+            var selectedRole = $('#userRole').val();
+            var selectedManager = $('#amManagerSelect').val();
+
+            if (selectedRole === '' || selectedRole === null) {
+                alert('Please select the User Role before submitting.');
+                event.preventDefault(); // Prevent form submission
+            } else if (selectedRole === 'Team Lead' && (selectedManager === '' || selectedManager === null)) {
+                alert('Please select the AM/Manager when Team Lead is selected.');
+                event.preventDefault(); // Prevent form submission
+            }
+        });
+    });
+</script>
+{% endblock script %}
