@@ -6,7 +6,8 @@ from django.contrib import messages
 from .models import (
     CustomUser, Hod, Register, TeamLead, RoleMaster, Respondent,
     Job, Country, Industry, Company, Analyst, Project, Incentive,
-    ProjectInterview, Manager, Department, Currency_Type
+    ProjectInterview, Manager, Department, Currency_Type,ProjectType,
+    IncentiveType,PhoneCode,PhoneNumber
 )
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
@@ -198,7 +199,7 @@ def confirm_registration(request,id):
                 username = Register.objects.get(id=id).username
                 password1 = Register.objects.get(id=id).password
                 hodname = Register.objects.get(id=id).hod_name
-                user_manager = ''
+                user_manager = hodname
  
                 try:
                     existing_user_active = Register.objects.get(id=id).is_active
@@ -221,7 +222,7 @@ def confirm_registration(request,id):
                         ''' Save the changes to the user '''
                         user1.save()
                         messages.success(request, 'This id user role and AM/Manager updated Successfully.',extra_tags="alert-success")
-                        CustomUser.objects.filter(email=email1).update(role=role1)
+                        CustomUser.objects.filter(email=email1).update(role=role1,user_manager=user_manager)
                         try:
                             Manager.objects.create(name=username,email=email1)
                             TeamLead.objects.filter(name=username,email=email1).delete()
@@ -491,10 +492,18 @@ def user_dashboard(request):
         industry = Industry.objects.all().values('name')
         mycountry = Country.objects.all().values('name')
         currency_type = Currency_Type.objects.all().values('currency_type')
+        Project_Type = ProjectType.objects.all().values('id','name')
+        Incentive_Type = IncentiveType.objects.all().values('id','name')
+        phone_code = PhoneCode.objects.all().values('id','phone_code')
         if request.method == 'POST':
             try:
                 ''' Get the data from the POST request '''
                 respondent_name = request.POST.get('respondent_name')
+                middle_name = request.POST.get('middle_name')
+                last_name = request.POST.get('last_name')
+                email = request.POST.get('email')
+                phone_number = request.POST.get('phone_number')
+                Phone_number_code = request.POST.get('Phone_number_code')
                 job_title = request.POST.get('job_title')
                 company_name = request.POST.get('company')
                 company_revenue_value = request.POST.get('company_revenue')
@@ -503,10 +512,12 @@ def user_dashboard(request):
                 industry_name = request.POST.get('industry')
                 incentive_code = request.POST.get('incentive_code')
                 analyst_name = request.POST.get('analyst')
-                incentive_type = request.POST.get('incentive_type')
+                incentive_type_id = request.POST.get('incentive_type')
                 project_name = request.POST.get('project')
-                project_type = request.POST.get('project_type')
+                project_code = request.POST.get('project_code')
+                project_type_id  = request.POST.get('project_type')
                 incentive_name = request.POST.get('incentive')
+                linkdin_profile = request.POST.get('linkdin_profile')
                 incentive_currency_type = request.POST.get('incentive_currency_type')
                 interview_date = request.POST.get('interview_date')
                 interview_duration_hours = request.POST.get('interview_duration_hours')
@@ -532,6 +543,12 @@ def user_dashboard(request):
                     country = countries.first()
                 else:
                     country = Country.objects.create(name=country_name)
+                    
+                phonenumber = PhoneNumber.objects.filter(phone_number=phone_number)
+                if phonenumber.exists():
+                    phone = phonenumber.first()
+                else:
+                    phone = PhoneNumber.objects.create(phone_number=phone_number,phone_code=Phone_number_code)
 
                 industries = Industry.objects.filter(name=industry_name)
                 if industries.exists():
@@ -552,11 +569,19 @@ def user_dashboard(request):
                     analyst = Analyst.objects.create(title=analyst_name)
 
                 ''' Retrieve or create the project '''
-                projects = Project.objects.filter(name=project_name, project_type=project_type)
+                # Get the ProjectType instance using the project_type_id
+                project_type_obj = get_object_or_404(ProjectType, pk=project_type_id)
+
+                # Check if a project with the given name and project type exists
+                projects = Project.objects.filter(name=project_name, project_type=project_type_id)
+
                 if projects.exists():
+                    # If a project with the given name and project type exists, retrieve it
                     project = projects.first()
                 else:
-                    project = Project.objects.create(name=project_name, project_type=project_type)
+                    # If not, create a new Project instance
+                    project = Project.objects.create(name=project_name, project_type=project_type_obj)
+
 
                 ''' Retrieve or create the project interview using the project '''
                 project_interviews = ProjectInterview.objects.filter(project=project)
@@ -572,14 +597,20 @@ def user_dashboard(request):
 
                 ''' Retrieve or create the incentive using the project '''
                 incentives = Incentive.objects.filter(project=project,Unique_identifier=incentive_name)
+                  
+                incentives_type_obj = get_object_or_404(IncentiveType, pk=incentive_type_id)
                 if incentives.exists():
                     incentive = incentives.first()
                 else:
-                    incentive = Incentive.objects.create(project=project, Unique_identifier=incentive_name,incentive_code=incentive_code,incentive_currency_type=incentive_currency_type)
+                    incentive = Incentive.objects.create(project=project, Unique_identifier=incentive_name,incentive_code=incentive_code, incentive_type = incentives_type_obj, incentive_currency_type=incentive_currency_type)
 
                 ''' Create the Respondent instance and associate it with the related records '''
                 respondent = Respondent.objects.create(
                     name=respondent_name,
+                    middle_name = middle_name ,
+                    last_name =  last_name,
+                    respondent_email = email,
+                    respondent_phone = phone,
                     job=job,
                     email=TeamLead_email,
                     user_manager=user_manager,
@@ -588,10 +619,10 @@ def user_dashboard(request):
                     country=country,
                     industry=industry,
                     company=company,
-                    incentive_type=incentive_type,
                     analyst=analyst,
                     project=project,
                     incentive=incentive,
+                    linkdin_profile = linkdin_profile,
                     project_interview=project_interview,
                     team_lead = TeamLeadname,
                     Department=department,
@@ -611,7 +642,10 @@ def user_dashboard(request):
         context = {
             'industry':industry,
             'allcountry':mycountry,
-            'currency_type':currency_type
+            'currency_type':currency_type,
+            'Project_Type' : Project_Type,
+            'Incentive_Type' : Incentive_Type,
+            'phone_code' : phone_code,
             }
         return render(request,"novusapp/user_dashboard.html",context)
     

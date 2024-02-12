@@ -113,6 +113,8 @@
                   <tr class="headings">
                     <th class="column-title">Sr.No</th>
                     <th class="column-title">Respondent Name</th>
+                    <th class="column-title">Email</th>
+                    <th class="column-title">Phone Number</th>
                     <th class="column-title">Job Title</th>
                     <th class="column-title">Country</th>
                     <th class="column-title">Industry</th>
@@ -135,6 +137,8 @@
                   <tr class="even pointer">
                     <td class=" ">{{ forloop.counter }}</td>
                     <td class=" ">{{ respondent.name }}</td>
+                    <td class=" ">{{ respondent.respondent_email }}</td>
+                    <td class=" ">{{ respondent.respondent_phone.phone_code }} {{ respondent.respondent_phone.phone_number }}</td>
                     <td class=" ">{{ respondent.job.title }}</td>
                     <td class=" ">{{ respondent.country.name }}</td>
                     <td class=" ">{{ respondent.industry.name }}</td>

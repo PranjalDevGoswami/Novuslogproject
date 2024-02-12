@@ -113,10 +113,12 @@
                       <tr class="headings">
                           <th class="column-title">Sr.No</th>
                           <th class="column-title">Respondent Name</th>
+                          <th class="column-title">Email</th>
+                          <th class="column-title">Phone Number</th>
                           <th class="column-title">Job Title</th>
+                          <th class="column-title">Company</th>
                           <th class="column-title">Country</th>
                           <th class="column-title">Industry</th>
-                          <th class="column-title">Company</th>
                           <th class="column-title">Interviewer Name</th>
                           <th class="column-title">Project</th>
                           <th class="column-title">Project Type</th>
@@ -136,15 +138,17 @@
                     {% for respondent in respondents %}
                     <tr class="even pointer">
                         <td class=" ">{{ forloop.counter }}</td>
-                        <td class=" ">{{ respondent.name }}</td>
+                        <td class=" ">{{ respondent.name }} {{respondent.middle_name|default_if_none:""}} {{respondent.last_name|default_if_none:""}}</td>
+                        <td class=" ">{{ respondent.respondent_email}}</td>
+                        <td class=" ">{{ respondent.respondent_phone.phone_code }} {{ respondent.respondent_phone.phone_number }}</td>
                         <td class=" ">{{ respondent.job.title }}</td>
+                        <td class=" ">{{ respondent.company.name }}</td>
                         <td class=" ">{{ respondent.country.name }}</td>
                         <td class=" ">{{ respondent.industry.name }}</td>
-                        <td class=" ">{{ respondent.company.name }}</td>
                         <td class=" ">{{ respondent.analyst.title }}</td>
                         <td class=" ">{{ respondent.project.name }}</td>
                         <td class=" ">{{ respondent.project.project_type }}</td>
-                        {% if respondent.company.revenue == "0" %}
+                        {% if respondent.company.revenue == 0 %}
                         <td class="">&nbsp;</td>
                         {% else %}
                         <td class="">{{ respondent.company.revenue}} {{respondent.company.revenue_currency_type}}</td>

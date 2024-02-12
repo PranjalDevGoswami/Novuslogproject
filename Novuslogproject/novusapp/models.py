@@ -94,13 +94,55 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
+# PhoneCode Master
+class PhoneCode(models.Model):
+    phone_code = models.CharField(max_length=255,null=True,blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.phone_code
+    
+# PhoneNumber Master
+class PhoneNumber(models.Model):
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    phone_code = models.CharField(max_length=20, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.phone_number
+
+
+# ProjectType Table
+class ProjectType(models.Model):
+    name = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+    
 # Project Table
 class Project(models.Model):
     name = models.CharField(max_length=255)
-    project_type = models.CharField(max_length=255)
+    project_type = models.ForeignKey(ProjectType, on_delete=models.CASCADE)
     project_code = models.CharField(max_length=255)
     LOI = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+    
+    
+# IncentiveType Table
+class IncentiveType(models.Model):
+    name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -113,6 +155,7 @@ class Incentive(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     incentive_code = models.CharField(max_length=255)
     incentive_currency_type = models.CharField(max_length=255)
+    incentive_type = models.ForeignKey(IncentiveType, on_delete=models.CASCADE)
     Unique_identifier = models.IntegerField()
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -131,24 +174,31 @@ class ProjectInterview(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.interview_date
 
 
 # Respondent Table
 class Respondent(models.Model):
     name = models.CharField(max_length=255)
+    middle_name = models.CharField(max_length=255,null=True,blank=True)
+    last_name = models.CharField(max_length=255,null=True,blank=True)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     email = models.EmailField()
+    respondent_email = models.EmailField(null=True,blank=True)
+    respondent_phone = models.ForeignKey(PhoneNumber,on_delete=models.CASCADE,null=True,blank=True)
     user_manager = models.CharField(max_length=255)
     user_manager_email = models.EmailField()
     hod_email = models.EmailField()
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     industry = models.ForeignKey(Industry, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    incentive_type = models.CharField(max_length=255)
     analyst = models.ForeignKey(Analyst, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     incentive = models.ForeignKey(Incentive, on_delete=models.CASCADE)
     project_interview = models.ForeignKey(ProjectInterview, on_delete=models.CASCADE)
+    linkdin_profile = models.CharField(max_length=255)
     team_lead = models.CharField(max_length=255,blank=True,null=True)
     Department = models.CharField(max_length=255,blank=True,null=True)
     is_active = models.BooleanField(default=True)

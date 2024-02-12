@@ -44,10 +44,29 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 
 
+@admin.register(ProjectType)
+class ProjectTypeAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    
+    
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('name','project_type','project_code','LOI')
-
+    
+    
+@admin.register(IncentiveType)
+class IncentiveTypeAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    
+@admin.register(PhoneNumber)
+class PhoneNumberAdmin(admin.ModelAdmin):
+    list_display = ('phone_number',)
+    
+@admin.register(PhoneCode)
+class PhoneCodeAdmin(admin.ModelAdmin):
+    list_display = ('phone_code',)
+    
 
 @admin.register(Incentive)
 class IncentiveAdmin(admin.ModelAdmin):
