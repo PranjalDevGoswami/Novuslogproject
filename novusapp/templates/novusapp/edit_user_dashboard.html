@@ -1,0 +1,403 @@
+{% extends "novusapp/base1.html" %}
+{{username}}
+{% load static %} 
+{% block head %}
+{% block title %}
+<title>User Dashboard </title>
+{% endblock title %}
+{% endblock head %} 
+{% block right_col %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+				{% include 'novusapp/alertmsg/msg.html' %}
+              <div class="title_left">
+                <h3><small></small></h3>
+              </div>
+
+              <div class="title_right">
+                <div class="col-md-5 col-sm-5   form-group pull-right top_search">
+                  <div class="input-group">
+                   
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="clearfix"></div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="x_panel">
+                  	<div class="e">
+                    	<h2>Respondent Form Data </h2>
+             
+                  	</div>
+                  	<div class="x_content">
+						<div class="col-md-12 col-lg-12 ">
+					
+							<form id="validationForm" class="form-horizontal form-label-left" action="{% url 'user_dashboard' %}" method="post">
+								{% csrf_token %}
+
+                                {% for respondent in respondents %}
+								<div class="form-group row">
+										<div class="col-md-4 col-sm-4">
+											<input type="text" id="respondent_name" name='respondent_name' placeholder="First Name * " required="required" class="form-control input-space" value = {{respondent.name|default_if_none:None}}>
+											<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
+										</div>
+
+										<div class="col-md-4 col-sm-4">
+											<input type="text" id="middle_name" name='middle_name' placeholder="Middle Name"  class="form-control input-space" value = {{respondent.middle_name|default_if_none:None}}>
+											<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
+										</div>
+										
+										<div class="col-md-4 col-sm-4">
+											<input type="text" id="last_name" name="last_name" placeholder="Last Name" class="form-control input-space" value = {{respondent.last_name|default_if_none:None}}>
+											<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
+										</div>	
+								</div>
+                               
+								
+
+								<div class="form-group row">	
+									<div class="col-md-4 col-sm-4">
+										<input type="text" id="email" placeholder="Email" name='email' class="form-control input-space" value = {{respondent.email|default_if_none:None}}>
+										<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
+										<span id="emailError" class="error"></span>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<div class="input-group">
+											<span class="input-group-addon" id="phone_code_label">☎ Ph:</span>
+											<select id="Phone_number_code" class="input-group-addon" name="Phone_number_code">
+												<option value="" disabled selected>Select Code</option>
+												
+												<option value = {{respondent.respondent_phone.phone_code|default_if_none:None}}>{{respondent.respondent_phone.phone_code}}</option>
+												
+											</select>
+											<input type="text" id="phone_number" placeholder="Phone Number" name="phone_number" class="form-control input-space" value = {{respondent.respondent_phone.phone_code|default_if_none:None}}>
+										</div>
+										<span id="phoneError" class="error"></span>
+									</div>
+									
+
+									<div class="col-md-4 col-sm-4">
+										<input type="text" id="job_title" placeholder="Job Title * " name="job_title" required="required" class="form-control input-space" value = {{respondent.Job.title|default_if_none:None}}>
+										<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
+									</div> 
+								</div>
+
+
+								<div class="form-group row">
+									<div class="col-md-4 col-sm-4">
+										<input id="company" class="form-control input-space" type="text" placeholder="Company * " name="company" required="required" value = {{respondent.company.name|default_if_none:None}}>
+										<span class="fa fa-building-o form-control-feedback right" aria-hidden="true"></span>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<input id="company_revenue" class="form-control input-space" type="text" placeholder="Company Revenue" name="company_revenue" value = {{respondent.company.revenue|default_if_none:None}}>
+										<span id="company_revenue_error" class="error-message"></span>
+										<select id="company_revenue_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="company_revenue_currency_type">
+											<option value="" disabled selected>CUR</option>
+											
+											<option value = {{respondent.company.revenue_currency_type|default_if_none:None}} style="color: black;">{{respondent.company.revenue_currency_type}}</option>
+											
+													
+										</select>
+									</div>
+									
+									<div class="col-md-4 col-sm-4">
+										<select id="country" class="form-control input-space" placeholder="Country" name="country" required="required"> 
+											<option value="" disabled selected>---SELECT COUNTRY*---</option>
+											
+											<option value = {{respondent.country.name|default_if_none:None}}>{{respondent.country.name}}</option>
+											
+										</select>
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<div class="col-md-4 col-sm-4">
+										<input type="text" id="project_code" placeholder="Project Code * " name='project_code' required="required" class="form-control input-space" value = {{respondent.project.project_code|default_if_none:None}}>
+										<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
+									</div>
+									
+									<div class="col-md-4 col-sm-4">
+										<input id="project" class="form-control input-space" placeholder="Project * " type="text" name="project" required="required" value = {{respondent.project.name|default_if_none:None}}>
+									</div>
+									
+
+									<div class="col-md-4 col-sm-4">    
+										<select id="industry" class="form-control input-space" placeholder="Industry" name="industry" required="required">  
+											<optgroup>
+												<option value="" disabled selected>---SELECT INDUSTRY*---</option>
+												
+												<option value = {{respondent.industry.name|default_if_none:None}}>{{respondent.industry.name}}</option>    
+															
+											</optgroup>
+										</select> 
+									</div>
+									
+
+								</div>
+
+								<div class="form-group row">
+									<div class="col-md-4 col-sm-4">
+										<input id="incentive" class="form-control input-space" type="text" placeholder="Incentive*" name="incentive" required="required">
+										<span id="incentiveError" class="error-message"></span>
+										<select id="incentive_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="incentive_currency_type" style="border:black;" required="required">
+											<option value="" disabled selected>CUR</option>
+											
+											<option value = {{respondent.company.revenue_currency_type|default_if_none:None}} style="color: black;">{{currency.currency_type}}</option>
+											
+											
+										</select>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<input id="project" class="form-control input-space" placeholder="Incentive Code*" type="text" name="incentive_code"required="required" value = {{respondent.incentive.incentive_code|default_if_none:None}}>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<select id="incentive_type" class="form-control input-space" name="incentive_type" required="required">
+											<option value="" disabled selected>---SELECT INCENTIVE TYPE*---</option>
+											
+											<option value = {{respondent.incentive.incentive_type.id|default_if_none:None}}>{{respondent.incentive.incentive_type.name}}</option>
+											
+											
+										</select>
+									</div>
+
+								</div>
+
+								
+
+								<div class="form-group row ">
+									<div class="col-md-4 col-sm-4">
+										<input type="text" id="client_name" name="client_name" placeholder="Client Name * " required="required" class="form-control input-space" value = {{respondent.analyst.title|default_if_none:None}}>
+										<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<input id="analyst" class="form-control input-space" placeholder="Analyst * " type="text" name="analyst" required="required" value = {{respondent.analyst.title|default_if_none:None}} >
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<select id="project_type" class="form-control input-space" name="project_type" required="required">
+											<option value="" disabled selected>---SELECT INTERVIEW TYPE*---</option>
+
+											<option value = {{respondent.project.project_type.id|default_if_none:None}}>{{respondent.project.project_type.name}}</option>
+											
+										</select> 
+									</div>
+
+								</div>
+
+								
+								<div class="form-group row ">
+									<div class="col-md-4 col-sm-4">
+										<input id="linkdin_profile" class="form-control input-space" placeholder="Linkdin Profile" type="text" name="linkdin_profile" value = {{respondent.analyst.title|default_if_none:None}}>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<input id="interview_date" class="date-picker form-control input-space" placeholder="Interview Date * " name="interview_date" placeholder="dd-mm-yyyy" type="text" required="required" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)" style="margin-bottom: 10px;">
+									</div>
+
+				
+									<div class="col-md-4 col-sm-4">
+										<div class="input-group">
+											<div class="form-group">
+												<!-- Hour Label -->
+												{% comment %} <label for="hourDropdown">Select Hours*:</label> {% endcomment %}
+												
+												<!-- Hour Dropdown -->
+												<div class="input-group">
+													<label for="hourDropdown">Hours*:</label>&nbsp;
+													<select id="hourDropdown" class="form-control input-space time-input" name="interview_duration_hours" required="required" value="dfff">
+														<!-- JavaScript will dynamically populate options here -->
+													</select>
+												</div>
+											</div>
+											&nbsp;
+											<div class="form-group">
+												<!-- Minute Label -->
+												{% comment %} <label for="minuteDropdown">Select Minutes*:</label> {% endcomment %}
+												
+												<!-- Minute Dropdown -->
+												<div class="input-group">
+													<label for="minuteDropdown">Minutes*:</label>&nbsp;
+													<select id="minuteDropdown" class="form-control input-space time-input" name="interview_duration_minutes" required="required">
+														<!-- JavaScript will dynamically populate options here -->
+													</select>
+													
+												</div>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+                                {% endfor %}
+
+								<div class="ln_solid"></div>
+										
+								<div class="form-group row">
+									<div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+										<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Submit</button>
+										<button class="btn btn-danger btn-attractive rounded-lg"  type="reset">Reset</button>
+									</div>
+								</div>
+							</form>
+							<div id="errorMessages" class="error"></div>
+						</div>	
+
+						<p></p>
+
+						<!-- start project list -->
+						<table class="table table-striped projects">
+					
+						</table>
+						<!-- end project list -->
+					</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /page content -->
+		
+
+{% endblock right_col %} 
+{% block script %}
+<script
+  type="text/javascript"
+  charset="utf8"
+  src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"
+></script>
+<script>
+	$(document).ready(function() {
+		// Set the timeout to hide messages after 5 seconds (5000 milliseconds)
+		$('#industry').select2();
+		$('#project_type').select2();
+		$('#country').select2();
+
+		setTimeout(function() {
+			$('.message-item').fadeOut('slow');
+		}, 8000);
+	});
+</script>
+
+<script>
+    // Function to populate the hour and minute dropdowns with a specified interval
+    function populateDropdown(selectElement, maxValue, label, interval) {
+        for (let i = 0; i <= maxValue; i += interval) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.text = `${i} ${label}${i === 1 ? '' : ''}`;
+            selectElement.add(option);
+        }
+    }
+
+    // Populate the hour dropdown with options from 0 to 12 hours
+    populateDropdown(document.getElementById('hourDropdown'), 12, 'hr', 1);
+
+    // Populate the minute dropdown with options from 0 to 55 minutes in 5-minute intervals
+    populateDropdown(document.getElementById('minuteDropdown'), 55, 'min', 5);
+</script>
+
+
+<script>
+// Add event listener to the incentive and company revenue fields for live validation
+document.getElementById('incentive').addEventListener('input', validateIncentive);
+document.getElementById('company_revenue').addEventListener('input', validateCompanyRevenue);
+document.getElementById('phone_number').addEventListener('input', validatePhoneno);
+document.getElementById('email').addEventListener('input', validateEmail);
+
+function validateIncentive() {
+	// Get the value of the incentive field
+	var incentiveValue = document.getElementById('incentive').value;
+	// Get the error message element for incentive
+	var incentiveError = document.getElementById('incentiveError');
+
+	// Reset error message and style
+	incentiveError.textContent = '';
+	incentiveError.style.color = '';
+
+
+	// Validate for integer in the incentive field
+	if (!isInteger(incentiveValue)) {
+	incentiveError.textContent = 'Please enter an integer value.';
+	incentiveError.style.color = 'red';
+	}
+}
+
+function validatePhoneno() {
+	// Get the value of the incentive field
+	var phone_number_Value = document.getElementById('phone_number').value;
+
+	var phoneError = document.getElementById('phoneError');
+
+	// Reset error message and style
+	phoneError.textContent = '';
+	phoneError.style.color = '';
+
+	// Validate for integer in the incentive field
+	if (!isInteger(phone_number_Value)) {
+	phoneError.textContent = 'Please enter an integer value.';
+	phoneError.style.color = 'red';
+	}
+
+	if (phone_number_Value.length > 10) {
+        phoneError.textContent = 'Please enter a valid phone number with 10 digits or less.';
+        phoneError.style.color = 'red';
+	}
+}
+
+function validateEmail() {
+    // Get the value of the email field
+    var emailValue = document.getElementById('email').value;
+
+    var emailError = document.getElementById('emailError');
+
+    // Reset error message and style
+    emailError.textContent = '';
+    emailError.style.color = '';
+
+    // Regular expression for email validation
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Check if the email format is valid
+    if (!emailRegex.test(emailValue)) {
+        emailError.textContent = 'Please enter a valid email address in the format example@example.com';
+        emailError.style.color = 'red';
+    }
+}
+
+
+
+function validateCompanyRevenue() {
+	// Get the value of the company revenue field
+	var companyRevenueValue = document.getElementById('company_revenue').value;
+
+	// Get the error message element for company revenue
+	var companyRevenueError = document.getElementById('company_revenue_error');
+
+	// Reset error message and style
+	companyRevenueError.textContent = '';
+	companyRevenueError.style.color = '';
+
+	// Validate for integer in the company revenue field
+	if (!isInteger(companyRevenueValue)) {
+	companyRevenueError.textContent = 'Please enter an integer value.';
+	companyRevenueError.style.color = 'red';
+	}
+}
+
+// Function to check if a given value is an integer
+function isInteger(value) {
+	return /^\d+$/.test(value);
+}
+</script>
+	
+{% endblock script %}

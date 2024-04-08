@@ -32,7 +32,8 @@ MESSAGE_TAGS = {
 
 # Application definition
 
-INSTALLED_APPS = [ 
+INSTALLED_APPS = [
+    'import_export',    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -87,44 +88,37 @@ WSGI_APPLICATION = 'novusproject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-# import yaml
-# credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
+import yaml
+credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 
-# db_name = credentials['db_name']
-# user = credentials['user']
-# password = credentials['password']
-# host = credentials['host']
-# port = credentials['port']
+db_name = credentials['db_name']
+user = credentials['user']
+password = credentials['password']
+host = credentials['host']
+port = credentials['port']
 
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'myproject',
-#         'USER': 'myprojectuser',
-#         'PASSWORD': 'password',
-#         'HOST': 'localhost',
-#         'PORT': '',
-#     }
-# }
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.mysql',
-#        'NAME': db_name,
-#        'USER': user,
-#        'PASSWORD': password,
-#        'HOST' : host,
-#        'PORT': port,
-#        
-#        
-#    }
-#}
-DATABASE_DIR = os.path.join(BASE_DIR, 'db.sqlite3')
+#      'default': {
+#          'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#          'NAME': 'unimarketdb',
+#          'USER': 'unimarketuser',
+#          'PASSWORD': 'password',
+#          'HOST': 'localhost',
+#          'PORT': '',
+#      }
+#  }
+PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DATABASE_DIR,
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'db.sqlite3',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -166,11 +160,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+
 import os
 
 # STATIC_URL = '/static/'
 # STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -230,4 +224,24 @@ PASSWORD_HASHERS = [
     
     
 #}
-#JAZZMIN_SETTINGS["show_ui_builder"] = True 
+#JAZZMIN_SETTINGS["show_ui_builder"] = True
+
+# settings.py
+
+
+
+# settings.py
+#import sentry_sdk
+
+#sentry_sdk.init(
+#    dsn="https://9e32459410c1bd303ddd82c1db70427e@o4506518002270208.ingest.sentry.io/4506518255435776",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+#    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+#    profiles_sample_rate=1.0,
+#)
+
+#api = falcon.API()
