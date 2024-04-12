@@ -32,16 +32,17 @@
               <div class="col-md-12">
                 <div class="x_panel">
                   	<div class="e">
-                    	<h2>Respondent Form Data </h2>
+                    	<h2>Edit Respondent Data </h2>
              
                   	</div>
                   	<div class="x_content">
 						<div class="col-md-12 col-lg-12 ">
+							{% for respondent in respondents %}
 					
-							<form id="validationForm" class="form-horizontal form-label-left" action="{% url 'user_dashboard' %}" method="post">
+							<form id="validationForm" class="form-horizontal form-label-left" action="{% url 'edit_respondent' respondent.id %}" method="post">
 								{% csrf_token %}
 
-                                {% for respondent in respondents %}
+                                
 								<div class="form-group row">
 										<div class="col-md-4 col-sm-4">
 											<input type="text" id="respondent_name" name='respondent_name' placeholder="First Name * " required="required" class="form-control input-space" value = {{respondent.name|default_if_none:None}}>
@@ -73,18 +74,20 @@
 											<span class="input-group-addon" id="phone_code_label">☎ Ph:</span>
 											<select id="Phone_number_code" class="input-group-addon" name="Phone_number_code">
 												<option value="" disabled selected>Select Code</option>
-												
-												<option value = {{respondent.respondent_phone.phone_code|default_if_none:None}}>{{respondent.respondent_phone.phone_code}}</option>
-												
+		
+												<option value = {{respondent.respondent_phone.phone_code|default_if_none:None}} hidden selected>{{respondent.respondent_phone.phone_code}}</option>
+												{% for code in phone_code %}
+												<option value="{{code.phone_code}}">{{code.phone_code}}</option>
+												{% endfor %}
 											</select>
-											<input type="text" id="phone_number" placeholder="Phone Number" name="phone_number" class="form-control input-space" value = {{respondent.respondent_phone.phone_code|default_if_none:None}}>
+											<input type="text" id="phone_number" placeholder="Phone Number" name="phone_number" class="form-control input-space" value = {{respondent.respondent_phone.phone_number|default_if_none:None}}>
 										</div>
 										<span id="phoneError" class="error"></span>
 									</div>
 									
 
 									<div class="col-md-4 col-sm-4">
-										<input type="text" id="job_title" placeholder="Job Title * " name="job_title" required="required" class="form-control input-space" value = {{respondent.Job.title|default_if_none:None}}>
+										<input type="text" id="job_title" placeholder="Job Title * " name="job_title" required="required" class="form-control input-space" value = {{respondent.job.title|default_if_none:None}}>
 										<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
 									</div> 
 								</div>
@@ -102,8 +105,10 @@
 										<select id="company_revenue_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="company_revenue_currency_type">
 											<option value="" disabled selected>CUR</option>
 											
-											<option value = {{respondent.company.revenue_currency_type|default_if_none:None}} style="color: black;">{{respondent.company.revenue_currency_type}}</option>
-											
+											<option value = {{respondent.company.revenue_currency_type|default_if_none:None}} style="color: black;" hidden selected>{{respondent.company.revenue_currency_type}}</option>
+											{% for currency in currency_type %}
+											<option value="{{currency.currency_type}}" style="color: black;">{{currency.currency_type}}</option>
+											{% endfor %}
 													
 										</select>
 									</div>
@@ -112,8 +117,10 @@
 										<select id="country" class="form-control input-space" placeholder="Country" name="country" required="required"> 
 											<option value="" disabled selected>---SELECT COUNTRY*---</option>
 											
-											<option value = {{respondent.country.name|default_if_none:None}}>{{respondent.country.name}}</option>
-											
+											<option value = {{respondent.country.name|default_if_none:None}} hidden selected>{{respondent.country.name}}</option>
+											{% for data in allcountry %}
+											<option value="{{data.name}}">{{data.name}}</option>
+											{% endfor %}
 										</select>
 									</div>
 								</div>
@@ -134,8 +141,16 @@
 											<optgroup>
 												<option value="" disabled selected>---SELECT INDUSTRY*---</option>
 												
-												<option value = {{respondent.industry.name|default_if_none:None}}>{{respondent.industry.name}}</option>    
-															
+												<option value = {{respondent.industry.name|default_if_none:None}} hidden selected>{{respondent.industry.name}}</option>    
+												{% for industry, subcategories in industry_data.items %}
+													{% if subcategories %}
+														<optgroup label="{{ industry.name }}">
+															{% for subcategory in subcategories %}
+																<option value="{{ subcategory.name }}">{{ subcategory.name }}</option>    
+															{% endfor %}
+														</optgroup>
+													{% endif %}
+												{% endfor %}		
 											</optgroup>
 										</select> 
 									</div>
@@ -145,14 +160,17 @@
 
 								<div class="form-group row">
 									<div class="col-md-4 col-sm-4">
-										<input id="incentive" class="form-control input-space" type="text" placeholder="Incentive*" name="incentive" required="required">
+										<input id="incentive" class="form-control input-space" type="text" placeholder="Incentive*" name="incentive" required="required" value = "{{respondent.incentive.Unique_identifier}}">
 										<span id="incentiveError" class="error-message"></span>
 										<select id="incentive_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="incentive_currency_type" style="border:black;" required="required">
 											<option value="" disabled selected>CUR</option>
 											
-											<option value = {{respondent.company.revenue_currency_type|default_if_none:None}} style="color: black;">{{currency.currency_type}}</option>
+											<option value = {{respondent.incentive.incentive_currency_type|default_if_none:None}} style="color: black;" hidden selected>{{respondent.incentive.incentive_currency_type}}</option>
 											
-											
+											{% for currency in currency_type %}
+											<option value="{{currency.currency_type}}" style="color: black;">{{currency.currency_type}}</option>
+											{% endfor %}
+
 										</select>
 									</div>
 
@@ -164,8 +182,10 @@
 										<select id="incentive_type" class="form-control input-space" name="incentive_type" required="required">
 											<option value="" disabled selected>---SELECT INCENTIVE TYPE*---</option>
 											
-											<option value = {{respondent.incentive.incentive_type.id|default_if_none:None}}>{{respondent.incentive.incentive_type.name}}</option>
-											
+											<option value = {{respondent.incentive.incentive_type.id|default_if_none:None}} hidden selected>{{respondent.incentive.incentive_type.name}}</option>
+											{% for type in Incentive_Type %}
+											<option value="{{type.id}}">{{type.name}}</option>
+											{% endfor %}
 											
 										</select>
 									</div>
@@ -188,8 +208,10 @@
 										<select id="project_type" class="form-control input-space" name="project_type" required="required">
 											<option value="" disabled selected>---SELECT INTERVIEW TYPE*---</option>
 
-											<option value = {{respondent.project.project_type.id|default_if_none:None}}>{{respondent.project.project_type.name}}</option>
-											
+											<option value = {{respondent.project.project_type.id|default_if_none:None}} hidden selected>{{respondent.project.project_type.name}}</option>
+											{% for type in Project_Type %}
+											<option value="{{type.id}}">{{type.name}}</option>
+											{% endfor %}
 										</select> 
 									</div>
 
@@ -198,11 +220,11 @@
 								
 								<div class="form-group row ">
 									<div class="col-md-4 col-sm-4">
-										<input id="linkdin_profile" class="form-control input-space" placeholder="Linkdin Profile" type="text" name="linkdin_profile" value = {{respondent.analyst.title|default_if_none:None}}>
+										<input id="linkdin_profile" class="form-control input-space" placeholder="Linkdin Profile" type="text" name="linkdin_profile" value = {{respondent.linkdin_profile|default_if_none:None}}>
 									</div>
 
 									<div class="col-md-4 col-sm-4">
-										<input id="interview_date" class="date-picker form-control input-space" placeholder="Interview Date * " name="interview_date" placeholder="dd-mm-yyyy" type="text" required="required" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)" style="margin-bottom: 10px;">
+										<input id="interview_date" class="date-picker form-control input-space" placeholder="Interview Date * " name="interview_date" placeholder="dd-mm-yyyy" type="text" required="required" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)" style="margin-bottom: 10px;" value = {{respondent.project_interview.interview_date|default_if_none:None}}>
 									</div>
 
 				
@@ -244,7 +266,7 @@
 										
 								<div class="form-group row">
 									<div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-										<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Submit</button>
+										<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Update</button>
 										<button class="btn btn-danger btn-attractive rounded-lg"  type="reset">Reset</button>
 									</div>
 								</div>
