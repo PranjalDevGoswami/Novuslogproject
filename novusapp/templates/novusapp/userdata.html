@@ -133,8 +133,10 @@
                           <th class="column-title">Team Lead</th> {% endcomment %}
 			                    <th class="column-title">Manager</th>
                           {% comment %} <th class="column-title">Department</th> {% endcomment %}
+                          <th class="column-title">Remark</th> 
                           <th class="column-title">Status</th> 
-                          <th class="column-title"></th>                        
+                          <th class="column-title">Action</th> 
+                                                 
                       </tr>
                   </thead>
           
@@ -164,13 +166,26 @@
                         <td class=" ">{{respondent.team_lead|default_if_none:"" }}</td> {% endcomment %}
                         <td class="">{{respondent.user_manager|default_if_none:"" }}</td>
                         {% comment %} <td class=" ">{{respondent.Department|default_if_none:"" }}</td> {% endcomment %}
+                         <!-- Inside the loop -->
+                         {% if respondent.remark %}
+                         <td><h2><span class="badge badge-danger">{{ respondent.remark }}</span></h2></td>
+                         {% else %}
+                         <td><h2><span class="badge badge-danger"></span></h2></td>
+                         {% endif %}
+                         
                         {% if respondent.is_active == 0 %}
 			                  <td><h2><span class="badge badge-danger">Pending</span></h2></td>
-                        <td><a href="{% url 'edit_respondent' respondent.pk %}" class="btn btn-primary">Edit</a></td>
                         {% elif respondent.is_active == 1 %}
 			                  <td><h2><span class="badge badge-success">Complete</span></h2></td>
                         <td><h2><span class="badge badge-success"></span></h2></td>
                         {% endif %}
+                        <td>
+                        {% if respondent.remark %} <!-- Check if remark exists -->
+                            <a href="{% url 'edit_respondent' respondent.pk %}" class="btn btn-primary">Edit</a>
+                        {% else %}
+                            <!-- Do nothing or add any other content you want to display -->
+                        {% endif %}
+                        </td>
                         
                     </tr>
                     {% endfor %}

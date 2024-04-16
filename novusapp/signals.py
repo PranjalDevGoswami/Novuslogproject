@@ -13,12 +13,18 @@ def update_respondent_id(instance, related_model):
 def update_master_records(sender, instance, created, **kwargs):
     if created: 
         with transaction.atomic():  
-            update_respondent_id(instance, 'country')
-            update_respondent_id(instance, 'job')
-            update_respondent_id(instance, 'industry')
-            update_respondent_id(instance, 'company')
-            update_respondent_id(instance, 'analyst')
-            update_respondent_id(instance, 'project')
-            update_respondent_id(instance, 'incentive')
-            update_respondent_id(instance, 'project_interview')
+            update_respondent_id(instance, 'Job')
+            update_respondent_id(instance, 'Country')
             update_respondent_id(instance, 'PhoneNumber')
+            update_respondent_id(instance, 'Industry')
+            update_respondent_id(instance, 'Company')
+            update_respondent_id(instance, 'Analyst')
+            update_respondent_id(instance, 'Project')
+            update_respondent_id(instance, 'ProjectInterview')
+            update_respondent_id(instance, 'Incentive')
+            
+
+
+
+                
+

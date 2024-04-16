@@ -2,3 +2,4 @@
 /novusapp/migrations/
 /novusapp/__pycache__
 /novusproject/__pycache__
+/db.sqlite3

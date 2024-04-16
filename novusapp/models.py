@@ -338,6 +338,7 @@ class Respondent(models.Model):
     linkdin_profile = models.CharField(max_length=255,null=True, blank=True)
     team_lead = models.CharField(max_length=255,blank=True,null=True)
     Department = models.CharField(max_length=255,blank=True,null=True)
+    remark = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)

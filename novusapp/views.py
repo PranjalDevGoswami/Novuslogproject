@@ -570,27 +570,29 @@ def user_dashboard(request):
                 middle_name = request.POST.get('middle_name')
                 last_name = request.POST.get('last_name')
                 email = request.POST.get('email')
+                job_title = request.POST.get('job_title')
+                country_name = request.POST.get('country')
                 phone_number = request.POST.get('phone_number')
                 Phone_number_code = request.POST.get('Phone_number_code')
-                job_title = request.POST.get('job_title')
+                industry_name = request.POST.get('industry')
                 company_name = request.POST.get('company')
                 company_revenue_value = request.POST.get('company_revenue')
                 company_revenue_currency_type_value = request.POST.get('company_revenue_currency_type')
-                country_name = request.POST.get('country')
-                industry_name = request.POST.get('industry')
-                incentive_code = request.POST.get('incentive_code')
                 analyst_name = request.POST.get('analyst')
-                incentive_type_id = request.POST.get('incentive_type')
+                project_type_id = request.POST.get('project_type')
                 project_name = request.POST.get('project')
                 project_code = request.POST.get('project_code')
-                project_type_id = request.POST.get('project_type')
-                incentive_name = request.POST.get('incentive')
-                linkdin_profile = request.POST.get('linkdin_profile')
-                incentive_currency_type = request.POST.get('incentive_currency_type')
-                interview_date = request.POST.get('interview_date')
                 interview_duration_hours = request.POST.get('interview_duration_hours')
                 interview_duration_minutes = request.POST.get('interview_duration_minutes')
-
+                interview_date = request.POST.get('interview_date')
+                incentive_type_id = request.POST.get('incentive_type')
+                incentive_name = request.POST.get('incentive')
+                incentive_code = request.POST.get('incentive_code')
+                incentive_currency_type = request.POST.get('incentive_currency_type')
+                linkdin_profile = request.POST.get('linkdin_profile')
+              
+                
+                
                 if not company_revenue_value:
                     company_revenue_value = 0
 
@@ -669,8 +671,8 @@ def user_dashboard(request):
                     name=respondent_name,
                     middle_name=middle_name,
                     last_name=last_name,
-                    custom_user=custom_user_obj,
                     respondent_email=email,
+                    custom_user=custom_user_obj,
                     respondent_phone=phone,
                     job=job,
                     email=TeamLead_email,
@@ -835,35 +837,41 @@ def edit_respondent(request, id):
           
 
             # Update job object if it exists
-            Job.objects.filter(respondent_id=id).update(title=job_title)
+            Job.objects.filter(respondent_id=id).update(title=job_title,respondent_id=id)
 
             # Update country object if it exists
-            Country.objects.filter(respondent_id=id).update(name=country_name)
+            Country.objects.filter(respondent_id=id).update(name=country_name,respondent_id=id)
 
             # Update phone object if it exists
-            PhoneNumber.objects.filter(respondent_id=id).update(phone_code=Phone_number_code)
+            PhoneNumber.objects.filter(respondent_id=id).update(phone_code=Phone_number_code,respondent_id=id)
 
             # Update industry object if it exists
-            Industry.objects.filter(respondent_id=id).update(name=industry_name)
+            Industry.objects.filter(respondent_id=id).update(name=industry_name,respondent_id=id)
 
             # Update company object if it exists
-            Company.objects.filter(respondent_id=id).update(name=company_name, revenue=company_revenue_value, revenue_currency_type=company_revenue_currency_type_value)
+            Company.objects.filter(respondent_id=id).update(name=company_name, revenue=company_revenue_value, revenue_currency_type=company_revenue_currency_type_value,respondent_id=id)
 
             # Update analyst object if it exists
-            Analyst.objects.filter(respondent_id=id).update(title=analyst_name)
+            Analyst.objects.filter(respondent_id=id).update(title=analyst_name,respondent_id=id)
 
             # Get project type object
             project_type_obj = get_object_or_404(ProjectType, pk=project_type_id)
 
             # Update project object if it exists
-            Project.objects.filter(respondent_id=id).update(name=project_name, project_type=project_type_obj)
+            Project.objects.filter(respondent_id=id).update(name=project_name, project_type=project_type_obj,respondent_id=id)
+            
+            # Get the queryset of project objects for the given respondent_id
+            project_objs = Project.objects.filter(respondent_id=id)
+
+            # Choose one project object from the queryset (you may need to define some logic here)
+            project_obj = project_objs.first()  # For example, choose the first project object
 
             # Update project interview object if it exists
             ProjectInterview.objects.filter(respondent_id=id).update(
-                project=project_name,
+                project=project_obj,
                 interview_duration_hours=interview_duration_hours,
                 interview_duration_minutes=interview_duration_minutes,
-                interview_date=interview_date
+                interview_date=interview_date,respondent_id=id
             )
 
             # Get incentive type object
@@ -871,22 +879,23 @@ def edit_respondent(request, id):
 
             # Update incentive object if it exists
             Incentive.objects.filter(respondent_id=id).update(
-                project=project_name,
+                project=project_obj,
                 incentive_code=incentive_code,
                 incentive_type_id=incentive_type_id,
-                incentive_currency_type=incentive_currency_type
+                incentive_currency_type=incentive_currency_type,respondent_id=id
             )
+
             
             # Fetch all master objects after updating
-            job_obj = Job.objects.get(respondent_id=id)
-            country_obj = Country.objects.get(respondent_id=id)
-            phone_obj = PhoneNumber.objects.get(respondent_id=id)
-            industry_obj = Industry.objects.get(respondent_id=id)
-            company_obj = Company.objects.get(respondent_id=id)
-            analyst_obj = Analyst.objects.get(respondent_id=id)
-            project_obj = Project.objects.get(respondent_id=id)
-            projectinterview_obj = ProjectInterview.objects.get(respondent_id=id)
-            incentive_obj = Incentive.objects.get(respondent_id=id)
+            job_obj = Job.objects.filter(respondent_id=id).first()
+            country_obj = Country.objects.filter(respondent_id=id).first()
+            phone_objs = PhoneNumber.objects.filter(respondent_id=id)
+            phone_obj = phone_objs.first() if phone_objs.exists() else None
+            industry_obj = Industry.objects.filter(respondent_id=id).first()
+            company_obj = Company.objects.filter(respondent_id=id).first()
+            analyst_obj = Analyst.objects.filter(respondent_id=id).first()
+            projectinterview_obj = ProjectInterview.objects.filter(respondent_id=id).first()
+            incentive_obj = Incentive.objects.filter(respondent_id=id).first()
 
 
             # Update the Respondent instance
@@ -1217,9 +1226,7 @@ def managerteam_data(request):
     if request.session.has_key('currentuser_id'):
         ''' Retrieve all data from the Respondent table '''
         userid = request.session['currentuser_id']
-        
         name = CustomUser.objects.get(id=userid).username
-       
         useremail = CustomUser.objects.get(id=userid).email
         respondents = Respondent.objects.filter(user_manager_email=useremail,is_active=0).all()
 
@@ -1334,10 +1341,20 @@ def logout_view(request):
     return redirect('/')
 
 
-
-
-
-
+@login_required
+@role_required(allowed_roles=['AM/Manager'])
+def sendremark(request, userid, respondentid):
+    print('Remark Getting')
+    try:
+        if request.session.has_key('currentuser_id'):
+            if request.method == "POST":
+                remark_comment = request.POST.get('remark')
+                Respondent.objects.filter(id=respondentid, custom_user=userid).update(remark=remark_comment)
+                messages.success(request, 'Remark sent successfully', extra_tags="alert-success")
+                return redirect('/managerteam_data')
+    except Exception as e:
+        messages.error(request, f'Error: {e}', extra_tags="alert-danger")
+    return redirect('/managerteam_data')
 
 
 

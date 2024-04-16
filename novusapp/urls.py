@@ -23,6 +23,7 @@ urlpatterns = [
     path('edit_respondent/<int:id>',views.edit_respondent,name='edit_respondent'),
     path('manager',views.manager,name='manager'),
     path('managerteam_data',views.managerteam_data,name='managerteam_data'),
+    path('send-remark/<int:userid>/<int:respondentid>',views.sendremark,name='remark'),
     path('form_approved/<int:id>',views.form_approved,name='form_approved'),
     path('profile', views.profile,name='profile'),
     path('profile/change_password', views.change_password,name='change_password'),

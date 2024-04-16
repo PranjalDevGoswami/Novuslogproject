@@ -132,7 +132,7 @@
                     <th class="column-title">Interview Date</th>
                     <th class="column-title">Team Lead</th>
                     <th class="column-title">Manager</th>
-                    <th class="column-title">Department</th>
+                    {% comment %} <th class="column-title">Department</th> {% endcomment %}
                     <th class="column-title">Status</th>                         
                 </tr>
             </thead>
@@ -162,7 +162,7 @@
                   <td class=" ">{{ respondent.project_interview.interview_date }}</td>
                   <td class=" ">{{respondent.team_lead|default_if_none:"" }}</td>
                   <td class="">{{respondent.user_manager|default_if_none:"" }}</td>
-                  <td class=" ">{{respondent.Department|default_if_none:"" }}</td>
+                  {% comment %} <td class=" ">{{respondent.Department|default_if_none:"" }}</td> {% endcomment %}
                   {% if respondent.is_active == 0 %}
                   <td><h2><span class="badge badge-danger">Pending</span></h2></td>
                   {% elif respondent.is_active == 1 %}

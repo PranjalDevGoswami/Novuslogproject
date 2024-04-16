@@ -76,8 +76,11 @@
                                 <th class="column-title">Incentive</th>
                                 <th class="column-title">Interview Duration</th>
                                 <th class="column-title">Interview Date</th>
+                                <th class="column-title">Sender id</th>
+                                <th class="column-title">respondent id</th>
                                 <th class="column-title">Status</th>
                                 <th class="column-title no-link last"><span class="nobr">Action</span></th>
+                                
                             </tr>
                         </thead>
                 
@@ -104,8 +107,9 @@
                               <td class=" ">{{ respondent.incentive.Unique_identifier }}</td>
                               <td class=" ">{{ respondent.project_interview.interview_duration_hours}}hr:{{respondent.project_interview.interview_duration_minutes}}min</td>
                               <td class=" ">{{ respondent.project_interview.interview_date }}</td>
-
-                              {% if respondent.is_active == 0 %}
+                              <td class=" ">{{ respondent.custom_user.id }}</td>
+                              <td class=" ">{{ respondent.id }}</td>
+                              {% comment %} {% if respondent.is_active == 0 %}
 			                          <td><h2><span class="badge badge-danger">Pending</span></h2></td>
                                   {% if hod %}
                                     <td class="last">
@@ -123,7 +127,67 @@
                                   <a href="#"
                                       class="btn btn-success btn-sm" disabled>Approve</a>
                               </td>
-                              {% endif %}
+                              {% endif %} {% endcomment %}
+
+                              {% if respondent.is_active == 0 %}
+                                <td><h2><span class="badge badge-danger">Pending</span></h2></td>
+                                <td class="last">
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Actions
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            {% if hod %}
+                                                <a class="dropdown-item" href="#">Approve</a>
+                                            {% else %}
+                                                <a class="dropdown-item" href="/form_approved/{{ respondent.id }}">Approve</a>
+                                            {% endif %}
+                                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#remarkModal">Remark</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            {% elif respondent.is_active == 1 %}
+                                <td><h2><span class="badge badge-success">Complete</span></h2></td>
+                                <td class="last">
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+                                            Actions
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item" href="#" disabled>Approve</a>
+                                            <a class="dropdown-item" href="#" disabled>Remark</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            {% endif %}
+
+                            <!-- Remark Modal -->
+                            <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="remarkModalLabel" aria-hidden="true">
+                              <div class="modal-dialog" role="document">
+                                  <div class="modal-content">
+                                      <form id="remarkForm" action="{% url 'remark' respondent.custom_user.id respondent.id %}" method="post">
+                                          {% csrf_token %}
+                                          <div class="modal-header">
+                                              <h5 class="modal-title" id="remarkModalLabel">Add Remark</h5>
+                                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                  <span aria-hidden="true">&times;</span>
+                                              </button>
+                                          </div>
+                                          <div class="modal-body">
+                                              <textarea class="form-control" id="remarkTextarea" rows="3" name="remark" required></textarea>
+                                              <!-- Add the 'required' attribute to make the field mandatory -->
+                                          </div>
+                                          <div class="modal-footer">
+                                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                              <button type="button" class="btn btn-primary" id="saveRemarkBtn">Save Remark</button>
+                                              <!-- Changed type to button to prevent automatic form submission -->
+                                          </div>
+                                      </form>
+                                  </div>
+                              </div>
+                            </div>
+                                                      
+                          
                           </tr>
                         {% endfor %}
                             
@@ -152,6 +216,15 @@
   $(document).ready( function () {
     $('#manager_table').DataTable();
   } );
+</script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("saveRemarkBtn").addEventListener("click", function () {
+          document.getElementById("remarkForm").submit();
+      });
+  });
 </script>
 
 <script>
