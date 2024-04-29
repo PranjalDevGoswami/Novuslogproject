@@ -73,15 +73,15 @@ class RoleMasterAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
 @admin.register(Hod)
-class HodAdmin(admin.ModelAdmin):
+class HodAdmin(ImportExportModelAdmin):
     list_display = ('name','email','dep','Designation',)
 
 @admin.register(TeamLead)
-class TeamLeadAdmin(admin.ModelAdmin):
+class TeamLeadAdmin(ImportExportModelAdmin):
     list_display = ('name','email')
 
 @admin.register(Manager)
-class ManagerAdmin(admin.ModelAdmin):
+class ManagerAdmin(ImportExportModelAdmin):
     list_display = ('name','email')
 
 @admin.register(Register)

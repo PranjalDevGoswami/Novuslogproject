@@ -34,6 +34,18 @@ from openpyxl.styles import PatternFill
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.auth import get_user_model
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.utils import timezone
+import uuid
+
+User = get_user_model()
+
+
 credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 host_url = credentials['hosted_url']
 
@@ -527,6 +539,7 @@ def dashboard_redirect(request):
 def user_dashboard(request):
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
+        print('#################',userid)
         TeamLeadname = CustomUser.objects.get(id=userid).username
         TeamLead_email = CustomUser.objects.get(id=userid).email
         user_manager = CustomUser.objects.get(id=userid).user_manager
@@ -538,11 +551,14 @@ def user_dashboard(request):
             department = ""
         try:
             hod_name = CustomUser.objects.get(id=userid).hod_name
+            print('dasfadsfds',hod_name)
         except Exception as e:
             messages.error(request, "Your Registration is not confirmed please wait some time and after login.", extra_tags="alert-danger")
             return redirect('/')
         try:
+            print('#######')
             hod_email = Hod.objects.get(name=hod_name).email
+            print('$$$$$@@@@@@@')
         except Exception as e:
             messages.error(request, f"{e}", extra_tags="alert-danger")
 
@@ -592,7 +608,6 @@ def user_dashboard(request):
                 linkdin_profile = request.POST.get('linkdin_profile')
               
                 
-                
                 if not company_revenue_value:
                     company_revenue_value = 0
 
@@ -625,7 +640,7 @@ def user_dashboard(request):
                     return redirect('/user_dashboard')
 
                 try:
-                    company = Company.objects.create(name=company_name, revenue=company_revenue_value, revenue_currency_type=company_revenue_currency_type_value)
+                    company = Company.objects.create(name=company_name, revenue=company_revenue_value, revenue_currency_type=company_revenue_currency_type_value,country=country_name)
                 except Exception as e:
                     messages.error(request, f"Error creating company: {e}", extra_tags="alert-danger")
                     return redirect('/user_dashboard')
@@ -1357,6 +1372,79 @@ def sendremark(request, userid, respondentid):
     return redirect('/managerteam_data')
 
 
+
+def send_email(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        try:
+            # Generate a unique token for the user
+            token = str(uuid.uuid4())
+            print('token kdsfjkdfjf', token)
+            # Get the user object associated with the provided email
+            user = User.objects.get(email=email)
+            # Update the user's token
+            user.token = token
+            user.save()
+
+            # Render the HTML email content
+            ctx = {
+                'token': token
+            }
+            msg_html = render_to_string('novusapp/password_reset_form.html', ctx)
+            plain_message = strip_tags(msg_html)
+            recipient_list = [user.email]
+
+            # Send the password reset email
+            subject = 'Your Respondent password request'
+            # You can change the 'to' variable to user.email to send the email to the user's email
+            to = 'ankitkalinga03@outlook.com'  # Replace with your email
+            send_mail (
+                subject,
+                plain_message,
+                to,
+                recipient_list,
+                html_message=msg_html,
+            )
+
+            # Notify the user that the password reset link has been sent
+            messages.success(request, "Password reset link has been sent to your email.", extra_tags="alert-success")
+            return redirect('/')
+        
+        except User.DoesNotExist:
+            # If the provided email does not exist in the system, display an error message
+            messages.error(request, "This email does not exist in our system.", extra_tags="alert-danger")
+            return render(request, "novusapp/send_email.html")
+
+    # If the request method is not POST or if there's any other error, render the send_email.html template
+    return render(request, "novusapp/send_email.html")
+
+
+def reset_password_view(request, token):
+    if token:
+        try:
+            user = get_user_model().objects.filter(token=token).first()
+            if user:
+                if request.method == "POST":
+                    password = request.POST.get('password')
+                    password2 = request.POST.get('password2')
+                    if password != password2:
+                        messages.error(request, "Passwords do not match.", extra_tags="alert-danger")
+                        return redirect('/')
+                    # Update the password and clear the token
+                    user.set_password(password)
+                    user.token = None
+                    user.save()
+                    messages.success(request, "Password reset successfully.",extra_tags="alert-success")
+                    return redirect('/')  # Redirect to login page or any other page
+                context = {'token': token}
+                return render(request, "novusapp/reset_password.html", context)
+            else:
+                return HttpResponse('User not found.')
+        except ValueError as e:
+            messages.error(request, str(e), extra_tags="alert-danger")
+            return redirect('/')
+    else:
+        return HttpResponse('Token not provided.')
 
 
 

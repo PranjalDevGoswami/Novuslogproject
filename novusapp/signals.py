@@ -1,7 +1,8 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.db import transaction
 from .models import *
+
 # Reusable function to update respondent_id for related model
 def update_respondent_id(instance, related_model):
     related_instance = getattr(instance, related_model)
@@ -22,9 +23,15 @@ def update_master_records(sender, instance, created, **kwargs):
             update_respondent_id(instance, 'Project')
             update_respondent_id(instance, 'ProjectInterview')
             update_respondent_id(instance, 'Incentive')
-            
 
-
-
-                
-
+# # Define signal receiver to delete master records if no Respondent was created
+# @receiver(post_delete, sender=Respondent)
+# def delete_master_records(sender, instance, **kwargs):
+#     # Assuming all master models have a field named 'respondent_id' which links them to Respondent
+#     related_models = [Job, Country, PhoneNumber, Industry, Company, Analyst, Project, ProjectInterview, Incentive]
+#     for model in related_models:
+#         try:
+#             related_instance = model.objects.get(respondent_id=instance.pk)
+#             related_instance.delete()
+#         except model.DoesNotExist:
+#             pass

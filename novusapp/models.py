@@ -68,6 +68,7 @@ class Industry_Sub_Cate(models.Model):
 class Company(models.Model):
     name = models.CharField(max_length=255)
     revenue = models.CharField(max_length=255,null=True, blank=True)
+    country = models.CharField(max_length=255,null=True, blank=True)
     revenue_currency_type = models.CharField(max_length=255)
     strength = models.CharField(max_length=255)
     respondent_id = models.IntegerField(null=True,blank=True)

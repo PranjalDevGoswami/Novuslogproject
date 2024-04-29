@@ -7,6 +7,8 @@ from .import views
 
 urlpatterns = [
     path('',views.login_view,name="login_view"),
+    path('send_email',views.send_email, name="send_email"),
+    path('reset-password/<str:token>/', views.reset_password_view, name="reset-password"),
     path('dashboard_redirect', views.dashboard_redirect, name='dashboard_redirect'),
     path('register',views.register,name="register"),
     path('hod_dashboard/confirm_registration/<str:id>',views.confirm_registration,name='confirm_registration'),
