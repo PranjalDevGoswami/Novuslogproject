@@ -1,0 +1,76 @@
+{% extends 'novusapp/base1.html' %}
+{% load static %}
+{% block head %}
+{% endblock head %} 
+{% block right_col %}
+<div class="right_col" role="main">
+    <div class="">
+      <div class="page-title">
+          {% include 'novusapp/alertmsg/msg.html' %}
+        <div class="title_left">
+          <h3><small></small></h3>
+        </div>
+      </div>
+      
+      <div class="clearfix"></div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="x_panel">
+                <div class="e">
+                  {% comment %} <h2>Select Payment Mode</h2> {% endcomment %}
+       
+                </div>
+                <div class="x_content">
+                  <div class="col-md-12 col-lg-12 ">
+                      <div id="errorMessages" class="error"></div>
+                  </div>
+                  <div class="form-group row">
+                    <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Payment Mode<span class="required">*</span>
+                    </label>
+                    <div class="col-md-6 col-sm-6 ">
+                        <form id="validationForm" class="form-horizontal form-label-left" action="#" method="post">
+                            {% csrf_token %}
+                                
+                          
+                                    <select id="payment_mode" class="form-control input-space" placeholder="Pyament Mode" name="payment_mode" required="required"> 
+                                        <option value="" disabled selected>---SELECT PAYMENT MODE----</option>
+                                        {% for respondent in respondents %}
+                                           <option value="{{respondent.incentive_type}}" selected>{{respondent.incentive_type}}</option>
+                                        {% endfor %}   
+                                        <option value="paypal">PayPal</option>
+                                        <option value="xoxo">Xoxo Day</option>
+                                        <option value="upi">UPI</option>
+                                        <option value="amazon">Amazon Voucher</option>
+                                    </select>
+                         
+                                    
+                            <div class="form-group row">
+                                <div class="col-md-6 col-sm-6 pt-4 col-xs-12 col-md-offset-3">
+                                    <button type="submit" class="btn btn-primary rounded-lg btn-attractive">Continue</button>
+                                    <button class="btn btn-danger btn-attractive rounded-lg"  type="reset">Cencel</button>
+                                </div>
+                            </div>
+                        </form>
+                      
+                    </div>
+                  </div>	
+
+                  <p></p>
+
+                  <!-- start project list -->
+                  <table class="table table-striped projects">
+              
+                  </table>
+                  <!-- end project list -->
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /page content -->
+  
+{% endblock right_col %}
+ {% block script %}
+ {% endblock %}

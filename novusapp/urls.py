@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from django.urls import path, reverse_lazy
 from django.views.generic import RedirectView
 from .views import login_view, dashboard_redirect
@@ -28,5 +28,12 @@ urlpatterns = [
     path('profile', views.profile,name='profile'),
     path('profile/change_password', views.change_password,name='change_password'),
     path('loginDemo/', views.loginDemo, name='loginDemo'),
+    path('send_email',views.send_email, name="send_email"),
+    path('reset-password/<str:token>/', views.reset_password_view, name="reset-password"),
+    path('payment-page/', views.payment_page, name='payment_page'),
+    path('process-payment/<int:pk>/', views.process_payment, name='process_payment'),
+    path('payment-done/', views.payment_done, name='payment_done'),
+    path('payment-cancelled/', views.payment_cancelled, name='payment_cancelled'),
+
     
 ]

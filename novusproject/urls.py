@@ -7,5 +7,8 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('novusapp.urls')),
-
+    path('paypal/', include('paypal.standard.ipn.urls')),
 ]
+
+
+

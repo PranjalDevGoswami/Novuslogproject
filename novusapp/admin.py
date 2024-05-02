@@ -92,4 +92,4 @@ class RegisterAdmin(admin.ModelAdmin):
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ('email','username','role','user_manager','hod_name','mobile','is_active','is_staff')
 
-# admin.site.register(CustomUser, UserAdmin)
+admin.site.register(payment_status)

@@ -40,7 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'novusapp',
+    'paypal.standard.ipn',
+    
 ]
 
 MIDDLEWARE = [
@@ -143,8 +146,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-mail.outlook.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'ankit.sharma@novusinsights.com'
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = 'noreply.erp@unimrkt.com'
+EMAIL_HOST_PASSWORD = 'Q&005753819961ad'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -245,3 +248,15 @@ PASSWORD_HASHERS = [
 #)
 
 #api = falcon.API()
+
+import paypalrestsdk
+
+
+
+PAYPAL_TEST = True
+
+
+
+XOXO_CLIENT_ID = "fbc574677ab033b7f38861e6fd956384"
+XOXO_SECERT_ID = "4n1m973k3lrqhaoc0k4bq7vfbtos09k4eocm"
+XOXO_BASE_URL = "https://stagingaccount.xoxoday.com/chef"

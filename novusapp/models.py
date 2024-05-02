@@ -187,7 +187,7 @@ class Incentive(models.Model):
     incentive_code = models.CharField(max_length=255)
     incentive_type = models.ForeignKey(IncentiveType, on_delete=models.CASCADE, null=True, blank=True)
     incentive_currency_type = models.CharField(max_length=255, null=True, blank=True)
-    Unique_identifier = models.CharField(max_length=255)
+    Unique_identifier = models.CharField(max_length=255, verbose_name='Incentive Amount')
     respondent_id = models.IntegerField(null=True,blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -320,7 +320,7 @@ class Respondent(models.Model):
     middle_name = models.CharField(max_length=255,null=True,blank=True)
     last_name = models.CharField(max_length=255,null=True,blank=True)
     custom_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='respondents')
-    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    job = models.CharField(max_length=100,  null=True, blank=True)
     email = models.EmailField()
     respondent_email = models.EmailField(null=True,blank=True)
     respondent_phone = models.ForeignKey(PhoneNumber,on_delete=models.CASCADE,null=True,blank=True)
@@ -331,6 +331,7 @@ class Respondent(models.Model):
     industry = models.ForeignKey(Industry, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     incentive_type = models.CharField(max_length=255)
+    payment_id = models.CharField(max_length=100 , null=True , blank=True)
     analyst = models.ForeignKey(Analyst, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     incentive = models.ForeignKey(Incentive, on_delete=models.CASCADE)
@@ -339,10 +340,37 @@ class Respondent(models.Model):
     team_lead = models.CharField(max_length=255,blank=True,null=True)
     Department = models.CharField(max_length=255,blank=True,null=True)
     remark = models.TextField(blank=True, null=True)
+    payment_mode = models.CharField(max_length=50 ,null=True, blank=True)
+    pay_status = models.BooleanField(default=0,blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.name
+    
+
+
+
+
+
+class payment_status(models.Model):
+    respondents = models.ForeignKey(Respondent, on_delete=models.CASCADE, null=True, blank=True)
+    respondent_id = models.IntegerField(null=True,blank=True)
+    respondent_email = models.EmailField(null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    payment_id = models.CharField(max_length=100 , null=True , blank=True)
+    incentive_type = models.CharField(max_length=255)
+    payment_amount = models.IntegerField(max_length=50,null=True , blank=True)
+    payment_status = models.CharField(max_length=50, null=True , blank=True)
+    remark = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    
+    def __str__(self):
+        return self.payment_status
+    
+    
+    
     

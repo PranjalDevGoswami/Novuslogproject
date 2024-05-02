@@ -2,6 +2,7 @@
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.contrib import messages
 from .models import (
     CustomUser, Hod, Register, TeamLead, RoleMaster, Respondent,
@@ -26,6 +27,9 @@ import yaml
 from django.core import signing
 from django.contrib.auth.decorators import login_required
 from .decorators import unauthenitcated_user,role_required
+from django.contrib.auth import get_user_model
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 import io
 from django.http import HttpResponse
@@ -33,6 +37,16 @@ from openpyxl import Workbook
 from openpyxl.styles import PatternFill
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from django.contrib import messages
+from django.conf import settings
+from decimal import Decimal
+# from paypal.standard.forms import PayPalPaymentsForm
+from django.views.decorators.csrf import csrf_exempt
+import paypalrestsdk
+from .forms import *
+from paypal.standard.forms import PayPalPaymentsForm
+from django.http import HttpResponseBadRequest
+UserModel = get_user_model() 
 
 credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
 host_url = credentials['hosted_url']
@@ -525,6 +539,7 @@ def dashboard_redirect(request):
 @login_required
 @role_required(allowed_roles=['Team Lead'])
 def user_dashboard(request):
+    print('***************')
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
         TeamLeadname = CustomUser.objects.get(id=userid).username
@@ -600,11 +615,6 @@ def user_dashboard(request):
                     company_revenue_currency_type_value = ""
 
                 ''' Create or retrieve related records from other tables '''
-                try:
-                    job = Job.objects.create(title=job_title)
-                except Exception as e:
-                    messages.error(request, f"Error creating job: {e}", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
 
                 try:
                     country = Country.objects.create(name=country_name)
@@ -674,7 +684,7 @@ def user_dashboard(request):
                     respondent_email=email,
                     custom_user=custom_user_obj,
                     respondent_phone=phone,
-                    job=job,
+                    job=job_title,
                     email=TeamLead_email,
                     user_manager=user_manager,
                     hod_email=hod_email,
@@ -685,6 +695,7 @@ def user_dashboard(request):
                     analyst=analyst,
                     project=project,
                     incentive=incentive,
+                    incentive_type = incentive_type_id,
                     linkdin_profile=linkdin_profile,
                     project_interview=project_interview,
                     team_lead=TeamLeadname,
@@ -1049,8 +1060,10 @@ def hod_dashboard(request):
         currentid =  request.session['currentuser_id']
 
         customuserdata = CustomUser.objects.filter(id=currentid).values('hod_name')
+        print(customuserdata)
 
         current_hod = (customuserdata[0]['hod_name'])
+        print("***************",current_hod)
 
         complex_obj = Register.objects.filter(is_active=0,hod_name=current_hod).values('id','username', 'email', 'password', 'hod_name','is_active')
         complex_obj1 = Register.objects.filter(hod_name=current_hod).values('id', 'email', 'password', 'hod_name','is_active','role','user_manager','username')
@@ -1341,6 +1354,91 @@ def logout_view(request):
     return redirect('/')
 
 
+
+def send_email(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        try:
+            # Generate a unique token for the user
+            token = str(uuid.uuid4())
+            print('token kdsfjkdfjf', token)
+            # Get the user object associated with the provided email
+            user = UserModel.objects.get(email=email)
+            # Update the user's token
+            user.token = token
+            user.save()
+ 
+            # Render the HTML email content
+            ctx = {
+                'token': token
+            }
+            msg_html = render_to_string('novusapp/password_reset_form.html', ctx)
+            plain_message = strip_tags(msg_html)
+            recipient_list = [user.email]
+ 
+            # Send the password reset email
+            subject = 'Request for password reset.'
+            to_mail = user.email
+            from_mail = "noreply.erp@unimrkt.com"
+            send_mail (
+                subject,
+                plain_message,
+                from_mail,
+                [to_mail],
+                recipient_list,
+                html_message=msg_html,
+            )
+ 
+            # Notify the user that the password reset link has been sent
+            messages.success(request, "Password reset link has been sent to your email.", extra_tags="alert-success")
+            return redirect('/')
+        
+        except UserModel.DoesNotExist:
+            # If the provided email does not exist in the system, display an error message
+            messages.error(request, "This email does not exist in our system.", extra_tags="alert-danger")
+            return render(request, "novusapp/send_email.html")
+ 
+    # If the request method is not POST or if there's any other error, render the send_email.html template
+    return render(request, "novusapp/send_email.html")
+ 
+ 
+def reset_password_view(request, token):
+    if token:
+        try:
+            user = UserModel.objects.filter(token=token).first()
+            if user:
+                # Check if the token is expired (optional)
+                if user.updated_at < timezone.now() - timezone.timedelta(minutes=10):
+                    raise ValueError('The link to reset your password has expired. Please request a new one.')
+ 
+                if request.method == "POST":
+                    password = request.POST.get('password')
+                    password2 = request.POST.get('password2')
+                    if password != password2:
+                        messages.error(request, "Passwords do not match.", extra_tags="alert-danger")
+                        return redirect(f'/reset-password/{token}')
+                    
+                    # Update the password and clear the token
+                    user.set_password(password)
+                    user.token = None
+                    user.save()
+                    messages.success(request, "Password reset successfully.",extra_tags="alert-success")
+                    return redirect('/')  # Redirect to login page or any other page
+                context = {'token': token}
+                return render(request, "novusapp/reset_password.html", context)
+            else:
+                return HttpResponse('User not found.')
+        except ValueError as e:
+            messages.error(request, str(e), extra_tags="alert-danger")
+            return redirect('/')
+    else:
+        return HttpResponse('Token not provided.')
+
+
+
+
+
+
 @login_required
 @role_required(allowed_roles=['AM/Manager'])
 def sendremark(request, userid, respondentid):
@@ -1356,6 +1454,147 @@ def sendremark(request, userid, respondentid):
         messages.error(request, f'Error: {e}', extra_tags="alert-danger")
     return redirect('/managerteam_data')
 
+
+
+
+
+
+
+
+@login_required
+@role_required(allowed_roles=['HOD'])
+def payment_page(request):
+    if request.session.has_key('currentuser_id'):
+        userid = request.session['currentuser_id']
+        name = CustomUser.objects.get(id=userid).username
+        hodname = CustomUser.objects.get(id=userid).hod_name
+        hodemail = CustomUser.objects.get(id=userid).email
+       
+        ''' Retrieve the 'type' parameter from the GET request '''
+        data_type = request.GET.get('type')
+        download = request.GET.get('info')
+        items_per_page = int(request.GET.get('items_per_page', 10))
+
+        ''' Default queryset '''
+        respondents = Respondent.objects.filter(hod_email=hodemail, is_active__in=[0,1]).all()
+
+        if download == 'download':
+            if data_type == 'self':
+                return download_excel(respondents)
+            elif data_type == 'all':
+                respondents = Respondent.objects.filter(Q(hod_email=hodemail, is_active=1) | Q(is_active=1)).all()
+                return download_excel(respondents)
+        else:
+            if data_type == 'all':
+                respondents = Respondent.objects.filter(Q(hod_email=hodemail, is_active=1) | Q(is_active=1)).all()
+            elif data_type == 'self':
+                pass  # Respondents already filtered by default queryset
+
+            ''' Paginator '''
+            paginator = Paginator(respondents, items_per_page)
+            page_number = request.GET.get('page')
+
+            try:
+                servicedatafinal = paginator.page(page_number)
+            except PageNotAnInteger:
+                servicedatafinal = paginator.page(1)
+            except EmptyPage:
+                servicedatafinal = paginator.page(paginator.num_pages)
+
+            ''' Get total page count for pagination links '''
+            totalpage = servicedatafinal.paginator.num_pages
+            totalpagelist = [i + 1 for i in range(totalpage)]
+
+            ''' Create the URL for pagination links '''
+            base_url = reverse('userhod_data')
+            pagination_url = f"{base_url}?type={data_type}&items_per_page={items_per_page}&page="
+
+            context = {
+                'respondents': servicedatafinal,
+                'name': name,
+                'lastpage': totalpage,
+                'totalpagelist': totalpagelist,
+                'items_per_page': items_per_page,
+                'pagination_url': pagination_url,  
+            }
+
+            return render(request, 'novusapp/hod_payment.html', context)
+
+    return HttpResponse('Please Login')
+
+
+
+import uuid
+from urllib.parse import urlencode
+
+def process_payment(request, pk):
+    if request.method == "POST":
+        get_payment_mode = request.POST.get('payment_mode')
+        respondent = Respondent.objects.get(id=pk)
+        payment_id = respondent.payment_id
+        if respondent.pay_status == True:
+           messages.error(request, "Payment for this client has already been completed.", extra_tags='alert-error')
+           return redirect('/payment-page/')
+        if payment_id:
+            if get_payment_mode == "paypal":
+                host = request.get_host()
+                
+                # Constructing return_url with custom data
+                return_url = 'http://{}{}?{}'.format(
+                    host, reverse('payment_done'), urlencode({'respondent_id': respondent.id})
+                )
+                
+                paypal_dict = {
+                    'business': str(payment_id),
+                    'amount': str(respondent.incentive),
+                    'currency_code': 'USD',
+                    'item_name': 'Payment for {}'.format(respondent),
+                    'invoice': str(uuid.uuid4()),
+                    'notify_url': 'http://{}{}'.format(host, reverse('paypal-ipn')),
+                    'return_url': return_url,
+                    'cancel_return': 'http://{}{}'.format(host, reverse('payment_cancelled')),
+                    'custom': '{}_{}'.format(respondent.id, payment_id),  # Combine respondent ID and payment ID
+                }
+                form = PayPalPaymentsForm(initial=paypal_dict)
+                return render(request, 'novusapp/paypal/process_payment.html', {'form': form})
+            
+            elif get_payment_mode == "xoxo":
+                pass
+                
+                
+                
+            
+        else:
+            messages.error(request, 'Payment ID does not exist.', extra_tags='alert-error')
+
+    respondent_obj = Respondent.objects.filter(id=pk)
+    context = {
+        'respondents': respondent_obj
+    }
+    return render(request, 'novusapp/paypal/payment_mode.html', context)
+
+@csrf_exempt
+def payment_done(request):
+    custom_data = request.GET.get('respondent_id')
+    
+    if custom_data:
+        try:
+            respondent = Respondent.objects.get(id=custom_data)
+            respondent.pay_status = 1
+            respondent.save()
+            messages.success(request, 'Payment successfully completed for Respondent {}.'.format(custom_data), extra_tags='alert-success')
+            return redirect('/payment-page/')
+        except Respondent.DoesNotExist:
+            return HttpResponseBadRequest("Invalid respondent ID")
+    else:
+        return HttpResponseBadRequest("No custom data found in the request")
+
+
+@csrf_exempt
+def payment_cancelled(request):
+    # This view is called when payment is cancelled
+    messages.warning(request, 'Payment cancelled.')
+    return redirect('/payment-page/')
 
 
 
