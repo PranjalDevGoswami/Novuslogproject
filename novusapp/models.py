@@ -361,7 +361,7 @@ class payment_status(models.Model):
     country = models.CharField(max_length=100, null=True, blank=True)
     payment_id = models.CharField(max_length=100 , null=True , blank=True)
     incentive_type = models.CharField(max_length=255)
-    payment_amount = models.IntegerField(max_length=50,null=True , blank=True)
+    payment_amount = models.IntegerField(null=True , blank=True)
     payment_status = models.CharField(max_length=50, null=True , blank=True)
     remark = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)

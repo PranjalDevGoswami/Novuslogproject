@@ -5,7 +5,7 @@ from .models import *
 from paypal.standard.models import ST_PP_COMPLETED
 from paypal.standard.ipn.signals import valid_ipn_received, invalid_ipn_received
 from django.contrib.auth import get_user_model
-
+from django.contrib import messages
 UserModel = get_user_model()
 
 # Reusable function to update respondent_id for related model
@@ -49,45 +49,54 @@ def update_payment_status(sender, instance, created, **kwargs):
         payment.save()  # Save the payment data
         
         
-@receiver(post_save, sender=CustomUser)
-def update_hod_master(sender, instance, created, **kwargs):
-    if created:
-        hod_obj = Hod.objects.create(
-            name=instance.hod_name,
-            email=instance.email,
-            dep=instance.dep
-        )
-        hod_obj.save()
+# @receiver(post_save, sender=CustomUser)
+# def update_hod_master(sender, instance, created, **kwargs):
+#     try:
+#         if created and instance.hod_name:
+#             hod_obj = Hod.objects.create(
+#                 name=instance.hod_name,
+#                 email=instance.email,
+#                 dep=instance.dep
+#             )
+#             hod_obj.save()
+            
+#         else:
+#             try:
+#                 user_instance = UserModel.objects.get(id=instance.id)
+#                 hod_obj = Hod.objects.get(email=user_instance.email)
+#                 hod_obj.name = instance.hod_name
+#                 hod_obj.email = instance.email
+#                 hod_obj.dep = instance.dep
+#                 hod_obj.save()
+#             except Hod.DoesNotExist:
+#                 pass         
+#     except Exception as e:
+#         pass
         
-    else:
-        try:
-            user_instance = UserModel.objects.get(id=instance.id)
-            hod_obj = Hod.objects.get(email=user_instance.email)
-            hod_obj.name = instance.hod_name
-            hod_obj.email = instance.email
-            hod_obj.dep = instance.dep
-            hod_obj.save()
-        except Hod.DoesNotExist:
-            pass         
-        
+
+from django.db import transaction
 
 @receiver(post_save, sender=CustomUser)
 def update_hod_master(sender, instance, created, **kwargs):
-    if created: 
-        hod_obj = Hod.objects.create(
-            name=instance.hod_name,
-            email=instance.email,
-            dep=instance.dep
-        )
-        hod_obj.save()
+    if created and instance.hod_name:
+        with transaction.atomic():
+            hod_obj = Hod.objects.create(
+                name=instance.hod_name,
+                email=instance.email,
+                dep=instance.dep
+            )
+    elif instance.hod_name:
+        with transaction.atomic():
+            try:
+                hod_obj = Hod.objects.get(email=instance.email)
+                hod_obj.name = instance.hod_name
+                hod_obj.dep = instance.dep
+                hod_obj.save()
+            except Hod.DoesNotExist:
+                hod_obj = Hod.objects.create(
+                    name=instance.hod_name,
+                    email=instance.email,
+                    dep=instance.dep
+                )
     else:
-        try:
-            user_instance = UserModel.objects.get(id=instance.id)
-            hod_obj = Hod.objects.get(email=user_instance.email)
-            hod_obj.name = instance.hod_name
-            hod_obj.email = instance.email
-            hod_obj.dep = instance.dep
-            hod_obj.save()
-        except Hod.DoesNotExist:
-            pass           
-        
+        pass

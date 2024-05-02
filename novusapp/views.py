@@ -1527,40 +1527,46 @@ def payment_page(request):
 import uuid
 from urllib.parse import urlencode
 
+@login_required
+@role_required(allowed_roles=['HOD'])
 def process_payment(request, pk):
     if request.method == "POST":
         get_payment_mode = request.POST.get('payment_mode')
+        print(get_payment_mode)
         respondent = Respondent.objects.get(id=pk)
         payment_id = respondent.payment_id
         if respondent.pay_status == True:
            messages.error(request, "Payment for this client has already been completed.", extra_tags='alert-error')
            return redirect('/payment-page/')
         if payment_id:
-            if get_payment_mode == "paypal":
-                host = request.get_host()
+            if respondent.payment_mode == get_payment_mode:
+                if get_payment_mode == "paypal":
+                    host = request.get_host()
+                    
+                    # Constructing return_url with custom data
+                    return_url = 'http://{}{}?{}'.format(
+                        host, reverse('payment_done'), urlencode({'respondent_id': respondent.id})
+                    )
+                    
+                    paypal_dict = {
+                        'business': str(payment_id),
+                        'amount': str(respondent.incentive),
+                        'currency_code': 'USD',
+                        'item_name': 'Payment for {}'.format(respondent),
+                        'invoice': str(uuid.uuid4()),
+                        'notify_url': 'http://{}{}'.format(host, reverse('paypal-ipn')),
+                        'return_url': return_url,
+                        'cancel_return': 'http://{}{}'.format(host, reverse('payment_cancelled')),
+                        'custom': '{}_{}'.format(respondent.id, payment_id),  # Combine respondent ID and payment ID
+                    }
+                    form = PayPalPaymentsForm(initial=paypal_dict)
+                    return render(request, 'novusapp/paypal/process_payment.html', {'form': form})
                 
-                # Constructing return_url with custom data
-                return_url = 'http://{}{}?{}'.format(
-                    host, reverse('payment_done'), urlencode({'respondent_id': respondent.id})
-                )
-                
-                paypal_dict = {
-                    'business': str(payment_id),
-                    'amount': str(respondent.incentive),
-                    'currency_code': 'USD',
-                    'item_name': 'Payment for {}'.format(respondent),
-                    'invoice': str(uuid.uuid4()),
-                    'notify_url': 'http://{}{}'.format(host, reverse('paypal-ipn')),
-                    'return_url': return_url,
-                    'cancel_return': 'http://{}{}'.format(host, reverse('payment_cancelled')),
-                    'custom': '{}_{}'.format(respondent.id, payment_id),  # Combine respondent ID and payment ID
-                }
-                form = PayPalPaymentsForm(initial=paypal_dict)
-                return render(request, 'novusapp/paypal/process_payment.html', {'form': form})
+                elif get_payment_mode == "xoxo":
+                    messages.success(request, "success", extra_tags='alert-success')
             
-            elif get_payment_mode == "xoxo":
-                pass
-                
+            else:
+                messages.warning(request, "Please select correct payment mode.", extra_tags='alert-warning')    
                 
                 
             
