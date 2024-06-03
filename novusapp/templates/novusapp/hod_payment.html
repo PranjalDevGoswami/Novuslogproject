@@ -154,10 +154,15 @@
                             {% elif respondent.pay_status == 1 %}
                             <td><h2><span class="badge badge-success">Complete</span></h2></td>
                             {% endif %}
+                            {% if not respondent.pay_status == 1 %}
                             <td>
-                                {% comment %} {% include "novusapp/paypal/process_payment.html" %} {% endcomment %}
-                                <a href="{% url 'process_payment' respondent.id  %}" class="btn btn-primary btn-sm">Pay Now</a>
-                            </td>  
+                              <a href="{% url 'process_payment' respondent.id %}" class="btn btn-primary btn-sm">Pay Now</a>
+                            </td>
+                          {% else %}
+                            <td>
+                              <button class="btn btn-primary btn-sm" disabled>Pay Now</button>
+                            </td>
+                          {% endif %}        
                         </tr>
                         {% endfor %}
                       </tbody>

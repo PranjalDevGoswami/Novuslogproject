@@ -35,11 +35,12 @@
                           
                                     <select id="payment_mode" class="form-control input-space" placeholder="Pyament Mode" name="payment_mode" required="required"> 
                                         <option value="" disabled selected>---SELECT PAYMENT MODE----</option>
+                                
                                         {% for respondent in respondents %}
                                            <option value="{{respondent.incentive_type}}" selected>{{respondent.incentive_type}}</option>
-                                        {% endfor %}   
+                                        {% endfor %}
                                         <option value="paypal">PayPal</option>
-                                        <option value="xoxo">Xoxo Day</option>
+                                        <option value="Xoxo Day">Xoxo Day</option>
                                         <option value="upi">UPI</option>
                                         <option value="amazon">Amazon Voucher</option>
                                     </select>

@@ -5,7 +5,6 @@
   type="text/css"
   href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css"
 />
-<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 {% block title %}    
 <title>TeamLead Data</title>
@@ -112,7 +111,7 @@
 
             <!-- start project list -->
             <div class="table-responsive">
-              <table id="user_table" class="table table-striped jambo_table bulk_action">
+              <table id="respondent-table" class="table table-striped jambo_table bulk_action">
                   <thead>
                       <tr class="headings">
                           <th class="column-title">Sr.No</th>
@@ -177,16 +176,16 @@
 			                  <td><h2><span class="badge badge-danger">Pending</span></h2></td>
                         {% elif respondent.is_active == 1 %}
 			                  <td><h2><span class="badge badge-success">Complete</span></h2></td>
-                        <td><h2><span class="badge badge-success"></span></h2></td>
                         {% endif %}
-                        <td>
-                        {% if respondent.remark %} <!-- Check if remark exists -->
-                            <a href="{% url 'edit_respondent' respondent.pk %}" class="btn btn-primary">Edit</a>
+                        {% if not respondent.remark %}
+                            <td>
+                              <a href="{% url 'edit_respondent' respondent.pk %}" class="btn btn-primary">Edit</a>
+                            </td>   
                         {% else %}
-                            <!-- Do nothing or add any other content you want to display -->
+                        <td>
+                          <button class="btn btn-primary btn-sm" disabled>Edit</button>
+                        </td> 
                         {% endif %}
-                        </td>
-                        
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -210,10 +209,9 @@
 
 <script>
   $(document).ready( function () {
-    $('#user_table').DataTable();
+    $('.table').DataTable();
   } );
 </script> 
-
 
 <script>
   $(document).ready(function () {

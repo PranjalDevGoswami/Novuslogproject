@@ -285,6 +285,7 @@ class CustomUser(AbstractUser):
     otp = models.CharField(max_length=255, null=True, blank=True)
     is_superviser = models.CharField(max_length=255, null=True, blank=True)
     is_category = models.CharField(max_length=255, null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='user/profile', null=True, blank=True)
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)

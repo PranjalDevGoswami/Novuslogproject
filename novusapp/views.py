@@ -1261,49 +1261,62 @@ def form_approved(request,id):
 
 
     
+from django.conf import settings
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.contrib import messages
+from .models import CustomUser, Department, Respondent
+
+ 
 def profile(request):
     try:
         dep = Department.objects.all()
-
-        if request.session.has_key('currentuser_id'):
+ 
+        if 'currentuser_id' in request.session:
             id = request.session['currentuser_id']
             profile_obj = CustomUser.objects.get(id=id)
-
+            print(profile_obj.profile_picture)
             if request.method == 'POST':
                 mobile = request.POST.get('mobile_no')
                 dept = request.POST.get('department')
+                profile_picture = request.FILES.get('profile_picture')
+                print('$$$$$$$$$$$', profile_picture)
+                
+                if not dept:
+                    messages.error(request, 'Please choose a department.', extra_tags="alert-danger")
+                    return redirect('/profile')
+                    
                 try:
                     dept_obj = Department.objects.get(id=dept)
-                except:
-                    pass
-                    
-                ''' Update user information '''
-                if CustomUser.objects.filter(id=id,dep=dept, mobile=mobile).exists():
+                except Department.DoesNotExist:
+                    messages.error(request, 'Department does not exist.', extra_tags="alert-danger")
+                    return redirect('/profile')
+ 
+                if CustomUser.objects.filter(id=id, dep=dept, mobile=mobile).exists():
                     messages.info(request, 'Same record already exists.', extra_tags="alert-warning")
                     return redirect('/profile')
+ 
+                CustomUser.objects.filter(id=id).update(dep=dept, mobile=mobile, profile_picture=profile_picture)
                 
-                CustomUser.objects.filter(id=id).update(dep=dept, mobile=mobile)
-                
-                ''' Update related Respondent information '''
+                # Update related Respondent information
                 tl_email = profile_obj.email
                 Respondent.objects.filter(email=tl_email).update(Department=dept_obj.name)
                 
                 messages.success(request, 'Profile updated successfully.', extra_tags="alert-success")
                 return redirect('/profile')
-
+ 
             context = {
                 'profile_obj': profile_obj,
                 'department': dep,
             }
             return render(request, "novusapp/edit.html", context)
-
+ 
         return HttpResponse('Please Login')
  
     except Exception as e:
-        ''' Handle other exceptions '''
         messages.error(request, f'An error occurred: {str(e)}', extra_tags="alert-danger")
         return render(request, "novusapp/edit.html", {'department': dep})
-
+ 
 
 
 def change_password(request):
@@ -1527,28 +1540,41 @@ def payment_page(request):
 import uuid
 from urllib.parse import urlencode
 
+
+
+
+
+
+
+
+
 @login_required
 @role_required(allowed_roles=['HOD'])
 def process_payment(request, pk):
     if request.method == "POST":
         get_payment_mode = request.POST.get('payment_mode')
-        print(get_payment_mode)
         respondent = Respondent.objects.get(id=pk)
         payment_id = respondent.payment_id
+        print(get_payment_mode)      
+        if not respondent.incentive_type == get_payment_mode:
+           messages.error(request, "Please select correct payment mode.", extra_tags='alert-error')
+           return redirect('/payment-page/')
+       
+       
         if respondent.pay_status == True:
            messages.error(request, "Payment for this client has already been completed.", extra_tags='alert-error')
            return redirect('/payment-page/')
+       
         if payment_id:
-            if respondent.payment_mode == get_payment_mode:
-                if get_payment_mode == "paypal":
-                    host = request.get_host()
+            if get_payment_mode == "paypal":
+                host = request.get_host()
                     
                     # Constructing return_url with custom data
-                    return_url = 'http://{}{}?{}'.format(
+                return_url = 'http://{}{}?{}'.format(
                         host, reverse('payment_done'), urlencode({'respondent_id': respondent.id})
                     )
                     
-                    paypal_dict = {
+                paypal_dict = {
                         'business': str(payment_id),
                         'amount': str(respondent.incentive),
                         'currency_code': 'USD',
@@ -1559,15 +1585,13 @@ def process_payment(request, pk):
                         'cancel_return': 'http://{}{}'.format(host, reverse('payment_cancelled')),
                         'custom': '{}_{}'.format(respondent.id, payment_id),  # Combine respondent ID and payment ID
                     }
-                    form = PayPalPaymentsForm(initial=paypal_dict)
-                    return render(request, 'novusapp/paypal/process_payment.html', {'form': form})
+                respondent.payment_mode=get_payment_mode
+                respondent.save()
+                form = PayPalPaymentsForm(initial=paypal_dict)
+                return render(request, 'novusapp/paypal/process_payment.html', {'form': form})
                 
-                elif get_payment_mode == "xoxo":
-                    messages.success(request, "success", extra_tags='alert-success')
-            
-            else:
-                messages.warning(request, "Please select correct payment mode.", extra_tags='alert-warning')    
-                
+            elif get_payment_mode == "Xoxo Day":
+                return get_vouchers()
                 
             
         else:
@@ -1578,6 +1602,34 @@ def process_payment(request, pk):
         'respondents': respondent_obj
     }
     return render(request, 'novusapp/paypal/payment_mode.html', context)
+
+
+
+
+
+import requests
+
+def xoxo_login(request):
+    if request.method == "POST":
+        email_id_or_mobile =request.POST.get('email')
+        print(email_id_or_mobile)
+        
+    
+    return render(request, 'novusapp/xoxo/xoxo_login.html')     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @csrf_exempt
 def payment_done(request):
@@ -1602,6 +1654,30 @@ def payment_cancelled(request):
     messages.warning(request, 'Payment cancelled.')
     return redirect('/payment-page/')
 
+
+import requests
+from django.conf import settings
+def process_xoxo_day_payment(request):
+    # Replace these placeholders with actual Xoxo Day API endpoint and authentication details
+    xoxo_day_api_url = 'https://stagingaccount.xoxoday.com/chef/v1/oauth/token'
+    url = 'https://stagingaccount.xoxoday.com/login'
+    xoxo_day_client_id = settings.XOXO_CLIENT_ID
+    xoxo_day_secert_kay = settings.XOXO_SECERT_ID
+    
+    # Construct payload for Xoxo Day API
+    payload = {
+ 
+        # Add any other required parameters
+    }
+    
+    #token = obtain_xoxo_day_token(xoxo_day_client_id, xoxo_day_secret_key)
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    response = requests.post(xoxo_day_api_url)
+    print(response.text)
+    
+    return HttpResponse(response)
 
 
 

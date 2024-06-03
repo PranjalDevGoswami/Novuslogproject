@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voucher</title>
+</head>
+<body>
+    <h1>Voucher</h1>
+    {% if vouchers %}
+        <pre>{{ vouchers|json_script:"voucher_data" }}</pre>
+    {% elif error %}
+        <p>Error: {{ error }}</p>
+    {% else %}
+        <p>No voucher data available.</p>
+    {% endif %}
+</body>
+</html>

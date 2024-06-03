@@ -34,6 +34,10 @@ urlpatterns = [
     path('process-payment/<int:pk>/', views.process_payment, name='process_payment'),
     path('payment-done/', views.payment_done, name='payment_done'),
     path('payment-cancelled/', views.payment_cancelled, name='payment_cancelled'),
+    path('xoxo_login/', views.xoxo_login, name='xoxo_login'),
+    path('xoday_payment/', views.process_xoxo_day_payment, name='xoxo_day_payment'),
+
+   
 
     
 ]

@@ -1,0 +1,71 @@
+{% extends "novusapp/base1.html" %}
+{% load static %} 
+{% block head %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css"
+/>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock head %} 
+{% block right_col %}
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+              {% include 'novusapp/alertmsg/msg.html' %}
+              <div class="title_left">
+              </div>
+
+              <div class="title_right">
+                <div class="col-md-5 col-sm-5   form-group pull-right top_search">
+                  <div class="input-group">
+                
+                  </div>
+                </div>
+	
+                <div class="col-md-5 col-sm-5 form-group top_search">
+                </div>
+              </div>
+            </div>
+            <div class="">
+              <!-- Advanced Search Fields -->
+              <div class="row mt-3" id="advancedSearchFields" style="display: none">
+        
+
+              </div>
+            </div>
+            <div class="clearfix"></div>
+
+
+            <div class="btn btn-info simple-link" id="downloadExcel" style="cursor: pointer; margin-left: 90%;">
+              <a href="#" style="color: white; text-decoration: none;">Download Excel</a>
+            </div>
+
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="x_panel">
+                  <div class="x_title">
+                    <h2>Projects</h2>
+
+                    <ul class="nav navbar-right panel_toolbox">
+                 
+                    </ul>
+                    <div class="clearfix"></div>
+                  </div>
+                  <div class="x_content">
+
+                    <p></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> 
+        <!-- /page content -->
+ 
+{% endblock right_col %} 
+{% block script %}
+
+{% endblock script %}
