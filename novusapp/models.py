@@ -124,8 +124,8 @@ class PhoneCode(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.phone_code
+    # def __str__(self):
+    #     return self.phone_code
 
 # PhoneNumber Master
 class PhoneNumber(models.Model):

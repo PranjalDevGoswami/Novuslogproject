@@ -1,16 +1,96 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Voucher</title>
-</head>
-<body>
-    <h1>Voucher</h1>
-    {% if vouchers %}
-        <pre>{{ vouchers|json_script:"voucher_data" }}</pre>
-    {% elif error %}
-        <p>Error: {{ error }}</p>
-    {% else %}
-        <p>No voucher data available.</p>
-    {% endif %}
-</body>
-</html>
+{% extends 'novusapp/base1.html' %}
+{% load static %}
+{% block head %}
+{% endblock head %} 
+{% block right_col %}
+<div class="right_col" role="main">
+    <div class="">
+      <div class="page-title">
+          {% include 'novusapp/alertmsg/msg.html' %}
+        <div class="title_left">
+          <h3><small></small></h3>
+        </div>
+      </div>
+      
+      <div class="clearfix"></div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="x_panel">
+                <div class="e">
+
+       
+                </div>
+                <div class="x_content">
+                  <div class="col-md-12 col-lg-12 ">
+                      <div id="errorMessages" class="error"></div>
+                  </div>
+                    <div class="row">
+                        <div class="w-100">
+                            <div id="vouchers-container" class="d-flex pd-4 md-4  flex-wrap"></div>
+                            {% comment %} <div id="vouchers-container" class="row row-cols-1 row-cols-md-3 g-4"></div> {% endcomment %}
+                        </div>
+                    </div>
+              	
+
+                  <p></p>
+
+                  <!-- start project list -->
+                  <table class="table table-striped projects">
+                    
+                  </table>
+                  <!-- end project list -->
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /page content -->
+  
+{% endblock right_col %}
+ {% block script %}
+ <script>
+    fetch('http://127.0.0.1:8000/api/xoxo/vouchers/')
+        .then(response => response.json())
+        .then(data => {
+            const vouchersContainer = document.getElementById('vouchers-container');
+            const vouchers = data.data.getVouchers.data;
+
+            vouchers.forEach(voucher => {
+                const voucherCard = document.createElement('div');
+                voucherCard.classList.add('voucher-card');
+                //voucherCard.classList.add('d-flex');
+
+                voucherCard.innerHTML = `
+                <div class="row row-cols-1 row-cols-md-3 g-4 pt-4">
+                <div class="col">
+                    <div class="card h-100">
+                        <img class="card-img-top" src="${voucher.imageUrl}" alt="${voucher.name}">
+                        <div class="card-body">
+                             <h5 class="card-title">Card title</h5>
+                            <div class="voucher-content">
+                                <div class="voucher-title">${voucher.name}</div>
+                                <div class="voucher-description">${voucher.productId}</div>
+                                <div class="voucher-categories"><strong>Categories:</strong> ${voucher.categories}</div>
+                                <div class="voucher-price">Price: ${voucher.currencyCode} ${voucher.valueDenominations.split(',')[0]}</div>
+                                <div class="voucher-expiry"><strong>Expiry and Validity:</strong> ${voucher.expiryAndValidity}</div>
+                              
+                            </div>
+                                 <button class="btn w-100 btn-outline-primary" data-product-id="${voucher.productId}">Add to Cart</button>
+                        </div>
+                        <div class="card-footer">
+                            <medium class="text-muted">Last updated 3 mins ago</medium>
+                          </div>
+                    </div> 
+                </div>  
+            </div>  
+                    
+                `;
+
+                vouchersContainer.appendChild(voucherCard);
+            });
+        })
+        .catch(error => console.error('Error fetching vouchers:', error));
+</script>
+ {% endblock %}

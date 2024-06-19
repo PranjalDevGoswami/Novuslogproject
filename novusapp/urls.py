@@ -3,6 +3,7 @@ from django.urls import path, reverse_lazy
 from django.views.generic import RedirectView
 from .views import login_view, dashboard_redirect
 from .import views
+from api.xoxo.views import get_vouchers
 
 
 urlpatterns = [
@@ -34,10 +35,13 @@ urlpatterns = [
     path('process-payment/<int:pk>/', views.process_payment, name='process_payment'),
     path('payment-done/', views.payment_done, name='payment_done'),
     path('payment-cancelled/', views.payment_cancelled, name='payment_cancelled'),
+    
+###############################Payment URL##################################################################    
     path('xoxo_login/', views.xoxo_login, name='xoxo_login'),
     path('xoday_payment/', views.process_xoxo_day_payment, name='xoxo_day_payment'),
-
-   
+    path('api/xoxo/vouchers/', get_vouchers, name='get_vouchers'),
+    path('vouchers/dropdown/', views.voucher_dropdown_view, name='voucher_dropdown'),
+    path('place_order/', views.place_order, name='place_order')
 
     
 ]

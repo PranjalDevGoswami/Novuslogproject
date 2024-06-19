@@ -1681,3 +1681,16 @@ def process_xoxo_day_payment(request):
 
 
 
+from django.shortcuts import render
+
+def voucher_dropdown_view(request):
+    return render(request, 'novusapp/xoxo/vouchers.html')
+
+
+def place_order(request):
+    phone_code = PhoneCode.objects.all().values('id', 'phone_code')
+    
+    context = {
+        'phone_code': phone_code,
+    }
+    return render(request, 'novusapp/xoxo/place_order.html',context)

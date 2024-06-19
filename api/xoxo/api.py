@@ -31,7 +31,7 @@ def get_vouchers():
         "tag": "plumProAPI",
         "variables": {
             "data": {
-                "limit": 10,
+                "limit": 20,
                 "page": 1,
                 "exchangeRate": 1,
                 "sort": {
@@ -49,17 +49,6 @@ def get_vouchers():
     response = requests.post(url, json=payload, headers=headers)
     response.raise_for_status()
     return response.json()
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,8 +1,8 @@
-from django.contrib import admin
-from django.urls import path,include
-from django.conf.urls.static import static
-from .import views
+from django.urls import path
+from .views import get_vouchers, get_Order, place_order
 
 urlpatterns = [
-    path('send/rewards/',views.get_vou,name="get_voucher")
+    path('vouchers/', get_vouchers, name='get_vouchers'),
+    path('vouchers/order/',get_Order, name='get_order' ),
+    path('vouchers/order/<int:productid>', place_order, name="post_order"),
 ]

@@ -75,7 +75,7 @@
                     <a href="{% url 'payment_page' %}"><i class="fa fa-bank"></i>Payment Status</a>
                   </li>
                   <li>
-                    <a href="{% url 'payment_page' %}"><i class="fa fa-solid fa-gift"></i>Xoxo Rewards</a>
+                    <a href="{% url 'voucher_dropdown' %}"><i class="fa fa-solid fa-gift"></i>Xoxo Rewards</a>
                   </li>
                 </ul>
                 {% endif %}
@@ -125,7 +125,7 @@
                   {% if Role == "HOD" %}
                   <li role="presentation" class="nav-item dropdown open">
                     <a href="javascript:;" class="dropdown-toggle info-number" id="navbarDropdown1" data-toggle="dropdown" aria-expanded="false">
-                      <i class="fa fa-envelope-o"></i>
+                      <i class="fa fa-envelope-o" style="font-size:25px;"></i>
                       <span class="badge bg-green">{{total_user}}</span>
                     </a>
                     <ul class="dropdown-menu list-unstyled msg_list" role="menu" aria-labelledby="navbarDropdown1">
@@ -154,6 +154,11 @@
                         </div>
                       </li>
                     </ul>
+                  </li>
+                  <li>
+                    {% comment %} <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span>
+                    <span class="glyphicon-class"></span> {% endcomment %}
+                    <a href="/vouchers/dropdown/"><i class="fa fa-shopping-cart mr-4"style="font-size:25px;"></i></a>
                   </li>
                   {% endif %}
                 </ul>

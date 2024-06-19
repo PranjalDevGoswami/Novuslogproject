@@ -1,15 +1,13 @@
-from django.shortcuts import render
-from django.shortcuts import render
-from .api import get_vouchers
 import requests
-from django.conf import settings
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.http import JsonResponse
-from rest_framework.views import APIView
+from rest_framework import status
 
+XOXO_CLIENT_ID = "fbc574677ab033b7f38861e6fd956384"
+XOXO_SECRET_ID = "4n1m973k3lrqhaoc0k4bq7vfbtos09k4eocm"
 
-
-def get_vou(request):
+@api_view(['GET'])
+def get_vouchers(request):
     url = "https://stagingaccount.xoxoday.com/chef/v1/oauth/api/"
     payload = {
         "query": "plumProAPI.mutation.getVouchers",
@@ -29,25 +27,77 @@ def get_vou(request):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "authorization": "Bearer eyJ0b2tlbkNvbnRlbnQiOnsiaXNzdWVkRm9yIjoidGVzdCIsInNjb3BlIjoiIiwiaXNzdWVkQXQiOjE3MTcxMjU1MzcxNTIsImV4cGlyZXNBdCI6MTcxODQyMTUzNzE1MiwidG9rZW5fdHlwZSI6IlVTRVIifSwiYV90IjoiZXlKbGJtTWlPaUpCTVRJNFEwSkRMVWhUTWpVMklpd2lZV3huSWpvaVJVTkVTQzFGVXlJc0ltdHBaQ0k2SW1WdVl5SXNJbVZ3YXlJNmV5SnJkSGtpT2lKRlF5SXNJbU55ZGlJNklsQXRNalUySWl3aWVDSTZJbGxtYmpkcE1GZHVTazlxVFdocVVHSlVTRkpvTUV0UU4yTXdkRkJaZW0xd1VUWlFjMGhCVmxnMmRqZ2lMQ0o1SWpvaU5ubzBZbGRVTnpSbFppMVVNRE42WmtwUWVEVnBhVWgzVVdGNk5YYzVNSE5aYVhwaVEyOWhlRlpTTUNKOWZRLi5sWVZYQklkbHUyNlFMOE9yNTMtT2lRLkdDN0N4S0lTVVRMdjZkMExFWUtRV3JUaEFtX0tCWXk5Y0VlZGl6S0tLaDdwOUhnbmlwWkhjNTZkZzBCRl9LT2VNWVhzYUQxS3NCTHE1cFFkSGdVMk5ia3lTUko4QWcyTmFRa3ZOUUU0X05QenhFY016SHV4OG9uNWt5WkVnNV9TNDQ4TDdHNUVsajUzY0pRSnE0SVY5NmhFdWdXdjNOWlB0bXVnbTJMOXBSbUJHLUR2X29RQjVoUkp4YlVNaThSVW83RWRsOHl3bWRPTk90WWhibEVUY1paaEM5Zzk2aUJULXhZc0p4alZ6N1pNS25rY0JJV3V5S1pZLUtYZ3F5VzZVY3hza3hhOGY3NE96R2pJWTc2Z0ltVVNpZEpjZ2VrT05ySDBzNU1SX2p3aUJFX0lSdHhpQ1hMc045dlJ6YW54TzdIaTZfMTBnMWxfMGZSdnd3LUY4aHJnbXh3aVFSeEQ3UWMyN2JETlM0NTVvbjVwZTU4dXVpUTJELS1sZkUxbktCYUxTaGozQUt4VGs3RDdtcEZTR1Z5UDV4MGNQY3RfSXo5UmRkZnRnNmppaGJvcHpQU2ZUVUdZZjM4S3I1Z3RUZjkxV21qVHRlN3hXZkgyb1JmbkhJc0FSS2VTYTdBcUYwb05VcWh3dTk0QTJKc3ZldmhVLVYxS3RDdnU2TzVMWmo0SWp1bDhIbG5zamExY2hBRG9CZ2l5SlBlWjJiRFFpOVdLS0NXSE1heGtxSk9GZTdhQm1oVkdsZVI2SWpVRlN4bXFXSHgtV0dvVnRrTVBDbzV0bndjdTlPVzhfX3JDenZPWVMyeWRjbDQ4VkVBYU8xUGdlMTh1ZnZMRnRzRjNjQl9YS3lvRnRXejdtS2xnOVRwU2VPNVZOQ1ZyVW5nel9MWmxTNm5UMVhMbFZKWllnUEc5R3BQdDdEc0hOMHppbTI5alBDT3ltUjZ3UFVSNm9CTTR1NktVaXRwMlo4VjBGSzlqODBMdl9jS1U1MlgtdlZZMXo3TFVRQ1czdHdQbHhWVUl5U2pNa0F1czloS1RRbTQwbDJoN3N1NF9TaGhmQmNEUDNwUWVzbWJjVFJPUGZmdnFreFc0M0dPMGlvOF9DYVhWaGt5Wl90LUZEZEJLb0ZnNThIeUNOSnNsWU5oN2RHaXozYU1VdWFfakJXeEU0XzZheFI5WWl3aDFLNkw3SmM4UWUwQk9RWGp4RzJ2bElDWGNHQS52bkNVSXVXVU9rbU1TbzZCZWtUOXdRIn0="
+        "authorization": "Bearer eyJ0b2tlbkNvbnRlbnQiOnsiaXNzdWVkRm9yIjoidGVzdCIsInNjb3BlIjoiIiwiaXNzdWVkQXQiOjE3MTczOTkyMTgwMzIsImV4cGlyZXNBdCI6MTcxODY5NTIxODAzMiwidG9rZW5fdHlwZSI6IlVTRVIifSwiYV90IjoiZXlKbGJtTWlPaUpCTVRJNFEwSkRMVWhUTWpVMklpd2lZV3huSWpvaVJVTkVTQzFGVXlJc0ltdHBaQ0k2SW1WdVl5SXNJbVZ3YXlJNmV5SnJkSGtpT2lKRlF5SXNJbU55ZGlJNklsQXRNalUySWl3aWVDSTZJbWxsWkVSR1VuUkhhekJTUm05V09XaFNiRVZ5WDJ4TmNIRjVRV3B6VFMwNFlWUmhkVXR5ZEhjM09ITWlMQ0o1SWpvaU1VRmFhVlY2ZFhoNVVETkVWbFJRYURKNFgwbGZNRGd4Ylc5YU9Fc3pZVjkzTVV4Tk5VdDFXRFJ0VFNKOWZRLi41NktITElKZjJXSmI1UHl4el9vZ05nLkh0R0laMjlLMXpBZW94cUktSHJhQzV3aloyRDFHMktqNDBqYXlmTXZZamtwRFpTMm1ROFZ0ek55MkpENFQzakM2TXN3bENiYll5cktkdzYzMGJMeWczb3hMUUY3T0FCUnJfMF8waTBGeHZMeUNfbHJ3QzVyZHV0Q0NPcTcwX3BTUkpMUHpXMUdLR2FfRUZxN0FmVng0ak1WdFVnd1dVbU9WNzU5SXdNUTBfdGZJdTREd0VocFFqSVdUMzB3Y2hGRWc5cHk3ajIyZDdQQmJtVXl2RHJLUUVuMGZHNXFHNWJtQ2l0TXJxX1ctdkhiU1hZT1QyaVZ3eDZUSHhldGt0ZEhaTkJNVk1QWXNjYUFkWC10eDFSRFljS3U1TFluZXpnNlZyMk1EX3pkaXhTVks0cUZQVjYwZno5cktJS1BtSlRmQnRTNGtmQW9uMXdDNEIteUFrdG92Sm0xcWlFYmtkd3NxZjUzS2daUHBVRFlneTg4bWtldEl2NkxneExvZkRQbURaMXc4cTA2QWVGZW83YkI2S2pBOXFuUGFDZVdXdFppSGhPckpfYTczLV9maEY1aVR1RFN4Z3p2WjVzVE5fMlhwMzdGdjZSOU9vUUVyc1M4MUdtVERXX0FMeG9oeXNZS0NzYURiRERLZE1vbGo0WlRFbjhKMjJkNXlzU0lRbEc0UGk4ZXFkVmhIX3ZYc0MzMGc3eTg5bVBrUHdEWktZblZoRkFUckpzd0t4dWZfeVo5Ym5zMHE0WEJUVDUyRGRqUzhzTUViZXptaTRwOW15VVZEaWxaOHNuOXJfOXdtZEQwVDhpQTdBZGFtMGs5aWRsTlFSM1puNjd4c3BPLXpZVHR2UVlqTy0zWVRMOVpzQ2N0czhrSHJvdmkxN3g5UUpRb1AxYlpscTNySEZqXzRScVF2SEREbURJcllsX2cyLVgyY2JwTGNBOVlMQXNtTklaeUFnSXBiZUw2MHpWLWpZUmdLd3AxZ2Q1aWhGYjFqcmZvSERyaGhCMUpUdFAzaElvbmJvUnZTMWJVQW1lNThBNXNwb0FCTHhPU1VOQnpubVhmNWFDQmczd3laWHBTSmN1bnRSME8zRG9TYlVIYXpnRDZDSFg1aUd5Wi16SnFzM1NLNzROWnFlTDc0ajVQMUhIV2tHNkVLcEhQc09kYW1RQVBtdGoxUVVnSEoyWHpsZC0yWXlPc3VMSGxHUTQ2WWRBbzlyajIyUS5FaXdCdnZvTENkUXZFTlEtY212Q01BIn0="
     }
 
-    response = requests.post(url, json=payload, headers=headers)
-    return JsonResponse(response)
-
-
-from django.shortcuts import render
-
-
-def voucher_view(request):
     try:
-        vouchers = get_vou()
-        return render(request, 'novusapp/xoxo/vouchers.html', {'vouchers': vouchers})
-    except Exception as e:
-        return render(request, 'novusapp/xoxo/vouchers.html', {'error': str(e)})
-def voucher_view(request):
+        response = requests.post(url, json=payload, headers=headers)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+        data = response.json()
+        return Response(data, status=status.HTTP_200_OK)
+    except requests.exceptions.RequestException as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+@api_view(['GET'])
+def get_Order(request):
+    url = "https://stagingaccount.xoxoday.com/chef/v1/oauth/api/"
+    payload = {
+        "query": "plumProAPI.mutation.getOrderDetails",
+        "tag": "plumProAPI",
+        "variables": { "data": {
+                "poNumber": "PO123",
+                "orderId": 123,
+                "sendMailToReceiver": 0
+            } }
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": "Bearer eyJ0b2tlbkNvbnRlbnQiOnsiaXNzdWVkRm9yIjoidGVzdCIsInNjb3BlIjoiIiwiaXNzdWVkQXQiOjE3MTczOTkyMTgwMzIsImV4cGlyZXNBdCI6MTcxODY5NTIxODAzMiwidG9rZW5fdHlwZSI6IlVTRVIifSwiYV90IjoiZXlKbGJtTWlPaUpCTVRJNFEwSkRMVWhUTWpVMklpd2lZV3huSWpvaVJVTkVTQzFGVXlJc0ltdHBaQ0k2SW1WdVl5SXNJbVZ3YXlJNmV5SnJkSGtpT2lKRlF5SXNJbU55ZGlJNklsQXRNalUySWl3aWVDSTZJbWxsWkVSR1VuUkhhekJTUm05V09XaFNiRVZ5WDJ4TmNIRjVRV3B6VFMwNFlWUmhkVXR5ZEhjM09ITWlMQ0o1SWpvaU1VRmFhVlY2ZFhoNVVETkVWbFJRYURKNFgwbGZNRGd4Ylc5YU9Fc3pZVjkzTVV4Tk5VdDFXRFJ0VFNKOWZRLi41NktITElKZjJXSmI1UHl4el9vZ05nLkh0R0laMjlLMXpBZW94cUktSHJhQzV3aloyRDFHMktqNDBqYXlmTXZZamtwRFpTMm1ROFZ0ek55MkpENFQzakM2TXN3bENiYll5cktkdzYzMGJMeWczb3hMUUY3T0FCUnJfMF8waTBGeHZMeUNfbHJ3QzVyZHV0Q0NPcTcwX3BTUkpMUHpXMUdLR2FfRUZxN0FmVng0ak1WdFVnd1dVbU9WNzU5SXdNUTBfdGZJdTREd0VocFFqSVdUMzB3Y2hGRWc5cHk3ajIyZDdQQmJtVXl2RHJLUUVuMGZHNXFHNWJtQ2l0TXJxX1ctdkhiU1hZT1QyaVZ3eDZUSHhldGt0ZEhaTkJNVk1QWXNjYUFkWC10eDFSRFljS3U1TFluZXpnNlZyMk1EX3pkaXhTVks0cUZQVjYwZno5cktJS1BtSlRmQnRTNGtmQW9uMXdDNEIteUFrdG92Sm0xcWlFYmtkd3NxZjUzS2daUHBVRFlneTg4bWtldEl2NkxneExvZkRQbURaMXc4cTA2QWVGZW83YkI2S2pBOXFuUGFDZVdXdFppSGhPckpfYTczLV9maEY1aVR1RFN4Z3p2WjVzVE5fMlhwMzdGdjZSOU9vUUVyc1M4MUdtVERXX0FMeG9oeXNZS0NzYURiRERLZE1vbGo0WlRFbjhKMjJkNXlzU0lRbEc0UGk4ZXFkVmhIX3ZYc0MzMGc3eTg5bVBrUHdEWktZblZoRkFUckpzd0t4dWZfeVo5Ym5zMHE0WEJUVDUyRGRqUzhzTUViZXptaTRwOW15VVZEaWxaOHNuOXJfOXdtZEQwVDhpQTdBZGFtMGs5aWRsTlFSM1puNjd4c3BPLXpZVHR2UVlqTy0zWVRMOVpzQ2N0czhrSHJvdmkxN3g5UUpRb1AxYlpscTNySEZqXzRScVF2SEREbURJcllsX2cyLVgyY2JwTGNBOVlMQXNtTklaeUFnSXBiZUw2MHpWLWpZUmdLd3AxZ2Q1aWhGYjFqcmZvSERyaGhCMUpUdFAzaElvbmJvUnZTMWJVQW1lNThBNXNwb0FCTHhPU1VOQnpubVhmNWFDQmczd3laWHBTSmN1bnRSME8zRG9TYlVIYXpnRDZDSFg1aUd5Wi16SnFzM1NLNzROWnFlTDc0ajVQMUhIV2tHNkVLcEhQc09kYW1RQVBtdGoxUVVnSEoyWHpsZC0yWXlPc3VMSGxHUTQ2WWRBbzlyajIyUS5FaXdCdnZvTENkUXZFTlEtY212Q01BIn0="
+    }
+
     try:
-        vouchers = get_vou()
-        return render(request, 'vouchers/voucher.html', {'vouchers': vouchers})
-    except Exception as e:
-        return render(request, 'vouchers/voucher.html', {'error': str(e)})
+        response = requests.post(url, json=payload, headers=headers)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+        data = response.json()
+        return Response(data, status=status.HTTP_200_OK)
+    except requests.exceptions.RequestException as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)    
+    
+    
+    
+
+@api_view(['POST'])
+def place_order(request):
+    url = "https://stagingaccount.xoxoday.com/chef/v1/oauth/api/"
+    payload = {
+        "query": "plumProAPI.mutation.placeOrder",
+        "tag": "plumProAPI",
+        "variables": {
+            "data": {
+                "productId": request.data.get('productId', 51699),
+                "quantity": request.data.get('quantity', 1),
+                "denomination": request.data.get('denomination', 20),
+                "poNumber": request.data.get('poNumber', "PO12662"),
+                "notifyAdminEmail": request.data.get('notifyAdminEmail', 0),
+                "email": request.data.get('email', "tomarpramod0532@gmail.com"),
+                "contact": request.data.get('contact', "+91-7835864271"),
+                "tag": request.data.get('tag', "b2cf")
+            }
+        }
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": "Bearer eyJ0b2tlbkNvbnRlbnQiOnsiaXNzdWVkRm9yIjoidGVzdCIsInNjb3BlIjoiIiwiaXNzdWVkQXQiOjE3MTczOTkyMTgwMzIsImV4cGlyZXNBdCI6MTcxODY5NTIxODAzMiwidG9rZW5fdHlwZSI6IlVTRVIifSwiYV90IjoiZXlKbGJtTWlPaUpCTVRJNFEwSkRMVWhUTWpVMklpd2lZV3huSWpvaVJVTkVTQzFGVXlJc0ltdHBaQ0k2SW1WdVl5SXNJbVZ3YXlJNmV5SnJkSGtpT2lKRlF5SXNJbU55ZGlJNklsQXRNalUySWl3aWVDSTZJbWxsWkVSR1VuUkhhekJTUm05V09XaFNiRVZ5WDJ4TmNIRjVRV3B6VFMwNFlWUmhkVXR5ZEhjM09ITWlMQ0o1SWpvaU1VRmFhVlY2ZFhoNVVETkVWbFJRYURKNFgwbGZNRGd4Ylc5YU9Fc3pZVjkzTVV4Tk5VdDFXRFJ0VFNKOWZRLi41NktITElKZjJXSmI1UHl4el9vZ05nLkh0R0laMjlLMXpBZW94cUktSHJhQzV3aloyRDFHMktqNDBqYXlmTXZZamtwRFpTMm1ROFZ0ek55MkpENFQzakM2TXN3bENiYll5cktkdzYzMGJMeWczb3hMUUY3T0FCUnJfMF8waTBGeHZMeUNfbHJ3QzVyZHV0Q0NPcTcwX3BTUkpMUHpXMUdLR2FfRUZxN0FmVng0ak1WdFVnd1dVbU9WNzU5SXdNUTBfdGZJdTREd0VocFFqSVdUMzB3Y2hGRWc5cHk3ajIyZDdQQmJtVXl2RHJLUUVuMGZHNXFHNWJtQ2l0TXJxX1ctdkhiU1hZT1QyaVZ3eDZUSHhldGt0ZEhaTkJNVk1QWXNjYUFkWC10eDFSRFljS3U1TFluZXpnNlZyMk1EX3pkaXhTVks0cUZQVjYwZno5cktJS1BtSlRmQnRTNGtmQW9uMXdDNEIteUFrdG92Sm0xcWlFYmtkd3NxZjUzS2daUHBVRFlneTg4bWtldEl2NkxneExvZkRQbURaMXc4cTA2QWVGZW83YkI2S2pBOXFuUGFDZVdXdFppSGhPckpfYTczLV9maEY1aVR1RFN4Z3p2WjVzVE5fMlhwMzdGdjZSOU9vUUVyc1M4MUdtVERXX0FMeG9oeXNZS0NzYURiRERLZE1vbGo0WlRFbjhKMjJkNXlzU0lRbEc0UGk4ZXFkVmhIX3ZYc0MzMGc3eTg5bVBrUHdEWktZblZoRkFUckpzd0t4dWZfeVo5Ym5zMHE0WEJUVDUyRGRqUzhzTUViZXptaTRwOW15VVZEaWxaOHNuOXJfOXdtZEQwVDhpQTdBZGFtMGs5aWRsTlFSM1puNjd4c3BPLXpZVHR2UVlqTy0zWVRMOVpzQ2N0czhrSHJvdmkxN3g5UUpRb1AxYlpscTNySEZqXzRScVF2SEREbURJcllsX2cyLVgyY2JwTGNBOVlMQXNtTklaeUFnSXBiZUw2MHpWLWpZUmdLd3AxZ2Q1aWhGYjFqcmZvSERyaGhCMUpUdFAzaElvbmJvUnZTMWJVQW1lNThBNXNwb0FCTHhPU1VOQnpubVhmNWFDQmczd3laWHBTSmN1bnRSME8zRG9TYlVIYXpnRDZDSFg1aUd5Wi16SnFzM1NLNzROWnFlTDc0ajVQMUhIV2tHNkVLcEhQc09kYW1RQVBtdGoxUVVnSEoyWHpsZC0yWXlPc3VMSGxHUTQ2WWRBbzlyajIyUS5FaXdCdnZvTENkUXZFTlEtY212Q01BIn0="
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+        data = response.json()
+        return Response(data, status=status.HTTP_200_OK)
+    except requests.exceptions.RequestException as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
