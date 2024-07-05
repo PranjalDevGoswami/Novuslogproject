@@ -75,19 +75,19 @@
 											<select id="Phone_number_code" class="input-group-addon" name="Phone_number_code">
 												<option value="" disabled selected>Select Code</option>
 		
-												<option value = {{respondent.respondent_phone.phone_code|default_if_none:None}} hidden selected>{{respondent.respondent_phone.phone_code}}</option>
+												<option value = {{respondent.phone_code.id|default_if_none:None}} hidden selected>{{respondent.phone_code.phone_code}}</option>
 												{% for code in phone_code %}
-												<option value="{{code.phone_code}}">{{code.phone_code}}</option>
+												<option value="{{code.id}}">{{code.phone_code}}</option>
 												{% endfor %}
 											</select>
-											<input type="text" id="phone_number" placeholder="Phone Number" name="phone_number" class="form-control input-space" value = {{respondent.respondent_phone.phone_number|default_if_none:None}}>
+											<input type="text" id="phone_number" placeholder="Phone Number" name="phone_number" class="form-control input-space" value = {{respondent.respondent_phone|default_if_none:None}}>
 										</div>
 										<span id="phoneError" class="error"></span>
 									</div>
 									
 
 									<div class="col-md-4 col-sm-4">
-										<input type="text" id="job_title" placeholder="Job Title * " name="job_title" required="required" class="form-control input-space" value = {{respondent.job.title|default_if_none:None}}>
+										<input type="text" id="job_title" placeholder="Job Title * " name="job_title" required="required" class="form-control input-space" value = {{respondent.job|default_if_none:None}}>
 										<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
 									</div> 
 								</div>
@@ -95,19 +95,19 @@
 
 								<div class="form-group row">
 									<div class="col-md-4 col-sm-4">
-										<input id="company" class="form-control input-space" type="text" placeholder="Company * " name="company" required="required" value = {{respondent.company.name|default_if_none:None}}>
+										<input id="company" class="form-control input-space" type="text" placeholder="Company * " name="company" required="required" value = {{respondent.company_name|default_if_none:None}}>
 										<span class="fa fa-building-o form-control-feedback right" aria-hidden="true"></span>
 									</div>
 
 									<div class="col-md-4 col-sm-4">
-										<input id="company_revenue" class="form-control input-space" type="text" placeholder="Company Revenue" name="company_revenue" value = {{respondent.company.revenue|default_if_none:None}}>
+										<input id="company_revenue" class="form-control input-space" type="text" placeholder="Company Revenue" name="company_revenue" value = {{respondent.company_revenue|default_if_none:None}}>
 										<span id="company_revenue_error" class="error-message"></span>
 										<select id="company_revenue_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="company_revenue_currency_type">
 											<option value="" disabled selected>CUR</option>
 											
-											<option value = {{respondent.company.revenue_currency_type|default_if_none:None}} style="color: black;" hidden selected>{{respondent.company.revenue_currency_type}}</option>
+											<option value = {{respondent.currency_type.id|default_if_none:None}} style="color: black;" hidden selected>{{respondent.currency_type}}</option>
 											{% for currency in currency_type %}
-											<option value="{{currency.currency_type}}" style="color: black;">{{currency.currency_type}}</option>
+											<option value="{{currency.id}}" style="color: black;">{{currency.currency_type}}</option>
 											{% endfor %}
 													
 										</select>
@@ -117,9 +117,9 @@
 										<select id="country" class="form-control input-space" placeholder="Country" name="country" required="required"> 
 											<option value="" disabled selected>---SELECT COUNTRY*---</option>
 											
-											<option value = {{respondent.country.name|default_if_none:None}} hidden selected>{{respondent.country.name}}</option>
+											<option value = {{respondent.country.id|default_if_none:None}} hidden selected>{{respondent.country.name}}</option>
 											{% for data in allcountry %}
-											<option value="{{data.name}}">{{data.name}}</option>
+											<option value="{{data.id}}">{{data.name}}</option>
 											{% endfor %}
 										</select>
 									</div>
@@ -127,12 +127,12 @@
 
 								<div class="form-group row">
 									<div class="col-md-4 col-sm-4">
-										<input type="text" id="project_code" placeholder="Project Code * " name='project_code' required="required" class="form-control input-space" value = {{respondent.project.project_code|default_if_none:None}}>
+										<input type="text" id="project_code" placeholder="Project Code * " name='project_code' required="required" class="form-control input-space" value = {{respondent.project_code|default_if_none:None}}>
 										<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
 									</div>
 									
 									<div class="col-md-4 col-sm-4">
-										<input id="project" class="form-control input-space" placeholder="Project * " type="text" name="project" required="required" value = {{respondent.project.name|default_if_none:None}}>
+										<input id="project" class="form-control input-space" placeholder="Project * " type="text" name="project" required="required" value = {{respondent.project_name|default_if_none:None}}>
 									</div>
 									
 
@@ -141,12 +141,12 @@
 											<optgroup>
 												<option value="" disabled selected>---SELECT INDUSTRY*---</option>
 												
-												<option value = {{respondent.industry.name|default_if_none:None}} hidden selected>{{respondent.industry.name}}</option>    
+												<option value = {{respondent.industry_sub_cate.id|default_if_none:None}} hidden selected>{{respondent.industry_sub_cate.name}}</option>    
 												{% for industry, subcategories in industry_data.items %}
 													{% if subcategories %}
 														<optgroup label="{{ industry.name }}">
 															{% for subcategory in subcategories %}
-																<option value="{{ subcategory.name }}">{{ subcategory.name }}</option>    
+																<option value="{{ subcategory.id }}">{{ subcategory.name }}</option>    
 															{% endfor %}
 														</optgroup>
 													{% endif %}
@@ -160,29 +160,29 @@
 
 								<div class="form-group row">
 									<div class="col-md-4 col-sm-4">
-										<input id="incentive" class="form-control input-space" type="text" placeholder="Incentive*" name="incentive" required="required" value = "{{respondent.incentive.Unique_identifier}}">
+										<input id="incentive" class="form-control input-space" type="text" placeholder="Incentive*" name="incentive" required="required" value = "{{respondent.incentive_amount}}">
 										<span id="incentiveError" class="error-message"></span>
 										<select id="incentive_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="incentive_currency_type" style="border:black;" required="required">
 											<option value="" disabled selected>CUR</option>
 											
-											<option value = {{respondent.incentive.incentive_currency_type|default_if_none:None}} style="color: black;" hidden selected>{{respondent.incentive.incentive_currency_type}}</option>
+											<option value = {{respondent.incentive_currency_type.id|default_if_none:None}} style="color: black;" hidden selected>{{respondent.incentive_currency_type}}</option>
 											
-											{% for currency in currency_type %}
-											<option value="{{currency.currency_type}}" style="color: black;">{{currency.currency_type}}</option>
+											{% for currency in incentive_currency_type %}
+											<option value="{{currency.id}}" style="color: black;">{{currency.currency_type}}</option>
 											{% endfor %}
 
 										</select>
 									</div>
 
 									<div class="col-md-4 col-sm-4">
-										<input id="project" class="form-control input-space" placeholder="Incentive Code*" type="text" name="incentive_code"required="required" value = {{respondent.incentive.incentive_code|default_if_none:None}}>
+										<input id="project" class="form-control input-space" placeholder="Incentive Code*" type="text" name="incentive_code"required="required" value = {{respondent.incentive_code|default_if_none:None}}>
 									</div>
 
 									<div class="col-md-4 col-sm-4">
 										<select id="incentive_type" class="form-control input-space" name="incentive_type" required="required">
 											<option value="" disabled selected>---SELECT INCENTIVE TYPE*---</option>
 											
-											<option value = {{respondent.incentive.incentive_type.id|default_if_none:None}} hidden selected>{{respondent.incentive.incentive_type.name}}</option>
+											<option value = {{respondent.incentive_type_id.id|default_if_none:None}} hidden selected>{{respondent.incentive_type_id}}</option>
 											{% for type in Incentive_Type %}
 											<option value="{{type.id}}">{{type.name}}</option>
 											{% endfor %}
@@ -196,19 +196,19 @@
 
 								<div class="form-group row ">
 									<div class="col-md-4 col-sm-4">
-										<input type="text" id="client_name" name="client_name" placeholder="Client Name * " required="required" class="form-control input-space" value = {{respondent.analyst.title|default_if_none:None}}>
+										<input type="text" id="client_name" name="client_name" placeholder="Client Name * " required="required" class="form-control input-space" value = {{respondent.client_name|default_if_none:None}}>
 										<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
 									</div>
 
 									<div class="col-md-4 col-sm-4">
-										<input id="analyst" class="form-control input-space" placeholder="Analyst * " type="text" name="analyst" required="required" value = {{respondent.analyst.title|default_if_none:None}} >
+										<input id="analyst" class="form-control input-space" placeholder="Analyst * " type="text" name="analyst" required="required" value = {{respondent.analyst|default_if_none:None}} >
 									</div>
 
 									<div class="col-md-4 col-sm-4">
 										<select id="project_type" class="form-control input-space" name="project_type" required="required">
 											<option value="" disabled selected>---SELECT INTERVIEW TYPE*---</option>
 
-											<option value = {{respondent.project.project_type.id|default_if_none:None}} hidden selected>{{respondent.project.project_type.name}}</option>
+											<option value = {{respondent.project_type.id|default_if_none:None}} hidden selected>{{respondent.project_type}}</option>
 											{% for type in Project_Type %}
 											<option value="{{type.id}}">{{type.name}}</option>
 											{% endfor %}
@@ -224,7 +224,7 @@
 									</div>
 
 									<div class="col-md-4 col-sm-4">
-										<input id="interview_date" class="date-picker form-control input-space" placeholder="Interview Date * " name="interview_date" placeholder="dd-mm-yyyy" type="text" required="required" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)" style="margin-bottom: 10px;" value = {{respondent.project_interview.interview_date|default_if_none:None}}>
+										<input id="interview_date" class="date-picker form-control input-space" placeholder="Interview Date * " name="interview_date" placeholder="dd-mm-yyyy" type="text" required="required" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)" style="margin-bottom: 10px;" value = {{respondent.interview_date|default_if_none:None}}>
 									</div>
 
 				
@@ -237,7 +237,8 @@
 												<!-- Hour Dropdown -->
 												<div class="input-group">
 													<label for="hourDropdown">Hours*:</label>&nbsp;
-													<select id="hourDropdown" class="form-control input-space time-input" name="interview_duration_hours" required="required" value="dfff">
+													
+													<select id="hourDropdown" class="form-control input-space time-input"  name="interview_duration_hours" required="required" value="dfff">
 														<!-- JavaScript will dynamically populate options here -->
 													</select>
 												</div>
@@ -250,12 +251,41 @@
 												<!-- Minute Dropdown -->
 												<div class="input-group">
 													<label for="minuteDropdown">Minutes*:</label>&nbsp;
+													
 													<select id="minuteDropdown" class="form-control input-space time-input" name="interview_duration_minutes" required="required">
 														<!-- JavaScript will dynamically populate options here -->
 													</select>
 													
 												</div>
 											</div>
+
+											<script>
+												// Function to populate the dropdown
+												function populateDropdown(selectElement, maxValue, label, interval, selectedValue) {
+													for (let i = 0; i <= maxValue; i += interval) {
+														const option = document.createElement('option');
+														option.value = i;
+														option.text = `${i} ${label}${i === 1 ? '' : 's'}`;
+														if (i == selectedValue) {  // Using == for type coercion (string to number comparison)
+															option.selected = true; // Set as the selected option if it matches the value from the respondent object
+														}
+														selectElement.add(option);
+													}
+												}
+											
+												// Get the current hour and minute from the respondent's data or default to 0
+												const currentHour = {{ respondent.interview_duration_hours|default:0 }};
+												const currentMinute = {{ respondent.interview_duration_minutes|default:0 }};
+												
+												// Populate the hour dropdown with options from 0 to 12 hours
+												const hourDropdown = document.getElementById('hourDropdown');
+												populateDropdown(hourDropdown, 12, 'hr', 1, currentHour);
+											
+												// Populate the minute dropdown with options from 0 to 55 minutes in 5-minute intervals
+												const minuteDropdown = document.getElementById('minuteDropdown');
+												populateDropdown(minuteDropdown, 55, 'min', 5, currentMinute);
+											
+											</script>
 											
 										</div>
 									</div>
@@ -310,23 +340,7 @@
 	});
 </script>
 
-<script>
-    // Function to populate the hour and minute dropdowns with a specified interval
-    function populateDropdown(selectElement, maxValue, label, interval) {
-        for (let i = 0; i <= maxValue; i += interval) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.text = `${i} ${label}${i === 1 ? '' : ''}`;
-            selectElement.add(option);
-        }
-    }
 
-    // Populate the hour dropdown with options from 0 to 12 hours
-    populateDropdown(document.getElementById('hourDropdown'), 12, 'hr', 1);
-
-    // Populate the minute dropdown with options from 0 to 55 minutes in 5-minute intervals
-    populateDropdown(document.getElementById('minuteDropdown'), 55, 'min', 5);
-</script>
 
 
 <script>
@@ -423,3 +437,18 @@ function isInteger(value) {
 </script>
 	
 {% endblock script %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

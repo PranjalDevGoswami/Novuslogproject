@@ -128,9 +128,9 @@
                     <th class="column-title">Project Type</th>
                     <th class="column-title">Company Revenue</th>
                     <th class="column-title">Incentive</th>
-                    <th class="column-title">Interview Duration</th>
-                    <th class="column-title">Interview Date</th>
-                    <th class="column-title">Team Lead</th>
+                    {% comment %} <th class="column-title">Interview Duration</th> {% endcomment %}
+                    {% comment %} <th class="column-title">Interview Date</th> {% endcomment %}
+                    {% comment %} <th class="column-title">Team Lead</th> {% endcomment %}
                     <th class="column-title">Manager</th>
                     {% comment %} <th class="column-title">Department</th> {% endcomment %}
                     <th class="column-title">Status</th>                         
@@ -144,23 +144,23 @@
                   <td class=" ">{{ forloop.counter }}</td>
                   <td class=" ">{{ respondent.name }} {{respondent.middle_name|default_if_none:""}} {{respondent.last_name|default_if_none:""}}</td>
                   <td class=" ">{{ respondent.respondent_email}}</td>
-                  <td class=" ">{{ respondent.respondent_phone.phone_code }} {{ respondent.respondent_phone.phone_number }}</td>
-                  <td class=" ">{{ respondent.job.title }}</td>
-                  <td class=" ">{{ respondent.company.name }}</td>
+                  <td class=" ">{{ respondent.phone_code.phone_code}} {{ respondent.respondent_phone}}</td>
+                  <td class=" ">{{ respondent.job}}</td>
+                  <td class=" ">{{ respondent.company_name}}</td>
                   <td class=" ">{{ respondent.country.name }}</td>
-                  <td class=" ">{{ respondent.industry.name }}</td>
+                  <td class=" ">{{ respondent.industry_sub_cate.name }}</td>
                   <td class=" ">{{ respondent.analyst.title }}</td>
-                  <td class=" ">{{ respondent.project.name }}</td>
-                  <td class=" ">{{ respondent.project.project_type }}</td>
-                  {% if respondent.company.revenue == "0" %}
+                  <td class=" ">{{ respondent.project_name }}</td>
+                  <td class=" ">{{ respondent.project_type }}</td>
+                  {% if respondent.company_revenue == "0" %}
                   <td class="">&nbsp;</td>
                   {% else %}
-                  <td class="">{{ respondent.company.revenue}} {{respondent.company.revenue_currency_type}}</td>
+                  <td class="">{{ respondent.company_revenue}} {{respondent.currency_type}}</td>
                   {% endif %}
-                  <td class=" ">{{ respondent.incentive.Unique_identifier }} {{respondent.incentive.incentive_currency_type}}</td>
-                  <td class=" ">{{ respondent.project_interview.interview_duration_hours}}hr:{{respondent.project_interview.interview_duration_minutes}}min</td>
+                  <td class=" ">{{ respondent.incentive_amount}} {{respondent.incentive_currency_type}}</td>
+                  {% comment %} <td class=" ">{{ respondent.project_interview.interview_duration_hours}}hr:{{respondent.project_interview.interview_duration_minutes}}min</td>
                   <td class=" ">{{ respondent.project_interview.interview_date }}</td>
-                  <td class=" ">{{respondent.team_lead|default_if_none:"" }}</td>
+                  <td class=" ">{{respondent.team_lead|default_if_none:"" }}</td> {% endcomment %}
                   <td class="">{{respondent.user_manager|default_if_none:"" }}</td>
                   {% comment %} <td class=" ">{{respondent.Department|default_if_none:"" }}</td> {% endcomment %}
                   {% if respondent.is_active == 0 %}

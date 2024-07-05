@@ -4,12 +4,7 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import messages
-from .models import (
-    CustomUser, Hod, Register, TeamLead, RoleMaster, Respondent,
-    Job, Country, Industry, Company, Analyst, Project, Incentive,
-    ProjectInterview, Manager, Department, Currency_Type,ProjectType,
-    IncentiveType,PhoneCode,PhoneNumber,Industry_Sub_Cate
-)
+from .models import *
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.utils import timezone
@@ -30,6 +25,7 @@ from .decorators import unauthenitcated_user,role_required
 from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from .send_voucher_email import send_voucher_order
 
 import io
 from django.http import HttpResponse
@@ -46,6 +42,14 @@ import paypalrestsdk
 from .forms import *
 from paypal.standard.forms import PayPalPaymentsForm
 from django.http import HttpResponseBadRequest
+from django.core.files.storage import FileSystemStorage
+import pandas as pd 
+from django.db import transaction
+import uuid
+from urllib.parse import urlencode
+import json
+
+
 UserModel = get_user_model() 
 
 credentials = yaml.load(open('./novusproject/credentials.yml','r'),Loader=yaml.FullLoader)
@@ -459,56 +463,69 @@ def login_view(request):
 
 
 def download_excel(respondents):
-    # Create an in-memory output stream for storing Excel file
+    # Create an in-memory output stream for storing the Excel file
     output = io.BytesIO()
     
-    # Create a new workbook
+    # Create a new workbook and select the active worksheet
     wb = Workbook()
     ws = wb.active
+ 
     # Set the height of the header row
     ws.row_dimensions[1].height = 22  # Set height in points (1 point = 1/72 inch)
-    # Write headers with colors and filter
-    headers = ['Respondent Name', 'Email', 'Phone Number', 'Job Title', 'Company', 'Country', 'Industry', 'Interviewer Name', 'Project', 'Project Type', 'Company Revenue', 'Incentive', 'Interview Duration', 'Interview Date', 'Team Lead', 'Manager', 'Department', 'Status']
+    
+    # Write headers with colors and enable filter
+    headers = [
+        'Respondent Name', 'Email', 'Phone Number', 'Job Title', 'Company', 'Country',
+        'Industry', 'Interviewer Name', 'Project', 'Project Type', 'Company Revenue',
+        'Incentive', 'Interview Duration', 'Interview Date', 'Team Lead',
+        'Manager', 'Department', 'Status'
+    ]
+    
     for idx, header in enumerate(headers, start=1):
         cell = ws.cell(row=1, column=idx, value=header)
         # Apply color to the header cell
         cell.fill = PatternFill(start_color="FFCCCB", end_color="FFCCCB", fill_type="solid")
-        # Enable filtering for each column
-        ws.auto_filter.ref = ws.dimensions
+ 
+    # Enable filtering for the headers
+    ws.auto_filter.ref = ws.dimensions
     
     # Write data rows
     for respondent in respondents:
+        # Construct the row with proper handling of potential None values
         row = [
-            respondent.name + ' ' + (respondent.middle_name if respondent.middle_name else '') + ' ' + (respondent.last_name if respondent.last_name else ''),
+            f"{respondent.name} {(respondent.middle_name or '')} {(respondent.last_name or '')}".strip(),
             respondent.respondent_email,
-            respondent.respondent_phone.phone_code + ' ' + respondent.respondent_phone.phone_number,
-            respondent.job.title,
-            respondent.company.name,
-            respondent.country.name,
-            respondent.industry.name,
-            respondent.analyst.title,
-            respondent.project.name,
-            respondent.project.project_type.name if respondent.project.project_type else '',  # Convert ProjectType to string
-            respondent.company.revenue + ' ' + respondent.company.revenue_currency_type if respondent.company.revenue != "0" else '',
-            respondent.incentive.Unique_identifier + ' ' + respondent.incentive.incentive_currency_type,
-            str(respondent.project_interview.interview_duration_hours) + 'hr:' + str(respondent.project_interview.interview_duration_minutes) + 'min',
-            respondent.project_interview.interview_date,
-            respondent.team_lead if respondent.team_lead else '',
-            respondent.user_manager if respondent.user_manager else '',
-            respondent.Department if respondent.Department else '',
+            f"{(respondent.phone_code or '')} {(respondent.respondent_phone or '')}".strip() if respondent.respondent_phone else '',
+            respondent.job if respondent.job else '',  # Assuming `job` is an object with a `title` attribute
+            respondent.company_name if respondent.company_name else '',
+            respondent.country.name if respondent.country else '',
+            respondent.industry.name if respondent.industry else '',
+            respondent.analyst if respondent.analyst else '',
+            respondent.project_name if respondent.project_name else '',
+            respondent.project_type.name if respondent.project_type else '',  # Ensure `project_type` is not None
+            f"{respondent.company_revenue or ''} {respondent.currency_type.currency_type or ''}".strip() if respondent.company_revenue else '',
+            f"{respondent.incentive_amount or ''} {respondent.incentive_currency_type or ''}".strip() if respondent.incentive_amount else '',
+            f"{str(respondent.interview_duration_hours) or ''}hr: {str(respondent.interview_duration_minutes) or ''}min".strip() if respondent.interview_duration_hours else '',
+            respondent.interview_date if respondent.interview_date else '',
+            respondent.team_lead or '',
+            respondent.user_manager or '',
+            respondent.Department or '',
             'Pending' if respondent.is_active == 0 else 'Complete'
         ]
+        # Ensure all elements are strings before appending
+        row = [str(cell) for cell in row]
         ws.append(row)
     
-    # Save workbook to the output stream
+    # Save the workbook to the output stream
     wb.save(output)
     output.seek(0)
     
-    # Set response headers for serving Excel file
+    # Set response headers to serve the Excel file
     response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response['Content-Disposition'] = "attachment; filename=respondents_data.xlsx"
     
     return response
+ 
 
 
 @login_required
@@ -536,62 +553,58 @@ def dashboard_redirect(request):
     ''' If not authenticated, handle as before '''
     return redirect('/')
 
+
 @login_required
 @role_required(allowed_roles=['Team Lead'])
 def user_dashboard(request):
-    print('***************')
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
-        TeamLeadname = CustomUser.objects.get(id=userid).username
-        TeamLead_email = CustomUser.objects.get(id=userid).email
-        user_manager = CustomUser.objects.get(id=userid).user_manager
         custom_user_obj = CustomUser.objects.get(id=userid)
+        TeamLeadname = custom_user_obj.username
+        TeamLead_email = custom_user_obj.email
+        user_manager = custom_user_obj.user_manager
+        
         try:
-            department_obj = get_object_or_404(CustomUser, id=int(userid))
-            department = department_obj.dep.name
-        except:
+            department = custom_user_obj.dep.name
+        except AttributeError:
             department = ""
-        try:
-            hod_name = CustomUser.objects.get(id=userid).hod_name
-        except Exception as e:
-            messages.error(request, "Your Registration is not confirmed please wait some time and after login.", extra_tags="alert-danger")
-            return redirect('/')
-        try:
-            hod_email = Hod.objects.get(name=hod_name).email
-        except Exception as e:
-            messages.error(request, f"{e}", extra_tags="alert-danger")
 
-        if user_manager == '':
-            user_manager_email = CustomUser.objects.get(id=userid).email
-        else:
-            try:
-                user_manager_email = Manager.objects.get(name=user_manager).email
-            except:
-                pass
+        try:
+            hod_name = custom_user_obj.hod_name
+            hod_email = Hod.objects.filter(name=hod_name)[0].email
+        except (AttributeError, IndexError):
+            messages.error(request, "Your Registration is not confirmed. Please wait some time and then login.", extra_tags="alert-danger")
+            return redirect('/')
+
+        try:
+            user_manager_email = Manager.objects.get(name=user_manager).email
+        except Manager.DoesNotExist:
+            user_manager_email = TeamLead_email
 
         industries = Industry.objects.all()
         industry_data = {industry: industry.subindustry.all() for industry in industries if industry.subindustry.exists()}
-
-        mycountry = Country.objects.values('name').distinct()
-        currency_type = Currency_Type.objects.all().values('currency_type')
+        mycountry = Country.objects.values('id', 'name').distinct()
+        currency_type = Currency_Type.objects.all().values('id', 'currency_type')
         Project_Type = ProjectType.objects.all().values('id', 'name')
         Incentive_Type = IncentiveType.objects.all().values('id', 'name')
         phone_code = PhoneCode.objects.all().values('id', 'phone_code')
+        incentive_currency_type = Incentive_Currency_Type.objects.all().values('id', 'currency_type')
 
         if request.method == 'POST':
             try:
-                ''' Get the data from the POST request '''
+                # Get the data from the POST request
                 respondent_name = request.POST.get('respondent_name')
                 middle_name = request.POST.get('middle_name')
                 last_name = request.POST.get('last_name')
                 email = request.POST.get('email')
                 job_title = request.POST.get('job_title')
-                country_name = request.POST.get('country')
+                country_id = request.POST.get('country')
                 phone_number = request.POST.get('phone_number')
-                Phone_number_code = request.POST.get('Phone_number_code')
-                industry_name = request.POST.get('industry')
+                phone_code_id = request.POST.get('Phone_number_code')
+                industry_id = request.POST.get('industry')
                 company_name = request.POST.get('company')
                 company_revenue_value = request.POST.get('company_revenue')
+                client_name = request.POST.get('client_name')
                 company_revenue_currency_type_value = request.POST.get('company_revenue_currency_type')
                 analyst_name = request.POST.get('analyst')
                 project_type_id = request.POST.get('project_type')
@@ -601,110 +614,73 @@ def user_dashboard(request):
                 interview_duration_minutes = request.POST.get('interview_duration_minutes')
                 interview_date = request.POST.get('interview_date')
                 incentive_type_id = request.POST.get('incentive_type')
-                incentive_name = request.POST.get('incentive')
+                incentive_amount = request.POST.get('incentive')
                 incentive_code = request.POST.get('incentive_code')
-                incentive_currency_type = request.POST.get('incentive_currency_type')
+                incentive_currency_type_id = request.POST.get('incentive_currency_type')
                 linkdin_profile = request.POST.get('linkdin_profile')
-              
-                
-                
-                if not company_revenue_value:
-                    company_revenue_value = 0
-
-                if not company_revenue_currency_type_value:
-                    company_revenue_currency_type_value = ""
-
-                ''' Create or retrieve related records from other tables '''
-
-                try:
-                    country = Country.objects.create(name=country_name)
-                except Exception as e:
-                    messages.error(request, f"Error creating country: {e}", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                try:
-                    phone = PhoneNumber.objects.create(phone_number=phone_number, phone_code=Phone_number_code)
-                except Exception as e:
-                    messages.error(request, f"Error creating phone number: {e}", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                try:
-                    industry = Industry.objects.create(name=industry_name)
-                except Exception as e:
-                    messages.error(request, f"Error creating industry: {e}", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                try:
-                    company = Company.objects.create(name=company_name, revenue=company_revenue_value, revenue_currency_type=company_revenue_currency_type_value)
-                except Exception as e:
-                    messages.error(request, f"Error creating company: {e}", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                try:
-                    analyst = Analyst.objects.create(title=analyst_name)
-                except Exception as e:
-                    messages.error(request, f"Error creating analyst: {e}", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                try:
-                    project_type_obj = get_object_or_404(ProjectType, pk=project_type_id)
-                except ProjectType.DoesNotExist:
-                    messages.error(request, "Project type not found", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                try:
-                    project = Project.objects.create(name=project_name, project_type=project_type_obj,project_code=project_code)
-                except Exception as e:
-                    messages.error(request, f"Error creating project: {e}", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                try:
-                    project_interview = ProjectInterview.objects.create(project=project, interview_duration_hours=interview_duration_hours, interview_duration_minutes=interview_duration_minutes, interview_date=interview_date)
-                except Exception as e:
-                    messages.error(request, f"Error creating project interview: {e}", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                try:
-                    incentives_type_obj = get_object_or_404(IncentiveType, pk=incentive_type_id)
-                except IncentiveType.DoesNotExist:
-                    messages.error(request, "Incentive type not found", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                try:
-                    incentive = Incentive.objects.create(project=project, Unique_identifier=incentive_name, incentive_code=incentive_code, incentive_type=incentives_type_obj, incentive_currency_type=incentive_currency_type)
-                except Exception as e:
-                    messages.error(request, f"Error creating incentive: {e}", extra_tags="alert-danger")
-                    return redirect('/user_dashboard')
-
-                ''' Create the Respondent instance and associate it with the related records '''
+                payment_mode = request.POST.get('payment_mode')
+                pay_status = request.POST.get('pay_status') == 'on'
+                # Fetch the related objects
+                country = get_object_or_404(Country, id=country_id)
+                industry = get_object_or_404(Industry_Sub_Cate, id=industry_id)
+                project_type = get_object_or_404(ProjectType, id=project_type_id)
+                phone_code = get_object_or_404(PhoneCode, id=phone_code_id)
+                incentive_type = get_object_or_404(IncentiveType, id=incentive_type_id)
+                incentive_currency_type = get_object_or_404(Incentive_Currency_Type, id=incentive_currency_type_id)
+                company_currency_type_value = get_object_or_404(Currency_Type, id=company_revenue_currency_type_value)
+                selected_voucher = request.POST.get('selected_voucher','') 
+                voucher_value = request.POST.get('voucher_value','')
+                voucher_quantity = request.POST.get('number','')
+                # Create the Respondent instance and associate it with the related records
                 respondent = Respondent.objects.create(
                     name=respondent_name,
                     middle_name=middle_name,
                     last_name=last_name,
                     respondent_email=email,
                     custom_user=custom_user_obj,
-                    respondent_phone=phone,
+                    respondent_phone=phone_number,
+                    phone_code=phone_code,
                     job=job_title,
                     email=TeamLead_email,
                     user_manager=user_manager,
                     hod_email=hod_email,
                     user_manager_email=user_manager_email,
                     country=country,
-                    industry=industry,
-                    company=company,
-                    analyst=analyst,
-                    project=project,
-                    incentive=incentive,
-                    incentive_type = incentive_type_id,
+                    industry_sub_cate=industry,
+                    company_name=company_name,
+                    company_revenue=company_revenue_value,
+                    client_name = client_name,
+                    currency_type=company_currency_type_value,
+                    analyst=analyst_name,
+                    project_name=project_name,
+                    project_type=project_type,
+                    project_code=project_code,
+                    interview_duration_hours=interview_duration_hours,
+                    interview_duration_minutes=interview_duration_minutes,
+                    interview_date=interview_date,
+                    incentive_type_id=incentive_type,
+                    incentive_code=incentive_code,
+                    incentive_currency_type=incentive_currency_type,
+                    incentive_amount=incentive_amount,
                     linkdin_profile=linkdin_profile,
-                    project_interview=project_interview,
                     team_lead=TeamLeadname,
                     Department=department,
-                    is_active=0
+                    payment_mode=payment_mode,
+                    pay_status=pay_status,
+                    voucher_productid = selected_voucher,
+                    voucher_value = voucher_value,
+                    voucher_quantity = voucher_quantity,
+                    is_active=False
                 )
 
-                ''' Save the Respondent instance to the database '''
+                # Save the Respondent instance to the database
                 respondent.save()
+                if selected_voucher and voucher_value and voucher_quantity:
+                    notify_receiver_email = 0
+                    notify_admin_email = 0
+                    send_voucher_order(selected_voucher, voucher_value, voucher_quantity, notify_receiver_email, notify_admin_email)
+                    
+    
                 messages.success(request, 'Form Submitted Successfully', extra_tags="alert-success")
                 return redirect('/user_dashboard')
 
@@ -719,6 +695,8 @@ def user_dashboard(request):
             'Project_Type': Project_Type,
             'Incentive_Type': Incentive_Type,
             'phone_code': phone_code,
+            'incentive_currency_type': incentive_currency_type,
+            
         }
 
         return render(request, "novusapp/user_dashboard.html", context)
@@ -734,70 +712,53 @@ def userdata(request):
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
         name = CustomUser.objects.get(id=userid).username
-        useremail = CustomUser.objects.get(id=userid).email
-
+    
         data_type = request.GET.get('type')
         download = request.GET.get('info')
-        items_per_page = int(request.GET.get('items_per_page', 10))
+        # items_per_page = int(request.GET.get('items_per_page', 10))
         
         # Default queryset
-        respondents = Respondent.objects.filter(email=useremail, is_active__in=[0,1]).all()
+        respondents = Respondent.objects.filter(custom_user=userid, is_active__in=[0,1]).all()
+        print(respondents)
 
         if download == 'download':
             if data_type == 'self':
                 return download_excel(respondents)
             elif data_type == 'all':
-                respondents = Respondent.objects.filter(Q(email=useremail, is_active=1) | Q(is_active=1)).all()
+                respondents = Respondent.objects.filter(Q(custom_user=userid, is_active=1) | Q(is_active=1)).all()
                 return download_excel(respondents)
         else:
             if data_type == 'all':
-                respondents = Respondent.objects.filter(Q(email=useremail, is_active=1) | Q(is_active=1)).all()
+                respondents = Respondent.objects.filter(Q(custom_user=userid, is_active=1) | Q(is_active=1)).all()
             elif data_type == 'self':
                 pass  # Respondents already filtered by default queryset
-            # Pagination logic
-            paginator = Paginator(respondents, items_per_page)
-            page_number = request.GET.get('page')
 
-            try:
-                servicedatafinal = paginator.page(page_number)
-            except PageNotAnInteger:
-                servicedatafinal = paginator.page(1)
-            except EmptyPage:
-                servicedatafinal = paginator.page(paginator.num_pages)
-
-            totalpage = servicedatafinal.paginator.num_pages
-            totalpagelist = [i + 1 for i in range(totalpage)]
-
-            base_url = reverse('userdata')
-            pagination_url = f"{base_url}?type={data_type}&items_per_page={items_per_page}&page="
 
             context = {
-                'respondents': servicedatafinal,
+                'respondents': respondents,
                 'name': name,
-                'lastpage': totalpage,
-                'totalpagelist': totalpagelist,
-                'items_per_page': items_per_page,
-                'pagination_url': pagination_url, 
+
             }
             return render(request, "novusapp/userdata.html", context)
 
     return HttpResponse('Please Login')
 
 
+
 @login_required
 @role_required(allowed_roles=['Team Lead'])
 def edit_respondent(request, id):
-    print('###@@@@@@@@@@@@@@@@@@@@', id)
     try:
         respondent_obj = Respondent.objects.get(id=id)
     except Respondent.DoesNotExist:
         messages.error(request, 'Respondent not found', extra_tags="alert-danger")
         return redirect('/user_dashboard')
 
-    # Fetch related data
+   
     phone_code = PhoneCode.objects.all().values('id', 'phone_code')
-    currency_type = Currency_Type.objects.all().values('currency_type')
-    mycountry = Country.objects.all().values('name').distinct()
+    currency_type = Currency_Type.objects.all().values('id','currency_type')
+    incentive_currency_type = Incentive_Currency_Type.objects.all().values('id','currency_type')
+    mycountry = Country.objects.all().values('id','name').distinct()
     industries = Industry.objects.all()
     industry_data = {industry: industry.subindustry.all() for industry in industries if industry.subindustry.exists()}
     Incentive_Type = IncentiveType.objects.all().values('id', 'name')
@@ -806,6 +767,7 @@ def edit_respondent(request, id):
         "respondents": [respondent_obj],
         'phone_code': phone_code,
         'currency_type': currency_type,
+        'incentive_currency_type' : incentive_currency_type,
         'allcountry': mycountry,
         'industry_data': industry_data,
         'Incentive_Type': Incentive_Type,
@@ -814,7 +776,6 @@ def edit_respondent(request, id):
 
     if request.method == "POST":
         respondent_obj = Respondent.objects.get(id=id)
-        print('RRRRRRRRRRRRRRRRRR', respondent_obj)
         try:
             # Fetch user object
             userid = request.session.get('currentuser_id')
@@ -836,95 +797,52 @@ def edit_respondent(request, id):
             incentive_code = request.POST.get('incentive_code')
             analyst_name = request.POST.get('analyst')
             incentive_type_id = request.POST.get('incentive_type')
+            client_name = request.POST.get('client_name')
             project_name = request.POST.get('project')
             project_code = request.POST.get('project_code')
             project_type_id = request.POST.get('project_type')
-            incentive_name = request.POST.get('incentive')
-            linkdin_profile = request.POST.get('linkdin_profile')
-            incentive_currency_type = request.POST.get('incentive_currency_type')
+            incentive_amount = request.POST.get('incentive')
+            incentive_code_name = request.POST.get('incentive_code')
+            incentive_currency_type_id = request.POST.get('incentive_currency_type')
             interview_date = request.POST.get('interview_date')
             interview_duration_hours = request.POST.get('interview_duration_hours')
             interview_duration_minutes = request.POST.get('interview_duration_minutes')
-          
-
-            # Update job object if it exists
-            Job.objects.filter(respondent_id=id).update(title=job_title,respondent_id=id)
-
-            # Update country object if it exists
-            Country.objects.filter(respondent_id=id).update(name=country_name,respondent_id=id)
-
-            # Update phone object if it exists
-            PhoneNumber.objects.filter(respondent_id=id).update(phone_code=Phone_number_code,respondent_id=id)
-
-            # Update industry object if it exists
-            Industry.objects.filter(respondent_id=id).update(name=industry_name,respondent_id=id)
-
-            # Update company object if it exists
-            Company.objects.filter(respondent_id=id).update(name=company_name, revenue=company_revenue_value, revenue_currency_type=company_revenue_currency_type_value,respondent_id=id)
-
-            # Update analyst object if it exists
-            Analyst.objects.filter(respondent_id=id).update(title=analyst_name,respondent_id=id)
-
-            # Get project type object
-            project_type_obj = get_object_or_404(ProjectType, pk=project_type_id)
-
-            # Update project object if it exists
-            Project.objects.filter(respondent_id=id).update(name=project_name, project_type=project_type_obj,respondent_id=id)
+            linkdin_profile = request.POST.get('linkdin_profile')
+           
+            country = get_object_or_404(Country, id=country_name)
+            industry = get_object_or_404(Industry_Sub_Cate, id=industry_name)
+            project_type = get_object_or_404(ProjectType, id=project_type_id)
+            phone_code = get_object_or_404(PhoneCode, id=Phone_number_code)
+            incentive_type = get_object_or_404(IncentiveType, id=incentive_type_id)
+            incentive_currency_type = get_object_or_404(Incentive_Currency_Type, id=incentive_currency_type_id)
+            company_currency_type_value = get_object_or_404(Currency_Type, id=company_revenue_currency_type_value)
             
-            # Get the queryset of project objects for the given respondent_id
-            project_objs = Project.objects.filter(respondent_id=id)
-
-            # Choose one project object from the queryset (you may need to define some logic here)
-            project_obj = project_objs.first()  # For example, choose the first project object
-
-            # Update project interview object if it exists
-            ProjectInterview.objects.filter(respondent_id=id).update(
-                project=project_obj,
-                interview_duration_hours=interview_duration_hours,
-                interview_duration_minutes=interview_duration_minutes,
-                interview_date=interview_date,respondent_id=id
-            )
-
-            # Get incentive type object
-            incentives_type_obj = get_object_or_404(IncentiveType, pk=incentive_type_id)
-
-            # Update incentive object if it exists
-            Incentive.objects.filter(respondent_id=id).update(
-                project=project_obj,
-                incentive_code=incentive_code,
-                incentive_type_id=incentive_type_id,
-                incentive_currency_type=incentive_currency_type,respondent_id=id
-            )
-
-            
-            # Fetch all master objects after updating
-            job_obj = Job.objects.filter(respondent_id=id).first()
-            country_obj = Country.objects.filter(respondent_id=id).first()
-            phone_objs = PhoneNumber.objects.filter(respondent_id=id)
-            phone_obj = phone_objs.first() if phone_objs.exists() else None
-            industry_obj = Industry.objects.filter(respondent_id=id).first()
-            company_obj = Company.objects.filter(respondent_id=id).first()
-            analyst_obj = Analyst.objects.filter(respondent_id=id).first()
-            projectinterview_obj = ProjectInterview.objects.filter(respondent_id=id).first()
-            incentive_obj = Incentive.objects.filter(respondent_id=id).first()
-
-
             # Update the Respondent instance
             respondent_obj.name = respondent_name
             respondent_obj.middle_name = middle_name
             respondent_obj.last_name = last_name
             respondent_obj.custom_user = custom_user_obj
-            respondent_obj.job = job_obj
             respondent_obj.respondent_email = email
-            respondent_obj.respondent_phone = phone_obj
-            respondent_obj.country = country_obj
-            respondent_obj.industry = industry_obj
-            respondent_obj.company = company_obj
-            respondent_obj.analyst = analyst_obj
-            respondent_obj.project = project_obj
-            respondent_obj.incentive_type_id = incentive_type_id  # Assigning the ID of the IncentiveType
-            respondent_obj.incentive = incentive_obj
-            respondent_obj.project_interview = projectinterview_obj
+            respondent_obj.respondent_phone = phone_number
+            respondent_obj.phone_code = phone_code
+            respondent_obj.job = job_title
+            respondent_obj.company_name = company_name
+            respondent_obj.company_revenue = company_revenue_value
+            respondent_obj.currency_type = company_currency_type_value
+            respondent_obj.country = country
+            respondent_obj.industry_sub_cate = industry
+            respondent_obj.analyst = analyst_name 
+            respondent_obj.project_name = project_name
+            respondent_obj.project_code = project_code
+            respondent_obj.project_type = project_type
+            respondent_obj.incentive_amount = incentive_amount
+            respondent_obj.incentive_code = incentive_code_name
+            respondent_obj.incentive_currency_type = incentive_currency_type
+            respondent_obj.incentive_type_id = incentive_type
+            respondent_obj.client_name = client_name
+            respondent_obj.interview_date = interview_date
+            respondent_obj.interview_duration_hours = interview_duration_hours
+            respondent_obj.interview_duration_minutes = interview_duration_minutes
             respondent_obj.linkdin_profile = linkdin_profile
             respondent_obj.is_active = False
             respondent_obj.save()
@@ -934,10 +852,9 @@ def edit_respondent(request, id):
 
         except Exception as e:
             messages.error(request, f'Error: {e}', extra_tags="alert-danger")
-            return redirect('/user_dashboard')
+            return redirect(f'/edit_respondent/{id}')
 
     return render(request, "novusapp/edit_user_dashboard.html", context)
-
 
 
 
@@ -953,7 +870,7 @@ def userhod_data(request):
         ''' Retrieve the 'type' parameter from the GET request '''
         data_type = request.GET.get('type')
         download = request.GET.get('info')
-        items_per_page = int(request.GET.get('items_per_page', 10))
+        
 
         ''' Default queryset '''
         respondents = Respondent.objects.filter(hod_email=hodemail, is_active__in=[0,1]).all()
@@ -970,32 +887,10 @@ def userhod_data(request):
             elif data_type == 'self':
                 pass  # Respondents already filtered by default queryset
 
-            ''' Paginator '''
-            paginator = Paginator(respondents, items_per_page)
-            page_number = request.GET.get('page')
-
-            try:
-                servicedatafinal = paginator.page(page_number)
-            except PageNotAnInteger:
-                servicedatafinal = paginator.page(1)
-            except EmptyPage:
-                servicedatafinal = paginator.page(paginator.num_pages)
-
-            ''' Get total page count for pagination links '''
-            totalpage = servicedatafinal.paginator.num_pages
-            totalpagelist = [i + 1 for i in range(totalpage)]
-
-            ''' Create the URL for pagination links '''
-            base_url = reverse('userhod_data')
-            pagination_url = f"{base_url}?type={data_type}&items_per_page={items_per_page}&page="
-
             context = {
-                'respondents': servicedatafinal,
+                'respondents': respondents,
                 'name': name,
-                'lastpage': totalpage,
-                'totalpagelist': totalpagelist,
-                'items_per_page': items_per_page,
-                'pagination_url': pagination_url,  
+                
             }
 
             return render(request, "novusapp/userhod_data.html", context)
@@ -1179,7 +1074,7 @@ def manager(request):
 
         data_type = request.GET.get('type')
         download = request.GET.get('info')
-        items_per_page = int(request.GET.get('items_per_page', 10))
+      
         
         # Default queryset
         if data_type == 'self':
@@ -1201,31 +1096,12 @@ def manager(request):
             elif data_type == 'self':
                 pass  # Respondents already filtered by default queryset
             
-            # Pagination logic
-            paginator = Paginator(respondents, items_per_page)
-            page_number = request.GET.get('page')
-
-            try:
-                servicedatafinal = paginator.page(page_number)
-            except PageNotAnInteger:
-                servicedatafinal = paginator.page(1)
-            except EmptyPage:
-                servicedatafinal = paginator.page(paginator.num_pages)
-
-            totalpage = servicedatafinal.paginator.num_pages
-            totalpagelist = [i + 1 for i in range(totalpage)]
-
-            base_url = reverse('manager')
-            pagination_url = f"{base_url}?type={data_type}&items_per_page={items_per_page}&page="
-
+          
             context = {
-                'respondents': servicedatafinal,
+                'respondents': respondents,
                 'name': name,
-                'lastpage': totalpage,
-                'totalpagelist': totalpagelist,
                 'hod': current_manager,
-                'items_per_page': items_per_page,
-                'pagination_url': pagination_url,
+           
             }
 
             return render(request, "novusapp/teamlead_data.html", context)
@@ -1260,14 +1136,6 @@ def form_approved(request,id):
     return redirect('manager')
 
 
-    
-from django.conf import settings
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.contrib import messages
-from .models import CustomUser, Department, Respondent
-
- 
 def profile(request):
     try:
         dep = Department.objects.all()
@@ -1469,10 +1337,174 @@ def sendremark(request, userid, respondentid):
 
 
 
+@login_required
+@role_required(allowed_roles=['Team Lead'])
+def user_excel_data(request):
+    if request.session.has_key('currentuser_id'):
+        userid = request.session['currentuser_id']
+        custom_user_obj = CustomUser.objects.get(id=userid)
+        TeamLeadname = custom_user_obj.username
+        TeamLead_email = custom_user_obj.email
+        user_manager = custom_user_obj.user_manager
+        department = getattr(custom_user_obj.dep, 'name', "")
+
+        try:
+            hod_name = custom_user_obj.hod_name
+        except Exception:
+            messages.error(request, "Your Registration is not confirmed. Please wait some time and try again later.", extra_tags="alert-danger")
+            return redirect('/')
+
+        try:
+            hod_email = Hod.objects.filter(name=hod_name)[0].email
+        except Exception as e:
+            messages.error(request, f"{e}", extra_tags="alert-danger")
+
+        user_manager_email = ''
+        if user_manager:
+            try:
+                user_manager_email = Manager.objects.get(name=user_manager).email
+            except Manager.DoesNotExist:
+                user_manager_email = TeamLead_email
+        else:
+            user_manager_email = TeamLead_email
+
+        if request.method == 'POST':
+            if 'excel_file' in request.FILES:
+                excel_file = request.FILES['excel_file']
+                fs = FileSystemStorage()
+                filename = fs.save(excel_file.name, excel_file)
+                uploaded_file_url = fs.url(filename)
+
+                try:
+                    # Read the uploaded Excel file
+                    df = pd.read_excel(fs.path(filename), sheet_name='Respondent Incentive Sheet')
+
+                    for index, row in df.iterrows():
+                        try:
+                            respondent_name = row['Respondent Name']
+                            middle_name = row.get('Middle Name', '')
+                            last_name = row.get('Last Name', '')
+                            company_name = row.get('Company', '')
+                            industry_name = row.get('Industry', '')
+                            industry_sub_cate_name = row.get('Industry Sub Cate', '')
+                            job_title = row.get('Designation', '')
+                            phone_number = row.get('Contact', '')
+                            phone_code_value = row.get('Phone_number_code', '')
+                            email = row['Email id']
+                            respondent_email = row.get('Respondent Email', '')
+                            country_name = row['Country']
+                            project_name = row.get('Project Name', '')
+                            project_type_name = row['Project Type']
+                            project_code = row.get('PCR Code', '')
+                            client_name = row.get('Client Name', '')
+                            interview_duration_minutes = row.get('Interview Duration Minutes', '')
+                            interview_duration_hours = row.get('Interview Duration Hours', '')
+                            interview_date = row.get('Date of Interview', '')
+                            incentive_code = row.get('Incentive Code', '')
+                            incentive_amount = row.get('Incentive', '')
+                            incentive_type_name = row.get('Incentive Type', '')
+                            incentive_currency_type_name = row.get('Incentive Currency Type', '')
+                            paypal_id_amazon_voucher = row.get('Paypal Id/ Amazon Voucher', '')
+                            analyst_name = row.get('Scheduled by', '')
+                            company_revenue = row.get('Company Revenue', '')
+                            company_revenue_currency_type_name = row.get('Company Revenue Currency Type', '')
+                            linkdin_profile = row.get('Linkdin Profile', '')
+                         
+                         
+
+                            # Handle ProjectType retrieval
+                            try:
+                                project_type = ProjectType.objects.get(name=project_type_name)
+                            except ProjectType.DoesNotExist:
+                                messages.error(request, f"Error processing row {index + 1}: ProjectType '{project_type_name}' does not exist.", extra_tags="alert-danger")
+                                continue
+
+                            # Handle IncentiveType retrieval
+                            try:
+                                incentive_type = IncentiveType.objects.get(name=incentive_type_name)
+                            except IncentiveType.DoesNotExist:
+                                messages.error(request, f"Error processing row {index + 1}: IncentiveType '{incentive_type_name}' does not exist.", extra_tags="alert-danger")
+                                continue
+
+                            # Handle IncentiveCurrencyType retrieval
+                            try:
+                                incentive_currency_type = Incentive_Currency_Type.objects.get(currency_type=incentive_currency_type_name)
+                            except Incentive_Currency_Type.DoesNotExist:
+                                messages.error(request, f"Error processing row {index + 1}: Incentive Currency Type '{incentive_currency_type_name}' does not exist.", extra_tags="alert-danger")
+                                continue
+
+                            # Handle Currency_Type retrieval
+                            try:
+                                currency_type = Currency_Type.objects.get(currency_type=company_revenue_currency_type_name)
+                            except Currency_Type.DoesNotExist:
+                                messages.error(request, f"Error processing row {index + 1}: Currency Type '{company_revenue_currency_type_name}' does not exist.", extra_tags="alert-danger")
+                                continue
+
+                            # Fetch or create related objects
+                            with transaction.atomic():
+                                country, _ = Country.objects.get_or_create(name=country_name)
+                                phone_code, _ = PhoneCode.objects.get_or_create(phone_code=phone_code_value)
+                                industry_sub_cate, _ = Industry_Sub_Cate.objects.get_or_create(name=industry_name)
+
+                                # Create or update the Respondent instance
+                                respondent = Respondent.objects.create(
+                                        respondent_email = respondent_email,
+                                        name = respondent_name,
+                                        middle_name = middle_name,
+                                        last_name = last_name,
+                                        custom_user = custom_user_obj,
+                                        job = job_title,
+                                        email =  email,
+                                        respondent_phone = phone_number,
+                                        phone_code = phone_code,
+                                        currency_type = currency_type,
+                                        analyst = analyst_name,
+                                        project_name = project_name,
+                                        project_type = project_type,
+                                        project_code = project_code,
+                                        incentive_code = incentive_code,
+                                        incentive_type_id = incentive_type,
+                                        incentive_amount = incentive_amount,
+                                        incentive_currency_type = incentive_currency_type,
+                                        country = country,
+                                        industry_sub_cate = industry_sub_cate,
+                                        company_name = company_name,
+                                        company_revenue = company_revenue,
+                                        client_name = client_name,
+                                        interview_duration_hours = interview_duration_hours,
+                                        interview_duration_minutes = interview_duration_minutes,
+                                        interview_date = interview_date,
+                                        linkdin_profile = linkdin_profile,
+                                        team_lead = TeamLeadname,
+                                        Department = department,
+                                        user_manager = user_manager,
+                                        user_manager_email = user_manager_email,
+                                        hod_email = hod_email,
+                                        payment_id = paypal_id_amazon_voucher,
+                                        is_active = False 
+                                )
+
+                        except Exception as e:
+                            messages.error(request, f"Error processing row {index + 1}: {e}", extra_tags="alert-danger")
+
+                    messages.success(request, 'Excel file processed successfully', extra_tags="alert-success")
+                    return redirect('/user_dashboard')
+
+                except Exception as e:
+                    messages.error(request, f"Error reading Excel file: {e}", extra_tags="alert-danger")
+                    return redirect('/user_dashboard')
+
+            else:
+                messages.error(request, 'No file uploaded', extra_tags="alert-danger")
+                return redirect('/user_dashboard')
+
+        return render(request, "novusapp/user_dashboard.html")
+
+    return HttpResponse('Please login')
 
 
 
-
+############################################################### Payment Views ################################################
 
 @login_required
 @role_required(allowed_roles=['HOD'])
@@ -1537,17 +1569,6 @@ def payment_page(request):
 
 
 
-import uuid
-from urllib.parse import urlencode
-
-
-
-
-
-
-
-
-
 @login_required
 @role_required(allowed_roles=['HOD'])
 def process_payment(request, pk):
@@ -1605,10 +1626,7 @@ def process_payment(request, pk):
 
 
 
-
-
 import requests
-
 def xoxo_login(request):
     if request.method == "POST":
         email_id_or_mobile =request.POST.get('email')
@@ -1616,18 +1634,6 @@ def xoxo_login(request):
         
     
     return render(request, 'novusapp/xoxo/xoxo_login.html')     
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

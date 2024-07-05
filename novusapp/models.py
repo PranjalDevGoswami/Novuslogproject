@@ -64,19 +64,19 @@ class Industry_Sub_Cate(models.Model):
         return self.name
     
     
-# Company Table
-class Company(models.Model):
-    name = models.CharField(max_length=255)
-    revenue = models.CharField(max_length=255,null=True, blank=True)
-    revenue_currency_type = models.CharField(max_length=255)
-    strength = models.CharField(max_length=255)
-    respondent_id = models.IntegerField(null=True,blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
+# # Company Table
+# class Company(models.Model):
+#     name = models.CharField(max_length=255)
+#     revenue = models.CharField(max_length=255,null=True, blank=True)
+#     revenue_currency_type = models.CharField(max_length=255)
+#     strength = models.CharField(max_length=255)
+#     respondent_id = models.IntegerField(null=True,blank=True)
+#     is_active = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(default=timezone.now)
+#     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
 
 
 # Currency Table
@@ -93,15 +93,15 @@ class Currency_Type(models.Model):
 
 
 # Analyst Master
-class Analyst(models.Model):
-    title = models.CharField(max_length=255)
-    respondent_id = models.IntegerField(null=True,blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
+# class Analyst(models.Model):
+#     title = models.CharField(max_length=255)
+#     respondent_id = models.IntegerField(null=True,blank=True)
+#     is_active = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(default=timezone.now)
+#     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.title
+#     def __str__(self):
+#         return self.title
 
 
 # Department Master
@@ -124,20 +124,20 @@ class PhoneCode(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # def __str__(self):
-    #     return self.phone_code
-
-# PhoneNumber Master
-class PhoneNumber(models.Model):
-    phone_number = models.CharField(max_length=20, null=True, blank=True)
-    phone_code = models.CharField(max_length=20, null=True, blank=True)
-    respondent_id = models.IntegerField(null=True,blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
-
     def __str__(self):
-        return self.phone_number
+        return self.phone_code
+
+# # PhoneNumber Master
+# class PhoneNumber(models.Model):
+#     phone_number = models.CharField(max_length=20, null=True, blank=True)
+#     phone_code = models.CharField(max_length=20, null=True, blank=True)
+#     respondent_id = models.IntegerField(null=True,blank=True)
+#     is_active = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(default=timezone.now)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def __str__(self):
+#         return self.phone_number
 
 
 
@@ -153,19 +153,19 @@ class ProjectType(models.Model):
         return self.name
 
 
-# Project Table
-class Project(models.Model):
-    name = models.CharField(max_length=255)
-    project_type = models.ForeignKey(ProjectType, on_delete=models.CASCADE)
-    project_code = models.CharField(max_length=255)
-    LOI = models.CharField(max_length=255)
-    respondent_id = models.IntegerField(null=True,blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
+# # Project Table
+# class Project(models.Model):
+#     name = models.CharField(max_length=255)
+#     project_type = models.ForeignKey(ProjectType, on_delete=models.CASCADE)
+#     project_code = models.CharField(max_length=255)
+#     LOI = models.CharField(max_length=255)
+#     respondent_id = models.IntegerField(null=True,blank=True)
+#     is_active = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(default=timezone.now)
+#     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
 
 
 
@@ -181,32 +181,42 @@ class IncentiveType(models.Model):
         return self.name
 
 
-# Incentive Table
-class Incentive(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    incentive_code = models.CharField(max_length=255)
-    incentive_type = models.ForeignKey(IncentiveType, on_delete=models.CASCADE, null=True, blank=True)
-    incentive_currency_type = models.CharField(max_length=255, null=True, blank=True)
-    Unique_identifier = models.CharField(max_length=255, verbose_name='Incentive Amount')
-    respondent_id = models.IntegerField(null=True,blank=True)
+# # Incentive Table
+# class Incentive(models.Model):
+#     # project = models.ForeignKey(Project, on_delete=models.CASCADE)
+#     incentive_code = models.CharField(max_length=255)
+#     incentive_type = models.ForeignKey(IncentiveType, on_delete=models.CASCADE, null=True, blank=True)
+#     incentive_currency_type = models.CharField(max_length=255, null=True, blank=True)
+#     Unique_identifier = models.CharField(max_length=255, verbose_name='Incentive Amount')
+#     respondent_id = models.IntegerField(null=True,blank=True)
+#     is_active = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(default=timezone.now)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def __str__(self):
+#         return self.incentive_code
+    
+    
+class Incentive_Currency_Type(models.Model):
+    currency_type = models.CharField(max_length=255, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.Unique_identifier
+        return self.currency_type
 
 
-# Project Interview
-class ProjectInterview(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    interview_duration_hours = models.CharField(max_length=255)
-    interview_duration_minutes = models.CharField(max_length=255)
-    interview_date = models.CharField(max_length=255)
-    respondent_id = models.IntegerField(null=True,blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
+# # Project Interview
+# class ProjectInterview(models.Model):
+#     # project = models.ForeignKey(Project, on_delete=models.CASCADE)
+#     interview_duration_hours = models.CharField(max_length=255)
+#     interview_duration_minutes = models.CharField(max_length=255)
+#     interview_date = models.CharField(max_length=255)
+#     respondent_id = models.IntegerField(null=True,blank=True)
+#     is_active = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(default=timezone.now)
+#     updated_at = models.DateTimeField(auto_now=True)
 
 
 # Role Master
@@ -321,38 +331,48 @@ class Respondent(models.Model):
     middle_name = models.CharField(max_length=255,null=True,blank=True)
     last_name = models.CharField(max_length=255,null=True,blank=True)
     custom_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='respondents')
-    job = models.CharField(max_length=100,  null=True, blank=True)
+    job = models.CharField(max_length=100,null=True, blank=True)
     email = models.EmailField()
     respondent_email = models.EmailField(null=True,blank=True)
-    respondent_phone = models.ForeignKey(PhoneNumber,on_delete=models.CASCADE,null=True,blank=True)
     user_manager = models.CharField(max_length=255)
     user_manager_email = models.EmailField()
     hod_email = models.EmailField()
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
-    industry = models.ForeignKey(Industry, on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    incentive_type = models.CharField(max_length=255)
+    respondent_phone = models.CharField(max_length=20,null=True, blank=True)
+    phone_code = models.ForeignKey(PhoneCode, on_delete=models.CASCADE,null=True,blank=True)
+    currency_type = models.ForeignKey(Currency_Type, on_delete=models.CASCADE,null=True,blank=True)
+    analyst = models.CharField(max_length=255,null=True, blank=True)
+    project_name = models.CharField(max_length=255,null=True, blank=True)
+    project_type = models.ForeignKey(ProjectType, on_delete=models.CASCADE)
+    project_code = models.CharField(max_length=255,null=True,blank=True)
+    incentive_code = models.CharField(max_length=255,null=True,blank=True)
+    incentive_type_id = models.ForeignKey(IncentiveType, on_delete=models.CASCADE, null=True, blank=True)
+    incentive_amount = models.CharField(max_length=255, verbose_name='Incentive Amount',null=True,blank=True)
+    incentive_currency_type = models.ForeignKey(Incentive_Currency_Type, on_delete=models.CASCADE,null=True,blank=True)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE,null=True,blank=True)
+    industry = models.ForeignKey(Industry, on_delete=models.CASCADE,null=True,blank=True)
+    industry_sub_cate = models.ForeignKey(Industry_Sub_Cate, on_delete=models.CASCADE,null=True,blank=True)
+    company_name = models.CharField(max_length=100 , null=True , blank=True)
+    company_revenue = models.CharField(max_length=255,null=True, blank=True)
+    client_name = models.CharField(max_length=100,null=True, blank=True)
+    interview_duration_hours = models.CharField(max_length=255)
+    interview_duration_minutes = models.CharField(max_length=255)
+    interview_date = models.CharField(max_length=255)
     payment_id = models.CharField(max_length=100 , null=True , blank=True)
-    analyst = models.ForeignKey(Analyst, on_delete=models.CASCADE)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    incentive = models.ForeignKey(Incentive, on_delete=models.CASCADE)
-    project_interview = models.ForeignKey(ProjectInterview, on_delete=models.CASCADE)
     linkdin_profile = models.CharField(max_length=255,null=True, blank=True)
     team_lead = models.CharField(max_length=255,blank=True,null=True)
     Department = models.CharField(max_length=255,blank=True,null=True)
     remark = models.TextField(blank=True, null=True)
     payment_mode = models.CharField(max_length=50 ,null=True, blank=True)
     pay_status = models.BooleanField(default=0,blank=True, null=True)
+    voucher_productid = models.CharField(max_length=255,null=True, blank=True)
+    voucher_value = models.CharField(max_length=255,null=True, blank=True)
+    voucher_quantity = models.CharField(max_length=255,null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.name
-    
-
-
-
 
 
 class payment_status(models.Model):
@@ -372,6 +392,46 @@ class payment_status(models.Model):
     def __str__(self):
         return self.payment_status
     
-    
-    
-    
+
+
+class Order(models.Model):
+    order_id = models.BigIntegerField(unique=True)
+    order_total = models.CharField(max_length=30, null=True, blank=True)
+    order_discount = models.CharField(max_length=30, null=True, blank=True)
+    discount_percent = models.CharField(max_length=30, null=True, blank=True)
+    currency_code = models.CharField(max_length=20)
+    currency_value = models.CharField(max_length=30, null=True, blank=True)
+    amount_charged = models.CharField(max_length=30, null=True, blank=True)
+    order_status = models.CharField(max_length=20)
+    delivery_status = models.CharField(max_length=20)
+    tag = models.CharField(max_length=255, null=True, blank=True)
+    quantity = models.IntegerField()
+
+    def __str__(self):
+        return f"Order {self.order_id}"
+
+class Voucher(models.Model):
+    order = models.ForeignKey(Order, related_name='vouchers', on_delete=models.CASCADE)
+    product_id = models.BigIntegerField()
+    voucher_code = models.CharField(max_length=50)
+    pin = models.CharField(max_length=50, null=True, blank=True)
+    validity = models.DateField()
+    amount = models.CharField(max_length=30, null=True,blank=True)
+    currency = models.CharField(max_length=10)
+    country = models.CharField(max_length=10)
+    voucher_type = models.CharField(max_length=20)
+    currency_value = models.CharField(max_length=20,null=True,blank=True)
+
+    def __str__(self):
+        return f"Voucher {self.voucher_code} for Order {self.order.order_id}"
+
+class VoucherDetails(models.Model):
+    order = models.ForeignKey(Order, related_name='voucher_details', on_delete=models.CASCADE)
+    product_id = models.BigIntegerField()
+    product_name = models.CharField(max_length=255)
+    currency_code = models.CharField(max_length=10)
+    product_status = models.CharField(max_length=20)
+    denomination = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"VoucherDetail {self.product_name} for Order {self.order.order_id}"

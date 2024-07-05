@@ -45,12 +45,14 @@ INSTALLED_APPS = [
     'api.xoxo',
     'novusapp',
     'paypal.standard.ipn',
+    'corsheaders',
     
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -66,6 +68,8 @@ MIDDLEWARE = [
 
 # Set session timeout to 30 days (30 days * 24 hours * 60 minutes * 60 seconds)
 SESSION_COOKIE_AGE = 2592000
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 ROOT_URLCONF = 'novusproject.urls'
@@ -89,6 +93,23 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'novusproject.wsgi.application'
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8000',  # Adjust as needed
+    'http://127.0.0.1:8000',
+   
+]
+
+CORS_ALLOW_HEADERS = '*'
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+CORS_ALLOW_CREDENTIALS = True
 
 
 # Database
@@ -200,42 +221,6 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
     'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
-
-
-
-#JAZZMIN_SETTINGS = {
-#     "site title": "Novus Log Administrator",
-#     "site_logo": "images/novus_logo.png",
-#     "site_brand": "Novus Admin",
-#     "copyright": "Novus Insights Ltd",
-#     "site_logo_classes": "img-circle",
-#     "welcome_sign": "Welcome to the Novus Admin",
-
-     # "topmenu_links": [
-
-     #     # Url that gets reversed (Permissions can be added)
-     #     {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
-
-     #     # external url that opens in a new window (Permissions can be added)
-     #     {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
-
-     #     # model admin to link to (Permissions checked against model)
-     #     {"model": "auth.User"},
-
-     #     # App with dropdown menu to all its models pages (Permissions checked against models)
-     #     {"app": "CustomUser"},
-      #],
-
-
-    
-
-    
-    
-#}
-#JAZZMIN_SETTINGS["show_ui_builder"] = True
-
-# settings.py
-
 
 
 # settings.py

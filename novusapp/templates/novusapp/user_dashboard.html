@@ -27,6 +27,22 @@
             </div>
             
             <div class="clearfix"></div>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="col-md-2">
+							<form id="uploadForm" method="POST" enctype="multipart/form-data" action="{% url 'user_dashboard_data' %}">
+								{% csrf_token %}
+								<!-- other form fields -->
+								<div class="form-group">
+								<label for="excel_file">Upload Excel File</label>
+								<input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls" class="form-control-file">
+								<div id="fileError" class="error-message" style="color: red; display: none;">File not selected. Please choose a file.</div>
+								</div>
+								<button type="submit" id="uploadButton" class="btn btn-primary mt-2">Upload</button>
+							</form>
+						</div>	
+					</div>	
+				</div>
 
             <div class="row">
               <div class="col-md-12">
@@ -35,6 +51,7 @@
                     	<h2>Respondent Form Data </h2>
              
                   	</div>
+					
                   	<div class="x_content">
 						<div class="col-md-12 col-lg-12 ">
 					
@@ -72,7 +89,7 @@
 											<select id="Phone_number_code" class="input-group-addon" name="Phone_number_code">
 												<option value="" disabled selected>Select Code</option>
 												{% for code in phone_code %}
-												<option value="{{code.phone_code}}">{{code.phone_code}}</option>
+												<option value="{{code.id}}">{{code.phone_code}}</option>
 												{% endfor %}
 											</select>
 											<input type="text" id="phone_number" placeholder="Phone Number" name="phone_number" class="form-control input-space">
@@ -101,7 +118,7 @@
 										<select id="company_revenue_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="company_revenue_currency_type">
 											<option value="" disabled selected>CUR</option>
 											{% for currency in currency_type %}
-											<option value="{{currency.currency_type}}" style="color: black;">{{currency.currency_type}}</option>
+											<option value="{{currency.id}}" style="color: black;">{{currency.currency_type}}</option>
 											{% endfor %}
 													
 										</select>
@@ -111,7 +128,7 @@
 										<select id="country" class="form-control input-space" placeholder="Country" name="country" required="required"> 
 											<option value="" disabled selected>---SELECT COUNTRY*---</option>
 											{% for data in allcountry %}
-											<option value="{{data.name}}">{{data.name}}</option>
+											<option value="{{data.id}}">{{data.name}}</option>
 											{% endfor %}
 										</select>
 									</div>
@@ -136,7 +153,7 @@
 													{% if subcategories %}
 														<optgroup label="{{ industry.name }}">
 															{% for subcategory in subcategories %}
-																<option value="{{ subcategory.name }}">{{ subcategory.name }}</option>    
+																<option value="{{ subcategory.id }}">{{ subcategory.name }}</option>    
 															{% endfor %}
 														</optgroup>
 													{% endif %}
@@ -154,8 +171,8 @@
 										<span id="incentiveError" class="error-message"></span>
 										<select id="incentive_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="incentive_currency_type" style="border:black;" required="required">
 											<option value="" disabled selected>CUR</option>
-											{% for currency in currency_type %}
-											<option value="{{currency.currency_type}}" style="color: black;">{{currency.currency_type}}</option>
+											{% for currency in incentive_currency_type %}
+											<option value="{{currency.id}}" style="color: black;">{{currency.currency_type}}</option>
 											{% endfor %}
 											
 										</select>
@@ -164,20 +181,10 @@
 									<div class="col-md-4 col-sm-4">
 										<input id="project" class="form-control input-space" placeholder="Incentive Code*" type="text" name="incentive_code"required="required">
 									</div>
-
 									<div class="col-md-4 col-sm-4">
-										<select id="incentive_type" class="form-control input-space" name="incentive_type" required="required">
-											<option value="" disabled selected>---SELECT INCENTIVE TYPE*---</option>
-											{% for type in Incentive_Type %}
-											<option value="{{type.id}}">{{type.name}}</option>
-											{% endfor %}
-											
-										</select>
+										<input id="interview_date" class="date-picker form-control input-space" placeholder="Interview Date * " name="interview_date" placeholder="dd-mm-yyyy" type="text" required="required" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)" style="margin-bottom: 10px;">
 									</div>
-
 								</div>
-
-								
 
 								<div class="form-group row ">
 									<div class="col-md-4 col-sm-4">
@@ -203,15 +210,23 @@
 
 								
 								<div class="form-group row ">
+
 									<div class="col-md-4 col-sm-4">
 										<input id="linkdin_profile" class="form-control input-space" placeholder="Linkdin Profile" type="text" name="linkdin_profile">
 									</div>
 
+									
+				
 									<div class="col-md-4 col-sm-4">
-										<input id="interview_date" class="date-picker form-control input-space" placeholder="Interview Date * " name="interview_date" placeholder="dd-mm-yyyy" type="text" required="required" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)" style="margin-bottom: 10px;">
+										<select id="incentive_type" class="form-control input-space" name="incentive_type" required="required">
+											<option value="" disabled selected>---SELECT INCENTIVE TYPE*---</option>
+											{% for type in Incentive_Type %}
+											<option value="{{type.id}}">{{type.name}}</option>
+											{% endfor %}
+											
+										</select>
 									</div>
 
-				
 									<div class="col-md-4 col-sm-4">
 										<div class="input-group">
 											<div class="form-group">
@@ -244,29 +259,81 @@
 										</div>
 									</div>
 								</div>
-
-								<div class="ln_solid"></div>
-										
-								<div class="form-group row">
-									<div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-										<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Submit</button>
-										<button class="btn btn-danger btn-attractive rounded-lg"  type="reset">Reset</button>
-									</div>
-								</div>
-							</form>
 							<div id="errorMessages" class="error"></div>
-						</div>	
 
 						<p></p>
 
 						<!-- start project list -->
 						<table class="table table-striped projects">
+							<div class="x_panel ml-2" id="xoxoDayPanel">
+								<div class="x_content">
+									{% comment %} <div class="title_left">
+									<h2 class="text-dark">Recipient Details</h2>
+									</div>
+									<div class="col-md-12 col-lg-12 ">
+										<div id="errorMessages" class="error"></div>
+									</div> {% endcomment %}
+									
+									<div class="form-group row">                        
+										<div class="col-md-12 col-lg-12">
+										  <h2 class="text-dark">Voucher Details </h2>     
+										</div>
+						  
+										<div class="form-group col-md-3 col-sm-3">
+											<select id="select-voucher" class="form-control" name="selected_voucher" >
+											  <option value="" disabled selected>Select Voucher</option>
+											</select>
+											<div id="vouchers-container" class="d-flex flex-wrap w-100 h-100"></div>
+										  </div>
+										  
+										<div class="form-group col-md-3 col-sm-3">
+											<select id="voucher_value_data" class="form-control" name="voucher_value" >
+												<option value="" disabled selected>Voucher value Ex. 100</option>
+											</select>
+											<div id="vouchers-value" class="d-flex flex-wrap w-100 h-100"></div>
+										</div>
+										  
+										  
 					
+										<div class="form-group col-md-3 col-sm-3">
+											<input id="numberInput" class="form-control" type="number" name="number" placeholder="No. of Vouchers" data-validate-minmax="1,100">
+											<div id="validationMessage" class="error-message"></div>
+										</div>
+			
+										<div class="form-group col-md-3 col-sm-3">
+										  <h2 class="text-dark" id = "total_price">Total : 0:00 <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="bottom" title="Item Total: USD 0.00 Total Payable: USD 0.00" aria-hidden="true"></i></h2>
+										</div> 
+									</div> 
+									<div class="form-group row d-grid gap-2 d-md-flex justify-content-md-end">
+									{% comment %} <button type="button" class="btn btn-md btn-primary float:right">Add</button> {% endcomment %}
+									</div>      
+								</div>
+							</div> 
+							<div class="x_panel ml-2">
+								<div class="x_content">
+									<div class="title_left">
+									{% comment %} <h2 class="text-dark">Grand Total : USD 00:00 </h2> {% endcomment %}
+									</div>  
+									<div class="form-group row">
+										<div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+											<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Submit</button>
+											<button class="btn btn-danger btn-attractive rounded-lg"  type="reset">Reset</button>
+										</div>
+									</div>
+								</form> 
+									</div>  
+								</div> 
+						  </div>
+			  </div>
 						</table>
 						<!-- end project list -->
 					</div>
+
+					
                 </div>
-              </div>
+				
+				  
+				
             </div>
           </div>
         </div>
@@ -292,6 +359,251 @@
 		}, 8000);
 	});
 </script>
+
+<script>
+	document.addEventListener('DOMContentLoaded', (event) => {
+	  const incentiveTypeDropdown = document.getElementById('incentive_type');
+	  const xoxoDayPanel = document.getElementById('xoxoDayPanel');
+	  const selectVoucher = document.getElementById('select-voucher');
+	  const voucherValueDropdown = document.getElementById('voucher_value_data');
+	  const numberInput = document.getElementById('numberInput');
+  
+	  // Function to toggle required attributes and visibility of Xoxo Day panel
+	  function toggleXoxoDayPanel() {
+		const selectedText = incentiveTypeDropdown.options[incentiveTypeDropdown.selectedIndex].text;
+  
+		if (selectedText === "Xoxo Day") {
+		  xoxoDayPanel.style.display = 'inline-block';
+		  selectVoucher.required = true;
+		  voucherValueDropdown.required = true;
+		  numberInput.required = true;
+		} else {
+		  xoxoDayPanel.style.display = 'none';
+		  selectVoucher.required = false;
+		  voucherValueDropdown.required = false;
+		  numberInput.required = false;
+		}
+	  }
+  
+	  // Attach event listener to the dropdown to call the function on change
+	  incentiveTypeDropdown.addEventListener('change', toggleXoxoDayPanel);
+  
+	  // Initial call to set the correct visibility and required attributes based on the default selection
+	  toggleXoxoDayPanel();
+	});
+  </script>
+  
+	
+  {% comment %} <script>
+	document.addEventListener('DOMContentLoaded', (event) => {
+	  const selectVoucher = document.getElementById('select-voucher');
+	  const voucherValueDropdown = document.getElementById('voucher_value_data');
+  
+	  // Function to update the voucher value dropdown
+	  function updateVoucherValues(valueDenominations) {
+		// Check if valueDenominations is an array
+		if (Array.isArray(valueDenominations)) {
+			console.log("🚀 ~ updateVoucherValues ~ valueDenominations:", valueDenominations);
+	
+			
+			voucherValueDropdown.innerHTML = '';
+			if (valueDenominations.length > 0 && typeof valueDenominations[0] === 'string') {
+				const splitValues = valueDenominations[0].split(',').map(value => value.trim());
+				splitValues.forEach(value => {
+					const option = document.createElement('option'); 
+					option.value = value;
+					option.text = `INR ${value}`; 
+					voucherValueDropdown.appendChild(option);
+				});
+			} else {
+				console.error('Expected a comma-separated string in the array:', valueDenominations);
+			}
+		} else {
+			console.error('valueDenominations is not an array:', valueDenominations);
+		}
+	}
+	
+	
+  
+	  // Fetch vouchers and populate the select-voucher dropdown
+	  fetch('http://127.0.0.1:8000/api/xoxo/vouchers/')
+		.then(response => response.json())
+		.then(data => {
+		  // Log the entire data to ensure it's structured correctly
+		  console.log('API response:', data);
+  
+		  const vouchers = data.data.getVouchers.data;
+  
+		  vouchers.forEach(voucher => {
+			// Create a new option element for the dropdown
+			const option = document.createElement('option');
+			option.value = voucher.productId;
+			option.text = voucher.name;
+			// Check if valueDenominations is an array before storing
+			if (voucher.valueDenominations) {
+				
+			  option.dataset.denominations = JSON.stringify(voucher.valueDenominations); // Store denominations as a data attribute
+			} else {
+			  console.error('valueDenominations for voucher is not an array:', voucher.valueDenominations);
+			  option.dataset.denominations = '[]'; // Store an empty array to avoid issues
+			}
+			selectVoucher.appendChild(option);
+		  });
+		})
+		.catch(error => console.error('Error fetching vouchers:', error));
+  
+	  // Add event listener to update voucher value dropdown based on selected voucher
+	  selectVoucher.addEventListener('change', (event) => {
+		const selectedOption = selectVoucher.options[selectVoucher.selectedIndex];
+		// Parse the denominations from the data attribute
+		let valueDenominations;
+		try {
+		  valueDenominations = new Array(JSON.parse(selectedOption.dataset.denominations));
+		  
+		  //const valueDenominationsArray = new Array(valueDenominations)
+		  updateVoucherValues(valueDenominations);
+		} catch (e) {
+		  console.error('Failed to parse valueDenominations:', e);
+		  valueDenominationsArray = []; // Fallback to an empty array
+		  updateVoucherValues(valueDenominations);
+		}
+  
+		// Update the voucher value dropdown with denominations
+		// updateVoucherValues(valueDenominationsArray);
+	  });
+	});
+  </script> {% endcomment %}
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const selectVoucher = document.getElementById('select-voucher');
+        const voucherValueDropdown = document.getElementById('voucher_value_data');
+        const numberInput = document.getElementById('numberInput');
+        const totalPriceElement = document.getElementById('total_price');
+
+        // Conversion rate from INR to USD (this should be updated with the latest rate)
+        const conversionRate = 0.012; // Example rate: 1 INR = 0.012 USD
+
+        // Function to update the voucher value dropdown
+        function updateVoucherValues(valueDenominations) {
+            // Check if valueDenominations is an array
+            if (Array.isArray(valueDenominations)) {
+                console.log("🚀 ~ updateVoucherValues ~ valueDenominations:", valueDenominations);
+
+                voucherValueDropdown.innerHTML = '';
+                if (valueDenominations.length > 0 && typeof valueDenominations[0] === 'string') {
+                    const splitValues = valueDenominations[0].split(',').map(value => value.trim());
+                    splitValues.forEach(value => {
+                        const option = document.createElement('option'); 
+                        option.value = value;
+                        option.text = `INR ${value}`; 
+                        voucherValueDropdown.appendChild(option);
+                    });
+                } else {
+                    console.error('Expected a comma-separated string in the array:', valueDenominations);
+                }
+            } else {
+                console.error('valueDenominations is not an array:', valueDenominations);
+            }
+        }
+
+        // Function to calculate and display the total price
+        function calculateTotalPrice() {
+            const selectedVoucherValue = parseFloat(voucherValueDropdown.value);
+            const numberOfVouchers = parseInt(numberInput.value, 10);
+
+            if (!isNaN(selectedVoucherValue) && !isNaN(numberOfVouchers)) {
+                const totalInRupees = selectedVoucherValue * numberOfVouchers;
+                const totalInDollars = (totalInRupees * conversionRate).toFixed(2); // Convert to USD and format to 2 decimal places
+                totalPriceElement.innerHTML = `Total: USD ${totalInDollars}`;
+            } else {
+                totalPriceElement.innerHTML = `Total: 0:00`;
+            }
+        }
+
+        // Fetch vouchers and populate the select-voucher dropdown
+        fetch('http://127.0.0.1:8000/api/xoxo/vouchers/')
+            .then(response => response.json())
+            .then(data => {
+                // Log the entire data to ensure it's structured correctly
+                console.log('API response:', data);
+
+                const vouchers = data.data.getVouchers.data;
+
+                vouchers.forEach(voucher => {
+                    // Create a new option element for the dropdown
+                    const option = document.createElement('option');
+                    option.value = voucher.productId;
+                    option.text = voucher.name;
+                    // Check if valueDenominations is an array before storing
+                    if (voucher.valueDenominations) {
+                        option.dataset.denominations = JSON.stringify(voucher.valueDenominations); // Store denominations as a data attribute
+                    } else {
+                        console.error('valueDenominations for voucher is not an array:', voucher.valueDenominations);
+                        option.dataset.denominations = '[]'; // Store an empty array to avoid issues
+                    }
+                    selectVoucher.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching vouchers:', error));
+
+        // Add event listener to update voucher value dropdown based on selected voucher
+        selectVoucher.addEventListener('change', (event) => {
+            const selectedOption = selectVoucher.options[selectVoucher.selectedIndex];
+            // Parse the denominations from the data attribute
+            let valueDenominations;
+            try {
+                valueDenominations = new Array(JSON.parse(selectedOption.dataset.denominations));
+                updateVoucherValues(valueDenominations);
+            } catch (e) {
+                console.error('Failed to parse valueDenominations:', e);
+                valueDenominations = []; // Fallback to an empty array
+                updateVoucherValues(valueDenominations);
+            }
+        });
+
+        // Add event listeners to calculate total price when voucher value or number input changes
+        voucherValueDropdown.addEventListener('change', calculateTotalPrice);
+        numberInput.addEventListener('input', calculateTotalPrice);
+    });
+</script>
+  
+  <script>
+	const numberInput = document.getElementById('numberInput');
+	const validationMessage = document.getElementById('validationMessage');
+
+	numberInput.addEventListener('input', function() {
+		validateInput();
+	});
+
+	function validateInput() {
+		const inputValue = numberInput.value.trim();
+		if (inputValue === '') {
+			validationMessage.textContent = 'Field cannot be blank';
+			numberInput.style.borderColor = 'red';
+		} else {
+			const numberValue = parseFloat(inputValue);
+			if (isNaN(numberValue) || numberValue <= 0 || !Number.isInteger(numberValue)) {
+				validationMessage.textContent = 'Minimum order quantity for eGift voucher is 1 and must be a Integer number';
+				numberInput.style.borderColor = 'red';
+			} else {
+				validationMessage.textContent = '';
+				numberInput.style.borderColor = ''; // Reset border color if valid
+			}
+		}
+	}
+</script>
+
+ 
+  
+  <script>
+	$(document).ready(function(){
+	  $('[data-toggle="tooltip"]').tooltip();
+	});
+  </script>
+	
+	
 
 <script>
     // Function to populate the hour and minute dropdowns with a specified interval
@@ -403,6 +715,19 @@ function validateCompanyRevenue() {
 function isInteger(value) {
 	return /^\d+$/.test(value);
 }
+
+
+    document.getElementById('uploadButton').addEventListener('click', function(event) {
+      var fileInput = document.getElementById('excel_file');
+      var fileError = document.getElementById('fileError');
+      if (fileInput.files.length === 0) {
+        event.preventDefault();  // Prevent form submission
+        fileError.style.display = 'block';  // Show error message
+      } else {
+        fileError.style.display = 'none';  // Hide error message
+      }
+    });
+ 
 </script>
 	
 {% endblock script %}

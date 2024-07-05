@@ -31,12 +31,13 @@ urlpatterns = [
     path('loginDemo/', views.loginDemo, name='loginDemo'),
     path('send_email',views.send_email, name="send_email"),
     path('reset-password/<str:token>/', views.reset_password_view, name="reset-password"),
+    path('user_dashboard/data',views.user_excel_data, name='user_dashboard_data'),
+    
+###############################Payment URL##################################################################       
     path('payment-page/', views.payment_page, name='payment_page'),
     path('process-payment/<int:pk>/', views.process_payment, name='process_payment'),
     path('payment-done/', views.payment_done, name='payment_done'),
-    path('payment-cancelled/', views.payment_cancelled, name='payment_cancelled'),
-    
-###############################Payment URL##################################################################    
+    path('payment-cancelled/', views.payment_cancelled, name='payment_cancelled'), 
     path('xoxo_login/', views.xoxo_login, name='xoxo_login'),
     path('xoday_payment/', views.process_xoxo_day_payment, name='xoxo_day_payment'),
     path('api/xoxo/vouchers/', get_vouchers, name='get_vouchers'),

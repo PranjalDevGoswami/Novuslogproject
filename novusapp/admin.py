@@ -20,17 +20,17 @@ class IndustryAdmin(ImportExportModelAdmin):
 class JobAdmin(admin.ModelAdmin):
     list_display = ('title',)
 
-@admin.register(Company)
-class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('name','revenue','revenue_currency_type')
+# @admin.register(Company)
+# class CompanyAdmin(admin.ModelAdmin):
+#     list_display = ('name','revenue','revenue_currency_type')
     
 @admin.register(Currency_Type)
 class CompanyAdmin(ImportExportModelAdmin):
     list_display = ('currency_type',)
     
-@admin.register(Analyst)
-class AnalystAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created_at', 'updated_at')
+# @admin.register(Analyst)
+# class AnalystAdmin(admin.ModelAdmin):
+#     list_display = ('title', 'created_at', 'updated_at')
 
 @admin.register(Department)
 class DepartmentAdmin(ImportExportModelAdmin):
@@ -40,29 +40,30 @@ class DepartmentAdmin(ImportExportModelAdmin):
 class ProjectTypeAdmin(ImportExportModelAdmin):
     list_display = ('name',)
     
-@admin.register(Project)
-class ProjectAdmin(ImportExportModelAdmin):
-    list_display = ('name','project_type','project_code','LOI')
+# @admin.register(Project)
+# class ProjectAdmin(ImportExportModelAdmin):
+#     list_display = ('name','project_type','project_code','LOI')
       
 @admin.register(IncentiveType)
 class IncentiveTypeAdmin(admin.ModelAdmin):
     list_display = ('name',)
     
-@admin.register(PhoneNumber)
-class PhoneNumberAdmin(ImportExportModelAdmin):
-    list_display = ('phone_number',)
+# @admin.register(PhoneNumber)
+# class PhoneNumberAdmin(ImportExportModelAdmin):
+#     list_display = ('phone_number',)
     
 @admin.register(PhoneCode)
 class PhoneCodeAdmin(ImportExportModelAdmin):
+    
     list_display = ('phone_code',)
     
-@admin.register(Incentive)
-class IncentiveAdmin(admin.ModelAdmin):
-    list_display = ('project','Unique_identifier')
+# @admin.register(Incentive)
+# class IncentiveAdmin(admin.ModelAdmin):
+#     list_display = ('project','Unique_identifier')
 
-@admin.register(ProjectInterview)
-class ProjectInterviewAdmin(ImportExportModelAdmin):
-    list_display = ('project','interview_date')
+# @admin.register(ProjectInterview)
+# class ProjectInterviewAdmin(ImportExportModelAdmin):
+#     list_display = ('interview_date',)
 
 @admin.register(Respondent)
 # class HodAdmin(admin.ModelAdmin):
@@ -93,3 +94,21 @@ class CustomUserAdmin(admin.ModelAdmin):
     list_display = ('email','username','role','user_manager','hod_name','mobile','is_active','is_staff')
 
 admin.site.register(payment_status)
+
+
+@admin.register(Incentive_Currency_Type)
+class CompanyAdmin(ImportExportModelAdmin):
+    list_display = ('currency_type',)
+    
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('order_id', 'order_status', 'delivery_status', 'quantity')
+
+@admin.register(Voucher)
+class VoucherAdmin(admin.ModelAdmin):
+    list_display = ('voucher_code', 'validity', 'currency', 'order')
+
+@admin.register(VoucherDetails)
+class VoucherDetailsAdmin(admin.ModelAdmin):
+    list_display = ('product_name', 'product_status','order')

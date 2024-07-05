@@ -10,7 +10,8 @@
 <title>TeamLead Data</title>
 {% endblock title %}
 
-{% endblock head %} {% block right_col %}
+{% endblock head %} 
+{% block right_col %}
 <div class="right_col" role="main">
   <div class="">
     <div class="page-title">
@@ -80,6 +81,7 @@
     </div>
 
       <div class="clearfix"></div>
+      
       <div class="btn btn-info simple-link" data-type="self" style="cursor: pointer;">
         <a href="{% url 'userdata' %}?type=self" style="color: white; text-decoration: none;">
             Own Data
@@ -110,87 +112,87 @@
             <p></p>
 
             <!-- start project list -->
-            <div class="table-responsive">
-              <table id="respondent-table" class="table table-striped jambo_table bulk_action">
-                  <thead>
-                      <tr class="headings">
-                          <th class="column-title">Sr.No</th>
-                          <th class="column-title">Respondent Name</th>
-                          <th class="column-title">Email</th>
-                          <th class="column-title">Phone Number</th>
-                          <th class="column-title">Job Title</th>
-                          <th class="column-title">Company</th>
-                          <th class="column-title">Country</th>
-                          <th class="column-title">Industry</th>
-                          <th class="column-title">Interviewer Name</th>
-                          <th class="column-title">Project</th>
-                          <th class="column-title">Project Type</th>
-                          <th class="column-title">Company Revenue</th>
-                          <th class="column-title">Incentive</th>
-                          {% comment %} <th class="column-title">Interview Duration</th>
-                          <th class="column-title">Interview Date</th>
-                          <th class="column-title">Team Lead</th> {% endcomment %}
-			                    <th class="column-title">Manager</th>
-                          {% comment %} <th class="column-title">Department</th> {% endcomment %}
-                          <th class="column-title">Remark</th> 
-                          <th class="column-title">Status</th> 
-                          <th class="column-title">Action</th> 
-                                                 
+              <div class="table-responsive">
+                <table id="respondent-table" class="table table-striped projects jambo_table bulk_action">
+                    <thead>
+                        <tr class="headings">
+                            <th class="column-title">Sr.No</th>
+                            <th class="column-title">Respondent Name</th>
+                            <th class="column-title">Email</th>
+                            <th class="column-title">Phone Number</th>
+                            <th class="column-title">Job Title</th>
+                            <th class="column-title">Company</th>
+                            <th class="column-title">Country</th>
+                            <th class="column-title">Industry</th>
+                            <th class="column-title">Interviewer Name</th>
+                            <th class="column-title">Project</th>
+                            <th class="column-title">Project Type</th>
+                            <th class="column-title">Company Revenue</th>
+                            <th class="column-title">Incentive</th>
+                            {% comment %} <th class="column-title">Interview Duration</th>
+                            <th class="column-title">Interview Date</th>
+                            <th class="column-title">Team Lead</th> {% endcomment %}
+                            <th class="column-title">Manager</th>
+                            {% comment %} <th class="column-title">Department</th> {% endcomment %}
+                            <th class="column-title">Remark</th> 
+                            <th class="column-title">Status</th> 
+                            <th class="column-title">Action</th> 
+                                                  
+                        </tr>
+                    </thead>
+            
+                    <tbody>
+                      
+                      {% for respondent in respondents %}
+                      <tr class="even pointer">
+                          <td class=" ">{{ forloop.counter }}</td>
+                          <td class=" ">{{ respondent.name }} {{respondent.middle_name|default_if_none:""}} {{respondent.last_name|default_if_none:""}}</td>
+                          <td class=" ">{{ respondent.respondent_email}}</td>
+                          <td class=" ">{{ respondent.phone_code.phone_code}} {{ respondent.respondent_phone}}</td>
+                          <td class=" ">{{ respondent.job}}</td>
+                          <td class=" ">{{ respondent.company_name}}</td>
+                          <td class=" ">{{ respondent.country.name }}</td>
+                          <td class=" ">{{ respondent.industry_sub_cate.name }}</td>
+                          <td class=" ">{{ respondent.analyst.title }}</td>
+                          <td class=" ">{{ respondent.project_name }}</td>
+                          <td class=" ">{{ respondent.project_type }}</td>
+                          {% if respondent.company_revenue == "0" %}
+                          <td class="">&nbsp;</td>
+                          {% else %}
+                          <td class="">{{ respondent.company_revenue}} {{respondent.currency_type}}</td>
+                          {% endif %}
+                          <td class=" ">{{ respondent.incentive_amount}} {{respondent.incentive_currency_type}}</td>
+                          {% comment %} <td class=" ">{{ respondent.project_interview.interview_duration_hours}}hr:{{respondent.project_interview.interview_duration_minutes}}min</td>
+                          <td class=" ">{{ respondent.project_interview.interview_date }}</td>
+                          <td class=" ">{{respondent.team_lead|default_if_none:"" }}</td> {% endcomment %}
+                          <td class="">{{respondent.user_manager|default_if_none:"" }}</td>
+                          {% comment %} <td class=" ">{{respondent.Department|default_if_none:"" }}</td> {% endcomment %}
+                          <!-- Inside the loop -->
+                          {% if respondent.remark %}
+                          <td><h2><span class="badge badge-danger">{{ respondent.remark }}</span></h2></td>
+                          {% else %}
+                          <td><h2><span class="badge badge-danger"></span></h2></td>
+                          {% endif %}
+                          
+                          {% if respondent.is_active == 0 %}
+                          <td><h2><span class="badge badge-danger">Pending</span></h2></td>
+                          {% elif respondent.is_active == 1 %}
+                          <td><h2><span class="badge badge-success">Complete</span></h2></td>
+                          {% endif %}
+                          {% if not respondent.remark %}
+                              <td>
+                                <a href="{% url 'edit_respondent' respondent.pk %}" class="btn btn-primary">Edit</a>
+                              </td>   
+                          {% else %}
+                          <td>
+                            <button class="btn btn-primary btn-sm" disabled>Edit</button>
+                          </td> 
+                          {% endif %}
                       </tr>
-                  </thead>
-          
-                  <tbody>
-                     
-                    {% for respondent in respondents %}
-                    <tr class="even pointer">
-                        <td class=" ">{{ forloop.counter }}</td>
-                        <td class=" ">{{ respondent.name }} {{respondent.middle_name|default_if_none:""}} {{respondent.last_name|default_if_none:""}}</td>
-                        <td class=" ">{{ respondent.respondent_email}}</td>
-                        <td class=" ">{{ respondent.respondent_phone.phone_code }} {{ respondent.respondent_phone.phone_number }}</td>
-                        <td class=" ">{{ respondent.job.title }}</td>
-                        <td class=" ">{{ respondent.company.name }}</td>
-                        <td class=" ">{{ respondent.country.name }}</td>
-                        <td class=" ">{{ respondent.industry.name }}</td>
-                        <td class=" ">{{ respondent.analyst.title }}</td>
-                        <td class=" ">{{ respondent.project.name }}</td>
-                        <td class=" ">{{ respondent.project.project_type }}</td>
-                        {% if respondent.company.revenue == "0" %}
-                        <td class="">&nbsp;</td>
-                        {% else %}
-                        <td class="">{{ respondent.company.revenue}} {{respondent.company.revenue_currency_type}}</td>
-                        {% endif %}
-                        <td class=" ">{{ respondent.incentive.Unique_identifier }} {{respondent.incentive.incentive_currency_type}}</td>
-                        {% comment %} <td class=" ">{{ respondent.project_interview.interview_duration_hours}}hr:{{respondent.project_interview.interview_duration_minutes}}min</td>
-                        <td class=" ">{{ respondent.project_interview.interview_date }}</td>
-                        <td class=" ">{{respondent.team_lead|default_if_none:"" }}</td> {% endcomment %}
-                        <td class="">{{respondent.user_manager|default_if_none:"" }}</td>
-                        {% comment %} <td class=" ">{{respondent.Department|default_if_none:"" }}</td> {% endcomment %}
-                         <!-- Inside the loop -->
-                         {% if respondent.remark %}
-                         <td><h2><span class="badge badge-danger">{{ respondent.remark }}</span></h2></td>
-                         {% else %}
-                         <td><h2><span class="badge badge-danger"></span></h2></td>
-                         {% endif %}
-                         
-                        {% if respondent.is_active == 0 %}
-			                  <td><h2><span class="badge badge-danger">Pending</span></h2></td>
-                        {% elif respondent.is_active == 1 %}
-			                  <td><h2><span class="badge badge-success">Complete</span></h2></td>
-                        {% endif %}
-                        {% if not respondent.remark %}
-                            <td>
-                              <a href="{% url 'edit_respondent' respondent.pk %}" class="btn btn-primary">Edit</a>
-                            </td>   
-                        {% else %}
-                        <td>
-                          <button class="btn btn-primary btn-sm" disabled>Edit</button>
-                        </td> 
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-              </table>
-            </div>
+                      {% endfor %}
+                    </tbody>
+                </table>
+              </div>
             <!-- end project list -->
           </div>
         </div>
@@ -241,26 +243,7 @@
 </script>
 
 
-<script>
-  // Function to update items per page and reload the page
-  function updateItemsPerPage() {
-      var selectedValue = document.getElementById("itemsPerPage").value;
-      var currentUrl = window.location.href;
 
-      // Check if the 'items_per_page' parameter already exists in the URL
-      if (currentUrl.indexOf('items_per_page=') > -1) {
-          // Update the existing value
-          var newUrl = currentUrl.replace(/(items_per_page=)[^\&]+/, '$1' + selectedValue);
-      } else {
-          // Add the 'items_per_page' parameter to the URL
-          var separator = currentUrl.indexOf('?') !== -1 ? '&' : '?';
-          var newUrl = currentUrl + separator + 'items_per_page=' + selectedValue;
-      }
-
-      // Reload the page with the updated URL
-      window.location.href = newUrl;
-  }
-</script>
 
 
 <script>
