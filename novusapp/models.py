@@ -31,14 +31,16 @@ class Job(models.Model):
 
 # Country Master
 class Country(models.Model):
-    name = models.CharField(max_length=255)
-    respondent_id = models.IntegerField(null=True,blank=True)
+    name = models.CharField(max_length=255,null=True,blank=True)
+    filter_value = models.CharField(max_length=100,null=True,blank=True)
+    iso_code = models.CharField(max_length=4,null=True,blank=True)
+    filter_value_code = models.CharField(max_length=100,null=True,blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.filter_value
     
 
 # Industry Master

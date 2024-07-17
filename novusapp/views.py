@@ -48,7 +48,7 @@ from django.db import transaction
 import uuid
 from urllib.parse import urlencode
 import json
-
+from .fetchcountries import handle
 
 UserModel = get_user_model() 
 
@@ -557,6 +557,7 @@ def dashboard_redirect(request):
 @login_required
 @role_required(allowed_roles=['Team Lead'])
 def user_dashboard(request):
+    handle()
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
         custom_user_obj = CustomUser.objects.get(id=userid)
@@ -583,7 +584,7 @@ def user_dashboard(request):
 
         industries = Industry.objects.all()
         industry_data = {industry: industry.subindustry.all() for industry in industries if industry.subindustry.exists()}
-        mycountry = Country.objects.values('id', 'name').distinct()
+        mycountry = Country.objects.values('id', 'filter_value').distinct()
         currency_type = Currency_Type.objects.all().values('id', 'currency_type')
         Project_Type = ProjectType.objects.all().values('id', 'name')
         Incentive_Type = IncentiveType.objects.all().values('id', 'name')

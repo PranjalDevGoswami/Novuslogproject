@@ -128,7 +128,7 @@
 										<select id="country" class="form-control input-space" placeholder="Country" name="country" required="required"> 
 											<option value="" disabled selected>---SELECT COUNTRY*---</option>
 											{% for data in allcountry %}
-											<option value="{{data.id}}">{{data.name}}</option>
+											<option value="{{data.id}}">{{data.filter_value}}</option>
 											{% endfor %}
 										</select>
 									</div>
@@ -360,149 +360,29 @@
 	});
 </script>
 
+
 <script>
-	document.addEventListener('DOMContentLoaded', (event) => {
-	  const incentiveTypeDropdown = document.getElementById('incentive_type');
-	  const xoxoDayPanel = document.getElementById('xoxoDayPanel');
-	  const selectVoucher = document.getElementById('select-voucher');
-	  const voucherValueDropdown = document.getElementById('voucher_value_data');
-	  const numberInput = document.getElementById('numberInput');
-  
-	  // Function to toggle required attributes and visibility of Xoxo Day panel
-	  function toggleXoxoDayPanel() {
-		const selectedText = incentiveTypeDropdown.options[incentiveTypeDropdown.selectedIndex].text;
-  
-		if (selectedText === "Xoxo Day") {
-		  xoxoDayPanel.style.display = 'inline-block';
-		  selectVoucher.required = true;
-		  voucherValueDropdown.required = true;
-		  numberInput.required = true;
-		} else {
-		  xoxoDayPanel.style.display = 'none';
-		  selectVoucher.required = false;
-		  voucherValueDropdown.required = false;
-		  numberInput.required = false;
-		}
-	  }
-  
-	  // Attach event listener to the dropdown to call the function on change
-	  incentiveTypeDropdown.addEventListener('change', toggleXoxoDayPanel);
-  
-	  // Initial call to set the correct visibility and required attributes based on the default selection
-	  toggleXoxoDayPanel();
-	});
-  </script>
-  
-	
-  {% comment %} <script>
-	document.addEventListener('DOMContentLoaded', (event) => {
-	  const selectVoucher = document.getElementById('select-voucher');
-	  const voucherValueDropdown = document.getElementById('voucher_value_data');
-  
-	  // Function to update the voucher value dropdown
-	  function updateVoucherValues(valueDenominations) {
-		// Check if valueDenominations is an array
-		if (Array.isArray(valueDenominations)) {
-			console.log("🚀 ~ updateVoucherValues ~ valueDenominations:", valueDenominations);
-	
-			
-			voucherValueDropdown.innerHTML = '';
-			if (valueDenominations.length > 0 && typeof valueDenominations[0] === 'string') {
-				const splitValues = valueDenominations[0].split(',').map(value => value.trim());
-				splitValues.forEach(value => {
-					const option = document.createElement('option'); 
-					option.value = value;
-					option.text = `INR ${value}`; 
-					voucherValueDropdown.appendChild(option);
-				});
-			} else {
-				console.error('Expected a comma-separated string in the array:', valueDenominations);
-			}
-		} else {
-			console.error('valueDenominations is not an array:', valueDenominations);
-		}
-	}
-	
-	
-  
-	  // Fetch vouchers and populate the select-voucher dropdown
-	  fetch('http://127.0.0.1:8000/api/xoxo/vouchers/')
-		.then(response => response.json())
-		.then(data => {
-		  // Log the entire data to ensure it's structured correctly
-		  console.log('API response:', data);
-  
-		  const vouchers = data.data.getVouchers.data;
-  
-		  vouchers.forEach(voucher => {
-			// Create a new option element for the dropdown
-			const option = document.createElement('option');
-			option.value = voucher.productId;
-			option.text = voucher.name;
-			// Check if valueDenominations is an array before storing
-			if (voucher.valueDenominations) {
-				
-			  option.dataset.denominations = JSON.stringify(voucher.valueDenominations); // Store denominations as a data attribute
-			} else {
-			  console.error('valueDenominations for voucher is not an array:', voucher.valueDenominations);
-			  option.dataset.denominations = '[]'; // Store an empty array to avoid issues
-			}
-			selectVoucher.appendChild(option);
-		  });
-		})
-		.catch(error => console.error('Error fetching vouchers:', error));
-  
-	  // Add event listener to update voucher value dropdown based on selected voucher
-	  selectVoucher.addEventListener('change', (event) => {
-		const selectedOption = selectVoucher.options[selectVoucher.selectedIndex];
-		// Parse the denominations from the data attribute
-		let valueDenominations;
-		try {
-		  valueDenominations = new Array(JSON.parse(selectedOption.dataset.denominations));
-		  
-		  //const valueDenominationsArray = new Array(valueDenominations)
-		  updateVoucherValues(valueDenominations);
-		} catch (e) {
-		  console.error('Failed to parse valueDenominations:', e);
-		  valueDenominationsArray = []; // Fallback to an empty array
-		  updateVoucherValues(valueDenominations);
-		}
-  
-		// Update the voucher value dropdown with denominations
-		// updateVoucherValues(valueDenominationsArray);
-	  });
-	});
-  </script> {% endcomment %}
-
-
-  <script>
     document.addEventListener('DOMContentLoaded', (event) => {
+        const incentiveTypeDropdown = document.getElementById('incentive_type');
+        const xoxoDayPanel = document.getElementById('xoxoDayPanel');
         const selectVoucher = document.getElementById('select-voucher');
         const voucherValueDropdown = document.getElementById('voucher_value_data');
         const numberInput = document.getElementById('numberInput');
         const totalPriceElement = document.getElementById('total_price');
+        const countryDropdown = document.getElementById('country');
 
-        // Conversion rate from INR to USD (this should be updated with the latest rate)
-        const conversionRate = 0.012; // Example rate: 1 INR = 0.012 USD
 
         // Function to update the voucher value dropdown
         function updateVoucherValues(valueDenominations) {
-            // Check if valueDenominations is an array
             if (Array.isArray(valueDenominations)) {
-                console.log("🚀 ~ updateVoucherValues ~ valueDenominations:", valueDenominations);
-
                 voucherValueDropdown.innerHTML = '';
-                if (valueDenominations.length > 0 && typeof valueDenominations[0] === 'string') {
-                    const splitValues = valueDenominations[0].split(',').map(value => value.trim());
-                    splitValues.forEach(value => {
-                        const option = document.createElement('option'); 
-                        option.value = value;
-                        option.text = `INR ${value}`; 
-                        voucherValueDropdown.appendChild(option);
-                    });
-                } else {
-                    console.error('Expected a comma-separated string in the array:', valueDenominations);
-                }
+                const splitValues = valueDenominations[0].split(',').map(value => value.trim());
+                splitValues.forEach(value => {
+                    const option = document.createElement('option'); 
+                    option.value = value;
+                    option.text = `${currencyCode} ${value}`; 
+                    voucherValueDropdown.appendChild(option);
+                });
             } else {
                 console.error('valueDenominations is not an array:', valueDenominations);
             }
@@ -514,51 +394,76 @@
             const numberOfVouchers = parseInt(numberInput.value, 10);
 
             if (!isNaN(selectedVoucherValue) && !isNaN(numberOfVouchers)) {
-                const totalInRupees = selectedVoucherValue * numberOfVouchers;
-                const totalInDollars = (totalInRupees * conversionRate).toFixed(2); // Convert to USD and format to 2 decimal places
+                const totalInLocalCurrency = selectedVoucherValue * numberOfVouchers;
+                const totalInDollars = (totalInLocalCurrency * exchangeRate).toFixed(2); // Convert to USD and format to 2 decimal places
                 totalPriceElement.innerHTML = `Total: USD ${totalInDollars}`;
             } else {
-                totalPriceElement.innerHTML = `Total: 0:00`;
+                totalPriceElement.innerHTML = `Total: 0.00`;
             }
         }
 
-        // Fetch vouchers and populate the select-voucher dropdown
-        fetch('http://127.0.0.1:8000/api/xoxo/vouchers/')
-            .then(response => response.json())
-            .then(data => {
-                // Log the entire data to ensure it's structured correctly
-                console.log('API response:', data);
+        // Fetch vouchers based on the selected country
+        function fetchVouchers(filter_value) {
+            const url = `http://127.0.0.1:8000/api/xoxo/vouchers/${filter_value}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const vouchers = data.data.getVouchers.data;
+                    selectVoucher.innerHTML = '<option value="" disabled selected>---SELECT VOUCHER---</option>';
+					voucherValueDropdown.innerHTML = '<option value="" disabled selected>---SELECT VOUCHER VALUE---</option>';
+                    vouchers.forEach(voucher => {
+                        const option = document.createElement('option');
+                        option.value = voucher.productId;
+                        option.text = voucher.name;
+                        option.dataset.denominations = JSON.stringify(voucher.valueDenominations || []);
+                        option.dataset.exchangeRate = voucher.exchangeRate;
+                        option.dataset.currencyCode = voucher.currencyCode;
+                        selectVoucher.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching vouchers:', error));
+        }
 
-                const vouchers = data.data.getVouchers.data;
+        // Function to toggle required attributes and visibility of Xoxo Day panel
+        function toggleXoxoDayPanel() {
+            const selectedText = incentiveTypeDropdown.options[incentiveTypeDropdown.selectedIndex].text;
+            const selectedCountry = countryDropdown.options[countryDropdown.selectedIndex].text;
+  
+            if (selectedText === "Xoxo Day" && selectedCountry) {
+                fetchVouchers(selectedCountry);
+                xoxoDayPanel.style.display = 'inline-block';
+                selectVoucher.required = true;
+                voucherValueDropdown.required = true;
+                numberInput.required = true;
+            } else {
+                xoxoDayPanel.style.display = 'none';
+                selectVoucher.required = false;
+                voucherValueDropdown.required = false;
+                numberInput.required = false;
+            }
+        }
 
-                vouchers.forEach(voucher => {
-                    // Create a new option element for the dropdown
-                    const option = document.createElement('option');
-                    option.value = voucher.productId;
-                    option.text = voucher.name;
-                    // Check if valueDenominations is an array before storing
-                    if (voucher.valueDenominations) {
-                        option.dataset.denominations = JSON.stringify(voucher.valueDenominations); // Store denominations as a data attribute
-                    } else {
-                        console.error('valueDenominations for voucher is not an array:', voucher.valueDenominations);
-                        option.dataset.denominations = '[]'; // Store an empty array to avoid issues
-                    }
-                    selectVoucher.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error fetching vouchers:', error));
+        // Attach event listener to the incentive type dropdown to call the function on change
+        incentiveTypeDropdown.addEventListener('change', toggleXoxoDayPanel);
+
+        // Attach event listener to the country dropdown to call the function on change
+        countryDropdown.addEventListener('change', toggleXoxoDayPanel);
+
+        // Initial call to set the correct visibility and required attributes based on the default selection
+        toggleXoxoDayPanel();
 
         // Add event listener to update voucher value dropdown based on selected voucher
         selectVoucher.addEventListener('change', (event) => {
             const selectedOption = selectVoucher.options[selectVoucher.selectedIndex];
-            // Parse the denominations from the data attribute
             let valueDenominations;
             try {
                 valueDenominations = new Array(JSON.parse(selectedOption.dataset.denominations));
+                exchangeRate = parseFloat(selectedOption.dataset.exchangeRate);
+                currencyCode = selectedOption.dataset.currencyCode;
                 updateVoucherValues(valueDenominations);
             } catch (e) {
                 console.error('Failed to parse valueDenominations:', e);
-                valueDenominations = []; // Fallback to an empty array
+                valueDenominations = [];
                 updateVoucherValues(valueDenominations);
             }
         });
@@ -568,6 +473,11 @@
         numberInput.addEventListener('input', calculateTotalPrice);
     });
 </script>
+
+
+
+
+
   
   <script>
 	const numberInput = document.getElementById('numberInput');
