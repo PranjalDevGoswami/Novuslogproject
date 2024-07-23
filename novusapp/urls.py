@@ -32,6 +32,7 @@ urlpatterns = [
     path('send_email',views.send_email, name="send_email"),
     path('reset-password/<str:token>/', views.reset_password_view, name="reset-password"),
     path('user_dashboard/data',views.user_excel_data, name='user_dashboard_data'),
+    path('superuser/',views.superuser, name='superuser'),
     
 ###############################Payment URL##################################################################       
     path('payment-page/', views.payment_page, name='payment_page'),

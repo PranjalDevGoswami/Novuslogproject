@@ -1,0 +1,297 @@
+<script
+  type="text/javascript"
+  charset="utf8"
+  src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"
+></script>
+<script>
+	$(document).ready(function() {
+		// Set the timeout to hide messages after 5 seconds (5000 milliseconds)
+		$('#industry').select2();
+		$('#project_type').select2();
+		$('#country').select2();
+
+		setTimeout(function() {
+			$('.message-item').fadeOut('slow');
+		}, 8000);
+	});
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const incentiveTypeDropdown = document.getElementById('incentive_type');
+        const xoxoDayPanel = document.getElementById('xoxoDayPanel');
+        const selectVoucher = document.getElementById('select-voucher');
+        const voucherValueDropdown = document.getElementById('voucher_value_data');
+        const numberInput = document.getElementById('numberInput');
+        const totalPriceElement = document.getElementById('total_price');
+        const countryDropdown = document.getElementById('country');
+
+
+        // Function to update the voucher value dropdown
+        function updateVoucherValues(valueDenominations) {
+            if (Array.isArray(valueDenominations)) {
+                voucherValueDropdown.innerHTML = '';
+                const splitValues = valueDenominations[0].split(',').map(value => value.trim());
+                splitValues.forEach(value => {
+                    const option = document.createElement('option'); 
+                    option.value = value;
+                    option.text = `${currencyCode} ${value}`; 
+                    voucherValueDropdown.appendChild(option);
+                });
+            } else {
+                console.error('valueDenominations is not an array:', valueDenominations);
+            }
+        }
+
+        // Function to calculate and display the total price
+        function calculateTotalPrice() {
+            const selectedVoucherValue = parseFloat(voucherValueDropdown.value);
+            const numberOfVouchers = parseInt(numberInput.value, 10);
+
+            if (!isNaN(selectedVoucherValue) && !isNaN(numberOfVouchers)) {
+                const totalInLocalCurrency = selectedVoucherValue * numberOfVouchers;
+                const totalInDollars = (totalInLocalCurrency * exchangeRate).toFixed(2); // Convert to USD and format to 2 decimal places
+                totalPriceElement.innerHTML = `Total: USD ${totalInDollars}`;
+            } else {
+                totalPriceElement.innerHTML = `Total: 0.00`;
+            }
+        }
+
+        // Fetch vouchers based on the selected country
+        function fetchVouchers(filter_value) {
+            const url = `http://127.0.0.1:8000/api/xoxo/vouchers/${filter_value}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const vouchers = data.data.getVouchers.data;
+                    selectVoucher.innerHTML = '<option value="" disabled selected>---SELECT VOUCHER---</option>';
+					voucherValueDropdown.innerHTML = '<option value="" disabled selected>---SELECT VOUCHER VALUE---</option>';
+                    vouchers.forEach(voucher => {
+                        const option = document.createElement('option');
+                        option.value = voucher.productId;
+                        option.text = voucher.name;
+                        option.dataset.denominations = JSON.stringify(voucher.valueDenominations || []);
+                        option.dataset.exchangeRate = voucher.exchangeRate;
+                        option.dataset.currencyCode = voucher.currencyCode;
+                        selectVoucher.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching vouchers:', error));
+        }
+
+        // Function to toggle required attributes and visibility of Xoxo Day panel
+        function toggleXoxoDayPanel() {
+            const selectedText = incentiveTypeDropdown.options[incentiveTypeDropdown.selectedIndex].text;
+            const selectedCountry = countryDropdown.options[countryDropdown.selectedIndex].text;
+  
+            if (selectedText === "Xoxo Day" && selectedCountry) {
+                fetchVouchers(selectedCountry);
+                xoxoDayPanel.style.display = 'inline-block';
+                selectVoucher.required = true;
+                voucherValueDropdown.required = true;
+                numberInput.required = true;
+            } else {
+                xoxoDayPanel.style.display = 'none';
+                selectVoucher.required = false;
+                voucherValueDropdown.required = false;
+                numberInput.required = false;
+            }
+        }
+
+        // Attach event listener to the incentive type dropdown to call the function on change
+        incentiveTypeDropdown.addEventListener('change', toggleXoxoDayPanel);
+
+        // Attach event listener to the country dropdown to call the function on change
+        countryDropdown.addEventListener('change', toggleXoxoDayPanel);
+
+        // Initial call to set the correct visibility and required attributes based on the default selection
+        toggleXoxoDayPanel();
+
+        // Add event listener to update voucher value dropdown based on selected voucher
+        selectVoucher.addEventListener('change', (event) => {
+            const selectedOption = selectVoucher.options[selectVoucher.selectedIndex];
+            let valueDenominations;
+            try {
+                valueDenominations = new Array(JSON.parse(selectedOption.dataset.denominations));
+                exchangeRate = parseFloat(selectedOption.dataset.exchangeRate);
+                currencyCode = selectedOption.dataset.currencyCode;
+                updateVoucherValues(valueDenominations);
+            } catch (e) {
+                console.error('Failed to parse valueDenominations:', e);
+                valueDenominations = [];
+                updateVoucherValues(valueDenominations);
+            }
+        });
+
+        // Add event listeners to calculate total price when voucher value or number input changes
+        voucherValueDropdown.addEventListener('change', calculateTotalPrice);
+        numberInput.addEventListener('input', calculateTotalPrice);
+    });
+</script>
+
+
+
+
+
+  
+  <script>
+	const numberInput = document.getElementById('numberInput');
+	const validationMessage = document.getElementById('validationMessage');
+
+	numberInput.addEventListener('input', function() {
+		validateInput();
+	});
+
+	function validateInput() {
+		const inputValue = numberInput.value.trim();
+		if (inputValue === '') {
+			validationMessage.textContent = 'Field cannot be blank';
+			numberInput.style.borderColor = 'red';
+		} else {
+			const numberValue = parseFloat(inputValue);
+			if (isNaN(numberValue) || numberValue <= 0 || !Number.isInteger(numberValue)) {
+				validationMessage.textContent = 'Minimum order quantity for eGift voucher is 1 and must be a Integer number';
+				numberInput.style.borderColor = 'red';
+			} else {
+				validationMessage.textContent = '';
+				numberInput.style.borderColor = ''; // Reset border color if valid
+			}
+		}
+	}
+</script>
+
+ 
+  
+  <script>
+	$(document).ready(function(){
+	  $('[data-toggle="tooltip"]').tooltip();
+	});
+  </script>
+	
+	
+
+<script>
+    // Function to populate the hour and minute dropdowns with a specified interval
+    function populateDropdown(selectElement, maxValue, label, interval) {
+        for (let i = 0; i <= maxValue; i += interval) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.text = `${i} ${label}${i === 1 ? '' : ''}`;
+            selectElement.add(option);
+        }
+    }
+
+    // Populate the hour dropdown with options from 0 to 12 hours
+    populateDropdown(document.getElementById('hourDropdown'), 12, 'hr', 1);
+
+    // Populate the minute dropdown with options from 0 to 55 minutes in 5-minute intervals
+    populateDropdown(document.getElementById('minuteDropdown'), 55, 'min', 5);
+</script>
+
+
+<script>
+// Add event listener to the incentive and company revenue fields for live validation
+document.getElementById('incentive').addEventListener('input', validateIncentive);
+document.getElementById('company_revenue').addEventListener('input', validateCompanyRevenue);
+document.getElementById('phone_number').addEventListener('input', validatePhoneno);
+document.getElementById('email').addEventListener('input', validateEmail);
+
+function validateIncentive() {
+	// Get the value of the incentive field
+	var incentiveValue = document.getElementById('incentive').value;
+	// Get the error message element for incentive
+	var incentiveError = document.getElementById('incentiveError');
+
+	// Reset error message and style
+	incentiveError.textContent = '';
+	incentiveError.style.color = '';
+
+
+	// Validate for integer in the incentive field
+	if (!isInteger(incentiveValue)) {
+	incentiveError.textContent = 'Please enter an integer value.';
+	incentiveError.style.color = 'red';
+	}
+}
+
+function validatePhoneno() {
+	// Get the value of the incentive field
+	var phone_number_Value = document.getElementById('phone_number').value;
+
+	var phoneError = document.getElementById('phoneError');
+
+	// Reset error message and style
+	phoneError.textContent = '';
+	phoneError.style.color = '';
+
+	// Validate for integer in the incentive field
+	if (!isInteger(phone_number_Value)) {
+	phoneError.textContent = 'Please enter an integer value.';
+	phoneError.style.color = 'red';
+	}
+
+	if (phone_number_Value.length > 10) {
+        phoneError.textContent = 'Please enter a valid phone number with 10 digits or less.';
+        phoneError.style.color = 'red';
+	}
+}
+
+function validateEmail() {
+    // Get the value of the email field
+    var emailValue = document.getElementById('email').value;
+
+    var emailError = document.getElementById('emailError');
+
+    // Reset error message and style
+    emailError.textContent = '';
+    emailError.style.color = '';
+
+    // Regular expression for email validation
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Check if the email format is valid
+    if (!emailRegex.test(emailValue)) {
+        emailError.textContent = 'Please enter a valid email address in the format example@example.com';
+        emailError.style.color = 'red';
+    }
+}
+
+
+
+function validateCompanyRevenue() {
+	// Get the value of the company revenue field
+	var companyRevenueValue = document.getElementById('company_revenue').value;
+
+	// Get the error message element for company revenue
+	var companyRevenueError = document.getElementById('company_revenue_error');
+
+	// Reset error message and style
+	companyRevenueError.textContent = '';
+	companyRevenueError.style.color = '';
+
+	// Validate for integer in the company revenue field
+	if (!isInteger(companyRevenueValue)) {
+	companyRevenueError.textContent = 'Please enter an integer value.';
+	companyRevenueError.style.color = 'red';
+	}
+}
+
+// Function to check if a given value is an integer
+function isInteger(value) {
+	return /^\d+$/.test(value);
+}
+
+
+    document.getElementById('uploadButton').addEventListener('click', function(event) {
+      var fileInput = document.getElementById('excel_file');
+      var fileError = document.getElementById('fileError');
+      if (fileInput.files.length === 0) {
+        event.preventDefault();  // Prevent form submission
+        fileError.style.display = 'block';  // Show error message
+      } else {
+        fileError.style.display = 'none';  // Hide error message
+      }
+    });
+ 
+</script>

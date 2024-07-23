@@ -1,0 +1,16 @@
+{% extends "novusapp/base1.html" %}
+{{username}}
+{% load static %} 
+{% block head %}
+{% block title %}
+<title>SuperUser Dashboard </title>
+{% endblock title %}
+{% endblock head %} 
+{% block right_col %}
+{% include  "novusapp/form.html" %} 
+
+{% endblock right_col %} 
+{% block script %}
+{% include "novusapp/script.html" %}
+	
+{% endblock script %}

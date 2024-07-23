@@ -123,7 +123,7 @@ def register(request):
 
 
 @login_required
-@role_required(allowed_roles=['HOD'])
+@role_required(allowed_roles=['HOD','superuser'])
 def confirm_registration(request,id):
     role = RoleMaster.objects.all().values('name')
     team_manager = Manager.objects.all().values('name')
@@ -548,39 +548,47 @@ def dashboard_redirect(request):
             return redirect('hod_dashboard')
 
         elif request.user.is_superuser:
-            return redirect('admin:index')
+            return redirect('superuser')
 
     ''' If not authenticated, handle as before '''
     return redirect('/')
 
 
 @login_required
-@role_required(allowed_roles=['Team Lead'])
+@role_required(allowed_roles=['Team Lead','superuser'])
 def user_dashboard(request):
-    handle()
+    # handle()
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
         custom_user_obj = CustomUser.objects.get(id=userid)
         TeamLeadname = custom_user_obj.username
         TeamLead_email = custom_user_obj.email
-        user_manager = custom_user_obj.user_manager
+        if not request.user.is_superuser:
+            user_manager = custom_user_obj.user_manager
+        else:
+            user_manager = TeamLeadname
         
         try:
             department = custom_user_obj.dep.name
         except AttributeError:
             department = ""
-
-        try:
-            hod_name = custom_user_obj.hod_name
-            hod_email = Hod.objects.filter(name=hod_name)[0].email
-        except (AttributeError, IndexError):
-            messages.error(request, "Your Registration is not confirmed. Please wait some time and then login.", extra_tags="alert-danger")
-            return redirect('/')
-
-        try:
-            user_manager_email = Manager.objects.get(name=user_manager).email
-        except Manager.DoesNotExist:
-            user_manager_email = TeamLead_email
+        if not request.user.is_superuser:
+            try:
+                hod_name = custom_user_obj.hod_name
+                hod_email = Hod.objects.filter(name=hod_name)[0].email
+            except (AttributeError, IndexError):
+                messages.error(request, "Your Registration is not confirmed. Please wait some time and then login.", extra_tags="alert-danger")
+                return redirect('/')
+        else:
+            hod_email = custom_user_obj.email
+            
+        if not request.user.is_superuser:
+            try:
+                user_manager_email = Manager.objects.get(name=user_manager).email
+            except Manager.DoesNotExist:
+                user_manager_email = TeamLead_email
+        else:
+            user_manager_email = custom_user_obj.email
 
         industries = Industry.objects.all()
         industry_data = {industry: industry.subindustry.all() for industry in industries if industry.subindustry.exists()}
@@ -632,6 +640,7 @@ def user_dashboard(request):
                 selected_voucher = request.POST.get('selected_voucher','') 
                 voucher_value = request.POST.get('voucher_value','')
                 voucher_quantity = request.POST.get('number','')
+                print(selected_voucher,voucher_value,voucher_quantity)
                 # Create the Respondent instance and associate it with the related records
                 respondent = Respondent.objects.create(
                     name=respondent_name,
@@ -708,7 +717,7 @@ def user_dashboard(request):
 
 
 @login_required
-@role_required(allowed_roles=['Team Lead'])
+@role_required(allowed_roles=['Team Lead','superuser'])
 def userdata(request):
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
@@ -747,7 +756,7 @@ def userdata(request):
 
 
 @login_required
-@role_required(allowed_roles=['Team Lead'])
+@role_required(allowed_roles=['Team Lead','superuser'])
 def edit_respondent(request, id):
     try:
         respondent_obj = Respondent.objects.get(id=id)
@@ -860,7 +869,7 @@ def edit_respondent(request, id):
 
 
 @login_required
-@role_required(allowed_roles=['HOD'])
+@role_required(allowed_roles=['HOD','superuser'])
 def userhod_data(request):
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
@@ -943,33 +952,29 @@ def autocomplete2(request):
     return render(request, 'novusapp/userhod_data.html')
 
 
-
-
-
 @login_required
-@role_required(allowed_roles=['HOD'])
+@role_required(allowed_roles=['HOD', 'superuser'])
 def hod_dashboard(request):
     role = RoleMaster.objects.all().values('name')
     team_manager = Manager.objects.all().values('name')
 
     if request.session.has_key('currentuser_id'):
-        currentid =  request.session['currentuser_id']
+        currentid = request.session['currentuser_id']
+        customuserdata = CustomUser.objects.filter(id=currentid).values('hod_name', 'is_superuser')
+        current_hod = customuserdata[0]['hod_name']
+        is_superuser = customuserdata[0]['is_superuser']
 
-        customuserdata = CustomUser.objects.filter(id=currentid).values('hod_name')
-        print(customuserdata)
+        if is_superuser:
+            complex_obj = Register.objects.filter(is_active=0).values('id', 'username', 'email', 'password', 'hod_name', 'is_active')
+            complex_obj1 = Register.objects.all().values('id', 'email', 'password', 'hod_name', 'is_active', 'role', 'user_manager', 'username')
+        else:
+            complex_obj = Register.objects.filter(is_active=0, hod_name=current_hod).values('id', 'username', 'email', 'password', 'hod_name', 'is_active')
+            complex_obj1 = Register.objects.filter(hod_name=current_hod).values('id', 'email', 'password', 'hod_name', 'is_active', 'role', 'user_manager', 'username')
 
-        current_hod = (customuserdata[0]['hod_name'])
-        print("***************",current_hod)
-
-        complex_obj = Register.objects.filter(is_active=0,hod_name=current_hod).values('id','username', 'email', 'password', 'hod_name','is_active')
-        complex_obj1 = Register.objects.filter(hod_name=current_hod).values('id', 'email', 'password', 'hod_name','is_active','role','user_manager','username')
-       
         total_user = complex_obj.count()
 
-        ''' Create a list of dictionaries to store user-specific data '''
         user_data_list = []
         user_data_list1 = []
-        
 
         for userdata in complex_obj:
             id = signing.dumps(userdata['id'])
@@ -980,7 +985,6 @@ def hod_dashboard(request):
                 'password': userdata['password'],
                 'hod_name': userdata['hod_name'],
                 'is_active': userdata['is_active']
-                
             }
             user_data_list.append(user_data)
 
@@ -993,25 +997,24 @@ def hod_dashboard(request):
                 'password': userdata1['password'],
                 'hod_name': userdata1['hod_name'],
                 'is_active': userdata1['is_active'],
-                'role' : userdata1['role'],
+                'role': userdata1['role'],
                 'team': userdata1['user_manager']
-               
             }
             user_data_list1.append(user_data1)
-
 
         context = {
             'total': total_user,
             'user_data_list': user_data_list,
             'user_data_list1': user_data_list1,
-            'hod':current_hod,
-            'role':role,
-            'team' : team_manager,
+            'hod': current_hod,
+            'role': role,
+            'team': team_manager,
         }
-        
+
         return render(request, "novusapp/tables.html", context)
 
     return HttpResponse('Please login')
+
 
 
 def logout_view(request):
@@ -1020,7 +1023,7 @@ def logout_view(request):
     return redirect('/')  # Redirect to the login page or any other desired page
 
 @login_required
-@role_required(allowed_roles=['HOD'])
+@role_required(allowed_roles=['HOD','superuser'])
 def tables(request):
     role = RoleMaster.objects.all().values('name')
     team = TeamLead.objects.all().values('name')
@@ -1065,7 +1068,7 @@ def tables(request):
 
 
 @login_required
-@role_required(allowed_roles=['AM/Manager'])
+@role_required(allowed_roles=['AM/Manager','superuser'])
 def manager(request):
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
@@ -1111,7 +1114,7 @@ def manager(request):
 
 
 @login_required
-@role_required(allowed_roles=['AM/Manager'])
+@role_required(allowed_roles=['AM/Manager','superuser'])
 def managerteam_data(request):
     if request.session.has_key('currentuser_id'):
         ''' Retrieve all data from the Respondent table '''
@@ -1131,7 +1134,7 @@ def managerteam_data(request):
     return HttpResponse('Please Login')
 
 @login_required
-@role_required(allowed_roles=['AM/Manager'])
+@role_required(allowed_roles=['AM/Manager','superuser'])
 def form_approved(request,id):
     Respondent.objects.filter(id=id).update(is_active=1)
     return redirect('manager')
@@ -1337,34 +1340,41 @@ def sendremark(request, userid, respondentid):
     return redirect('/managerteam_data')
 
 
-
 @login_required
-@role_required(allowed_roles=['Team Lead'])
+@role_required(allowed_roles=['Team Lead', 'superuser'])
 def user_excel_data(request):
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
         custom_user_obj = CustomUser.objects.get(id=userid)
         TeamLeadname = custom_user_obj.username
         TeamLead_email = custom_user_obj.email
-        user_manager = custom_user_obj.user_manager
         department = getattr(custom_user_obj.dep, 'name', "")
+        
+        if custom_user_obj.is_superuser:
+            user_manager = TeamLeadname
+        else:
+            user_manager = custom_user_obj.user_manager
+        
 
-        try:
-            hod_name = custom_user_obj.hod_name
-        except Exception:
-            messages.error(request, "Your Registration is not confirmed. Please wait some time and try again later.", extra_tags="alert-danger")
-            return redirect('/')
-
-        try:
-            hod_email = Hod.objects.filter(name=hod_name)[0].email
-        except Exception as e:
-            messages.error(request, f"{e}", extra_tags="alert-danger")
-
-        user_manager_email = ''
-        if user_manager:
+        if custom_user_obj.is_superuser:
+            hod_email = TeamLead_email
+            
+        else:
             try:
-                user_manager_email = Manager.objects.get(name=user_manager).email
-            except Manager.DoesNotExist:
+                hod_name = custom_user_obj.hod_name
+                hod_email = Hod.objects.filter(name=hod_name).first().email
+            except (CustomUser.DoesNotExist, Hod.DoesNotExist, IndexError):
+                messages.error(request, "Your Registration is not confirmed. Please wait some time and try again later.", extra_tags="alert-danger")
+                return redirect('/')
+            
+        if custom_user_obj.is_superuser:
+            user_manager_email = ''
+            if user_manager:
+                try:
+                    user_manager_email = Manager.objects.get(name=user_manager).email
+                except Manager.DoesNotExist:
+                    user_manager_email = TeamLead_email
+            else:
                 user_manager_email = TeamLead_email
         else:
             user_manager_email = TeamLead_email
@@ -1377,7 +1387,6 @@ def user_excel_data(request):
                 uploaded_file_url = fs.url(filename)
 
                 try:
-                    # Read the uploaded Excel file
                     df = pd.read_excel(fs.path(filename), sheet_name='Respondent Incentive Sheet')
 
                     for index, row in df.iterrows():
@@ -1398,8 +1407,8 @@ def user_excel_data(request):
                             project_type_name = row['Project Type']
                             project_code = row.get('PCR Code', '')
                             client_name = row.get('Client Name', '')
-                            interview_duration_minutes = row.get('Interview Duration Minutes', '')
-                            interview_duration_hours = row.get('Interview Duration Hours', '')
+                            interview_duration_minutes = row.get('Interview Duration Minutes', "none")
+                            interview_duration_hours = row.get('Interview Duration Hours', "none")
                             interview_date = row.get('Date of Interview', '')
                             incentive_code = row.get('Incentive Code', '')
                             incentive_amount = row.get('Incentive', '')
@@ -1410,8 +1419,6 @@ def user_excel_data(request):
                             company_revenue = row.get('Company Revenue', '')
                             company_revenue_currency_type_name = row.get('Company Revenue Currency Type', '')
                             linkdin_profile = row.get('Linkdin Profile', '')
-                         
-                         
 
                             # Handle ProjectType retrieval
                             try:
@@ -1448,41 +1455,41 @@ def user_excel_data(request):
                                 industry_sub_cate, _ = Industry_Sub_Cate.objects.get_or_create(name=industry_name)
 
                                 # Create or update the Respondent instance
-                                respondent = Respondent.objects.create(
-                                        respondent_email = respondent_email,
-                                        name = respondent_name,
-                                        middle_name = middle_name,
-                                        last_name = last_name,
-                                        custom_user = custom_user_obj,
-                                        job = job_title,
-                                        email =  email,
-                                        respondent_phone = phone_number,
-                                        phone_code = phone_code,
-                                        currency_type = currency_type,
-                                        analyst = analyst_name,
-                                        project_name = project_name,
-                                        project_type = project_type,
-                                        project_code = project_code,
-                                        incentive_code = incentive_code,
-                                        incentive_type_id = incentive_type,
-                                        incentive_amount = incentive_amount,
-                                        incentive_currency_type = incentive_currency_type,
-                                        country = country,
-                                        industry_sub_cate = industry_sub_cate,
-                                        company_name = company_name,
-                                        company_revenue = company_revenue,
-                                        client_name = client_name,
-                                        interview_duration_hours = interview_duration_hours,
-                                        interview_duration_minutes = interview_duration_minutes,
-                                        interview_date = interview_date,
-                                        linkdin_profile = linkdin_profile,
-                                        team_lead = TeamLeadname,
-                                        Department = department,
-                                        user_manager = user_manager,
-                                        user_manager_email = user_manager_email,
-                                        hod_email = hod_email,
-                                        payment_id = paypal_id_amazon_voucher,
-                                        is_active = False 
+                                respondent = Respondent.objects.update_or_create(
+                                    respondent_email=respondent_email,
+                                    name=respondent_name,
+                                    middle_name=middle_name,
+                                    last_name=last_name,
+                                    custom_user=custom_user_obj,
+                                    job=job_title,
+                                    email=email,
+                                    respondent_phone=phone_number,
+                                    phone_code=phone_code,
+                                    currency_type=currency_type,
+                                    analyst=analyst_name,
+                                    project_name=project_name,
+                                    project_type=project_type,
+                                    project_code=project_code,
+                                    incentive_code=incentive_code,
+                                    incentive_type_id=incentive_type,
+                                    incentive_amount=incentive_amount,
+                                    incentive_currency_type=incentive_currency_type,
+                                    country=country,
+                                    industry_sub_cate=industry_sub_cate,
+                                    company_name=company_name,
+                                    company_revenue=company_revenue,
+                                    client_name=client_name,
+                                    interview_duration_hours=interview_duration_hours,
+                                    interview_duration_minutes=interview_duration_minutes,
+                                    interview_date=interview_date,
+                                    linkdin_profile=linkdin_profile,
+                                    team_lead=TeamLeadname,
+                                    Department=department,
+                                    user_manager=user_manager,
+                                    user_manager_email=user_manager_email,
+                                    hod_email=hod_email,
+                                    payment_id=paypal_id_amazon_voucher,
+                                    is_active=False
                                 )
 
                         except Exception as e:
@@ -1504,11 +1511,10 @@ def user_excel_data(request):
     return HttpResponse('Please login')
 
 
-
 ############################################################### Payment Views ################################################
 
 @login_required
-@role_required(allowed_roles=['HOD'])
+@role_required(allowed_roles=['HOD','superuser'])
 def payment_page(request):
     if request.session.has_key('currentuser_id'):
         userid = request.session['currentuser_id']
@@ -1571,7 +1577,7 @@ def payment_page(request):
 
 
 @login_required
-@role_required(allowed_roles=['HOD'])
+@role_required(allowed_roles=['HOD','superuser'])
 def process_payment(request, pk):
     if request.method == "POST":
         get_payment_mode = request.POST.get('payment_mode')
@@ -1701,3 +1707,8 @@ def place_order(request):
         'phone_code': phone_code,
     }
     return render(request, 'novusapp/xoxo/place_order.html',context)
+
+
+
+def superuser(request):
+    return render(request,"novusapp/superuser_dashboard.html")

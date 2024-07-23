@@ -138,15 +138,15 @@
                             <td class=" ">{{ forloop.counter }}</td>
                             <td class=" ">{{ respondent.name }} {{respondent.middle_name|default_if_none:""}} {{respondent.last_name|default_if_none:""}}</td>
                             <td class=" ">{{ respondent.respondent_email}}</td>
-                            <td class=" ">{{ respondent.country.name }}</td>
-                            <td class=" ">{{ respondent.industry.name }}</td>
+                            <td class=" ">{{ respondent.country }}</td>
+                            <td class=" ">{{ respondent.industry_sub_cate.name }}</td>
                             <td class=" ">{{ respondent.analyst.title }}</td>
-                            <td class=" ">{{ respondent.project.name }}</td>
-                            <td class=" ">{{ respondent.project.project_type }}</td>
-                            {% if respondent.company.revenue == "0" %}
+                            <td class=" ">{{ respondent.project_name }}</td>
+                            <td class=" ">{{ respondent.project_type }}</td>
+                            {% if respondent.company_revenue == "0" %}
                             <td class="">&nbsp;</td>
                             {% else %}
-                            <td class="">{{ respondent.company.revenue}} {{respondent.company.revenue_currency_type}}</td>
+                            <td class="">{{ respondent.company_revenue}} {{respondent.currency_type.currency_type}}</td>
                             {% endif %}
                             <td class=" ">{{ respondent.payment_mode }}</td>
                             {% if respondent.pay_status == 0 %}

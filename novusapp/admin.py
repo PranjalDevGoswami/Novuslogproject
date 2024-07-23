@@ -6,7 +6,7 @@ from import_export.admin import ImportExportModelAdmin
 
 @admin.register(Country)
 class CountryAdmin(ImportExportModelAdmin):
-    list_display = ("filter_value",)
+    list_display = ("id","filter_value",)
 
 @admin.register(Industry)
 class IndustryAdmin(ImportExportModelAdmin):

@@ -89,6 +89,21 @@
                 </ul>
                 {% endif %}
 
+                {% if Role ==  "superuser" %}
+                <ul class="nav side-menu">
+                  <li><a href="{% url 'user_dashboard' %}"><i class="fa fa-info"></i> Respondent Form</a>
+                  </li>
+                  <li><a href="{% url 'managerteam_data' %}"><i class="fa fa-info"></i> TeamLead Approval</a>
+                  </li>
+                  <li><a href="{% url 'manager' %}"><i class="fa fa-table"></i> Respondent Data</a>
+                  </li>
+                  <li><a href="{% url 'hod_dashboard' %}"><i class="fa fa-info"></i> Registration Request</a>
+                  <li>
+                    <a href="{% url 'payment_page' %}"><i class="fa fa-bank"></i>Payment Status</a>
+                  </li>
+                </ul>
+                {% endif %}
+
               </div>
               <div class="menu_section">
                

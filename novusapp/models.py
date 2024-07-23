@@ -374,7 +374,7 @@ class Respondent(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return self.name
+        return self.name if self.name else "Unnamed Respondent"
 
 
 class payment_status(models.Model):

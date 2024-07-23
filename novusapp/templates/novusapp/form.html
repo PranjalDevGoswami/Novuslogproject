@@ -1,0 +1,334 @@
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+				{% include 'novusapp/alertmsg/msg.html' %}
+              <div class="title_left">
+                <h3><small></small></h3>
+              </div>
+
+              <div class="title_right">
+                <div class="col-md-5 col-sm-5   form-group pull-right top_search">
+                  <div class="input-group">
+                   
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="clearfix"></div>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="col-md-2">
+							<form id="uploadForm" method="POST" enctype="multipart/form-data" action="{% url 'user_dashboard_data' %}">
+								{% csrf_token %}
+								<!-- other form fields -->
+								<div class="form-group">
+								<label for="excel_file">Upload Excel File</label>
+								<input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls" class="form-control-file">
+								<div id="fileError" class="error-message" style="color: red; display: none;">File not selected. Please choose a file.</div>
+								</div>
+								<button type="submit" id="uploadButton" class="btn btn-primary mt-2">Upload</button>
+							</form>
+						</div>	
+					</div>	
+				</div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="x_panel">
+                  	<div class="e">
+                    	<h2>Respondent Form Data </h2>
+             
+                  	</div>
+					
+                  	<div class="x_content">
+						<div class="col-md-12 col-lg-12 ">
+					
+							<form id="validationForm" class="form-horizontal form-label-left" action="{% url 'user_dashboard' %}" method="post">
+								{% csrf_token %}
+
+								<div class="form-group row">
+										<div class="col-md-4 col-sm-4">
+											<input type="text" id="respondent_name" name='respondent_name' placeholder="First Name * " required="required" class="form-control input-space">
+											<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
+										</div>
+
+										<div class="col-md-4 col-sm-4">
+											<input type="text" id="middle_name" name='middle_name' placeholder="Middle Name"  class="form-control input-space">
+											<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
+										</div>
+										
+										<div class="col-md-4 col-sm-4">
+											<input type="text" id="last_name" name="last_name" placeholder="Last Name" class="form-control input-space">
+											<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
+										</div>	
+								</div>
+								
+
+								<div class="form-group row">	
+									<div class="col-md-4 col-sm-4">
+										<input type="text" id="email" placeholder="Email" name='email' class="form-control input-space">
+										<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
+										<span id="emailError" class="error"></span>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<div class="input-group">
+											<span class="input-group-addon" id="phone_code_label">☎ Ph:</span>
+											<select id="Phone_number_code" class="input-group-addon" name="Phone_number_code">
+												<option value="" disabled selected>Select Code</option>
+												{% for code in phone_code %}
+												<option value="{{code.id}}">{{code.phone_code}}</option>
+												{% endfor %}
+											</select>
+											<input type="text" id="phone_number" placeholder="Phone Number" name="phone_number" class="form-control input-space">
+										</div>
+										<span id="phoneError" class="error"></span>
+									</div>
+									
+
+									<div class="col-md-4 col-sm-4">
+										<input type="text" id="job_title" placeholder="Job Title * " name="job_title" required="required" class="form-control input-space">
+										<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
+									</div> 
+									
+
+								</div>
+
+								<div class="form-group row">
+									<div class="col-md-4 col-sm-4">
+										<input id="company" class="form-control input-space" type="text" placeholder="Company * " name="company" required="required">
+										<span class="fa fa-building-o form-control-feedback right" aria-hidden="true"></span>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<input id="company_revenue" class="form-control input-space" type="text" placeholder="Company Revenue" name="company_revenue">
+										<span id="company_revenue_error" class="error-message"></span>
+										<select id="company_revenue_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="company_revenue_currency_type">
+											<option value="" disabled selected>CUR</option>
+											{% for currency in currency_type %}
+											<option value="{{currency.id}}" style="color: black;">{{currency.currency_type}}</option>
+											{% endfor %}
+													
+										</select>
+									</div>
+									
+									<div class="col-md-4 col-sm-4">
+										<select id="country" class="form-control input-space" placeholder="Country" name="country" required="required"> 
+											<option value="" disabled selected>---SELECT COUNTRY*---</option>
+											{% for data in allcountry %}
+											<option value="{{data.id}}">{{data.filter_value}}</option>
+											{% endfor %}
+										</select>
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<div class="col-md-4 col-sm-4">
+										<input type="text" id="project_code" placeholder="Project Code * " name='project_code' required="required" class="form-control input-space">
+										<span class="fa fa-user form-control-feedback right" aria-hidden="true"></span>
+									</div>
+									
+									<div class="col-md-4 col-sm-4">
+										<input id="project" class="form-control input-space" placeholder="Project * " type="text" name="project" required="required">
+									</div>
+									
+
+									<div class="col-md-4 col-sm-4">    
+										<select id="industry" class="form-control input-space" placeholder="Industry" name="industry" required="required">  
+											<optgroup>
+												<option value="" disabled selected>---SELECT INDUSTRY*---</option>
+												{% for industry, subcategories in industry_data.items %}
+													{% if subcategories %}
+														<optgroup label="{{ industry.name }}">
+															{% for subcategory in subcategories %}
+																<option value="{{ subcategory.id }}">{{ subcategory.name }}</option>    
+															{% endfor %}
+														</optgroup>
+													{% endif %}
+												{% endfor %}
+											</optgroup>
+										</select> 
+									</div>
+									
+
+								</div>
+
+								<div class="form-group row">
+									<div class="col-md-4 col-sm-4">
+										<input id="incentive" class="form-control input-space" type="text" placeholder="Incentive*" name="incentive" required="required">
+										<span id="incentiveError" class="error-message"></span>
+										<select id="incentive_currency_type" class="fa fa-user form-control-feedback right fa-lg" style="width: fit-content;border-color: black;" name="incentive_currency_type" style="border:black;" required="required">
+											<option value="" disabled selected>CUR</option>
+											{% for currency in incentive_currency_type %}
+											<option value="{{currency.id}}" style="color: black;">{{currency.currency_type}}</option>
+											{% endfor %}
+											
+										</select>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<input id="project" class="form-control input-space" placeholder="Incentive Code*" type="text" name="incentive_code"required="required">
+									</div>
+									<div class="col-md-4 col-sm-4">
+										<input id="interview_date" class="date-picker form-control input-space" placeholder="Interview Date * " name="interview_date" placeholder="dd-mm-yyyy" type="text" required="required" onfocus="this.type='date'" onmouseover="this.type='date'" onclick="this.type='date'" onblur="this.type='text'" onmouseout="timeFunctionLong(this)" style="margin-bottom: 10px;">
+									</div>
+								</div>
+
+								<div class="form-group row ">
+									<div class="col-md-4 col-sm-4">
+										<input type="text" id="client_name" name="client_name" placeholder="Client Name * " required="required" class="form-control input-space">
+										<span class="fa fa-briefcase form-control-feedback right" aria-hidden="true"></span>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<input id="analyst" class="form-control input-space" placeholder="Analyst * " type="text" name="analyst" required="required">
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<select id="project_type" class="form-control input-space" name="project_type" required="required">
+											<option value="" disabled selected>---SELECT INTERVIEW TYPE*---</option>
+											{% for type in Project_Type %}
+											<option value="{{type.id}}">{{type.name}}</option>
+											{% endfor %}
+											
+										</select> 
+									</div>
+
+								</div>
+
+								
+								<div class="form-group row ">
+
+									<div class="col-md-4 col-sm-4">
+										<input id="linkdin_profile" class="form-control input-space" placeholder="Linkdin Profile" type="text" name="linkdin_profile">
+									</div>
+
+									
+				
+									<div class="col-md-4 col-sm-4">
+										<select id="incentive_type" class="form-control input-space" name="incentive_type" required="required">
+											<option value="" disabled selected>---SELECT INCENTIVE TYPE*---</option>
+											{% for type in Incentive_Type %}
+											<option value="{{type.id}}">{{type.name}}</option>
+											{% endfor %}
+											
+										</select>
+									</div>
+
+									<div class="col-md-4 col-sm-4">
+										<div class="input-group">
+											<div class="form-group">
+												<!-- Hour Label -->
+												{% comment %} <label for="hourDropdown">Select Hours*:</label> {% endcomment %}
+												
+												<!-- Hour Dropdown -->
+												<div class="input-group">
+													<label for="hourDropdown">Hours*:</label>&nbsp;
+													<select id="hourDropdown" class="form-control input-space time-input" name="interview_duration_hours" required="required">
+														<!-- JavaScript will dynamically populate options here -->
+													</select>
+												</div>
+											</div>
+											&nbsp;
+											<div class="form-group">
+												<!-- Minute Label -->
+												{% comment %} <label for="minuteDropdown">Select Minutes*:</label> {% endcomment %}
+												
+												<!-- Minute Dropdown -->
+												<div class="input-group">
+													<label for="minuteDropdown">Minutes*:</label>&nbsp;
+													<select id="minuteDropdown" class="form-control input-space time-input" name="interview_duration_minutes" required="required">
+														<!-- JavaScript will dynamically populate options here -->
+													</select>
+													
+												</div>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+							<div id="errorMessages" class="error"></div>
+
+						<p></p>
+
+						<!-- start project list -->
+						<table class="table table-striped projects">
+							<div class="x_panel ml-2" id="xoxoDayPanel">
+								<div class="x_content">
+									{% comment %} <div class="title_left">
+									<h2 class="text-dark">Recipient Details</h2>
+									</div>
+									<div class="col-md-12 col-lg-12 ">
+										<div id="errorMessages" class="error"></div>
+									</div> {% endcomment %}
+									
+									<div class="form-group row">                        
+										<div class="col-md-12 col-lg-12">
+										  <h2 class="text-dark">Voucher Details </h2>     
+										</div>
+						  
+										<div class="form-group col-md-3 col-sm-3">
+											<select id="select-voucher" class="form-control" name="selected_voucher" >
+											  <option value="" disabled selected>Select Voucher</option>
+											</select>
+											<div id="vouchers-container" class="d-flex flex-wrap w-100 h-100"></div>
+										  </div>
+										  
+										<div class="form-group col-md-3 col-sm-3">
+											<select id="voucher_value_data" class="form-control" name="voucher_value" >
+												<option value="" disabled selected>Voucher value Ex. 100</option>
+											</select>
+											<div id="vouchers-value" class="d-flex flex-wrap w-100 h-100"></div>
+										</div>
+										  
+										  
+					
+										<div class="form-group col-md-3 col-sm-3">
+											<input id="numberInput" class="form-control" type="number" name="number" placeholder="No. of Vouchers" data-validate-minmax="1,100">
+											<div id="validationMessage" class="error-message"></div>
+										</div>
+			
+										<div class="form-group col-md-3 col-sm-3">
+										  <h2 class="text-dark" id = "total_price">Total : 0:00 <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="bottom" title="Item Total: USD 0.00 Total Payable: USD 0.00" aria-hidden="true"></i></h2>
+										</div> 
+									</div> 
+									<div class="form-group row d-grid gap-2 d-md-flex justify-content-md-end">
+									{% comment %} <button type="button" class="btn btn-md btn-primary float:right">Add</button> {% endcomment %}
+									</div>      
+								</div>
+							</div> 
+							<div class="x_panel ml-2">
+								<div class="x_content">
+									<div class="title_left">
+									{% comment %} <h2 class="text-dark">Grand Total : USD 00:00 </h2> {% endcomment %}
+									</div>  
+									<div class="form-group row">
+										<div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+											<button type="submit" class="btn btn-primary rounded-lg btn-attractive">Submit</button>
+											<button class="btn btn-danger btn-attractive rounded-lg"  type="reset">Reset</button>
+										</div>
+									</div>
+								</form> 
+									</div>  
+								</div> 
+						  </div>
+			  </div>
+						</table>
+						<!-- end project list -->
+					</div>
+
+					
+                </div>
+				
+				  
+				
+            </div>
+          </div>
+        </div>
+        <!-- /page content -->
+		
+
